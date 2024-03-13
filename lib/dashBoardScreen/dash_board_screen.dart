@@ -41,9 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   TextEditingController editingController = TextEditingController();
 
   late int getLanguageType;
-  //late
-
-  String getSelectedLanguageCode = "en";
+  late String getSelectedLanguageCode;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String profilePictureUrl = "";
   String profileName = "Guest";
@@ -120,7 +118,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   callInitState() async {
     bool internetConnectCheck = await CheckInternetConnectionMethod();
     if (internetConnectCheck) {
-      //futureFunctionMethod();
+      futureFunctionMethod();
       // getUserData();
     } else {
       print("No internet");
@@ -146,17 +144,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       theme.setTheme(switchValue);
       themeChange();
       SharedPreference.instance.setOnDarkMode("darkMode", darkMode);
-    });
-  }
-
-  initialData() {
-    setState(() {
-      languageLocal = Provider.of<ChangeLanguageLocal>(context);
-      getSelectedLanguageCode = languageMethod(context);
-      //getLanguageClassList.clear();
-      //getLanguageClassList.add(LanguageClass(languageId: LanguageTextFile().getEnglishLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameEnglishText(0), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownEnglishText(0), languageSelected: false));
-      //getLanguageClassList.add(LanguageClass(languageId: AppConfig().languageSettingArabicLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameArabicText(0), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownArabicText(0), languageSelected: false));
-      languageChange(getSelectedLanguageCode);
     });
   }
 
@@ -196,11 +183,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  initialData() {
+    setState(() {
+      languageLocal = Provider.of<ChangeLanguageLocal>(context);
+      getSelectedLanguageCode = languageMethod(context);
+      //getLanguageClassList.clear();
+      //getLanguageClassList.add(LanguageClass(languageId: LanguageTextFile().getEnglishLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameEnglishText(0), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownEnglishText(0), languageSelected: false));
+      //getLanguageClassList.add(LanguageClass(languageId: AppConfig().languageSettingArabicLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameArabicText(0), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownArabicText(0), languageSelected: false));
+      languageChange(getSelectedLanguageCode);
+    });
+  }
+
+  futureFunctionMethod() async {
+    getSelectedLanguageCode =
+        await SharedPreference.instance.getSelectedLanguage("language");
+    print("get lang : $getSelectedLanguageCode");
+
+    // bottomContentFutureMethod = languageTranslatorMethod(
+    //     getText: LanguageTextFile().getDashboardScreenBottomContentText(),
+    //     getLanguageCode: getSelectedLanguageCode);
+    // chapterTextFutureMethod = languageTranslatorMethod(
+    //     getText: LanguageTextFile().getDashboardScreenChapterText(),
+    //     getLanguageCode: getSelectedLanguageCode);
+    // copyRightContentTextFutureMethod = languageTranslatorMethod(
+    //     getText: LanguageTextFile().getDashboardScreenCopyRightText(),
+    //     getLanguageCode: getSelectedLanguageCode);
+    // bottomNavigationChapterTextFuture = languageTranslatorMethod(
+    //     getText: LanguageTextFile().getBottomNavigationChapterText(),
+    //     getLanguageCode: getSelectedLanguageCode);
+    // profileNameTextFuture = languageTranslatorMethod(
+    //     getText: profileName, getLanguageCode: getSelectedLanguageCode);
+    // searchGptHintText = await languageTranslatorMethod(
+    //     getText: LanguageTextFile().getSearchGPTWidgetHintText(),
+    //     getLanguageCode: getSelectedLanguageCode);
+    setState(() {});
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
     callInitState();
+    //  print(" in init $getSelectedLanguageCode");
   }
 
   @override
@@ -213,6 +238,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     darkMode = themeMethod(context);
     themeChange();
     print(darkMode);
+    //print(getSelectedLanguageCode);
     return WillPopScope(
       onWillPop: () async {
         if (_scaffoldKey.currentState!.isEndDrawerOpen) {
@@ -231,7 +257,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             screenHeight: screenHeight,
             statusBarHeight: statusBarHeight,
             getDarkMode: darkMode,
-            getLanguageCode: getSelectedLanguageCode,
+            getLanguageCode: "en",
             profilePictureUrl: profilePictureUrl,
             profileName: profileName,
             currentCategory: 4,
@@ -264,10 +290,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             callBackLanguageSelectedClick: (String getSelectedLanguage) {
               _scaffoldKey.currentState!.closeEndDrawer();
               languageLocal.setLanguage(getSelectedLanguage);
-              // SharedPreference.instance
-              //   .setSelectedLanguage("language", getSelectedLanguage);
-              //futureFunctionMethod();
-              //languageChange(getSelectedLanguage);
+              SharedPreference.instance
+                  .setSelectedLanguage("language", getSelectedLanguage);
+              futureFunctionMethod();
+              languageChange(getSelectedLanguage);
             },
           ),
           body: SizedBox(

@@ -111,6 +111,8 @@ class _MyHomePageState extends State<MyHomePage> {
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
     theme = Provider.of<ChangeThemeLocal>(context);
+    language = Provider.of<ChangeLanguageLocal>(context);
+    
     // darkMode = themeMethod(context);
 
     AppConfig().getStatusBar(false);

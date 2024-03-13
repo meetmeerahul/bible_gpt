@@ -2,5 +2,6 @@
   "editor.codeActionsOnSave": {
     "source.fixAll": "always"
   },
-  "java.configuration.updateBuildConfiguration": "interactive"
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "cmake.sourceDirectory": "D:/bible_gpt/linux"
 }
