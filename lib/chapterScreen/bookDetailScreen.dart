@@ -3,6 +3,7 @@ import 'package:bible_gpt/dashBoardScreen/gptScreen.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 
 import '../class/theme_method.dart';
@@ -21,6 +22,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   int num = 20;
 
+  bool isPlaying = false;
+
   final List<String> items = [
     'Item1',
     'Item2',
@@ -32,7 +35,37 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     'Item8',
   ];
 
+  late int checkedIndex;
+  String demoVerse =
+      " And the serpent hath been subtile above every beast of\nthe field which Jehovah God hath made, and he saith\nunto the woman, 'Is it true that God hath said, Ye do not\neat of every tree of the garden?";
+
   String? selectedChapter;
+  final FlutterTts fluttertts = FlutterTts();
+
+  Future<List<dynamic>> retrieveVoices() async {
+    List<dynamic> voices = await fluttertts.getVoices;
+
+    return voices;
+  }
+
+  speak() async {
+    List<dynamic> voices = [];
+    await fluttertts.setLanguage("en");
+    await fluttertts.setPitch(1);
+    voices = await retrieveVoices();
+
+    await fluttertts.speak(demoVerse);
+
+    setState(() {
+      isPlaying = true;
+    });
+
+    fluttertts.setCompletionHandler(() {
+      setState(() {
+        isPlaying = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -288,26 +321,225 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          "English",
-                          style: TextStyle(
-                              color: Color(
-                                0xFFAF6A06,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Language",
+                              style: TextStyle(
+                                color: darkMode
+                                    ? const Color(0xFFAF6A06)
+                                    : const Color(0xFF623301),
+                                fontSize: 12,
                               ),
-                              fontSize: 12),
+                            ),
+                            SizedBox(
+                              height: (screenHeight *
+                                  (5 / AppConfig().screenHeight)),
+                            ),
+                            DropdownButtonHideUnderline(
+                              child: DropdownButton2<String>(
+                                isExpanded: true,
+                                hint: Row(
+                                  children: [
+                                    const SizedBox(
+                                      width: 4,
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        AppConfig().all,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: darkMode
+                                              ? Colors.white
+                                              : Colors.black,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                items: items
+                                    .map((String item) =>
+                                        DropdownMenuItem<String>(
+                                          value: item,
+                                          child: Text(
+                                            item,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: darkMode
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ))
+                                    .toList(),
+                                value: selectedChapter,
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    selectedChapter = value;
+                                  });
+                                },
+                                buttonStyleData: ButtonStyleData(
+                                  height: (screenHeight *
+                                      (40 / AppConfig().screenHeight)),
+                                  width: (screenWidth *
+                                      (156 / AppConfig().screenWidth)),
+                                  padding: const EdgeInsets.only(
+                                      left: 14, right: 14),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(0),
+                                    border: Border.all(
+                                      color: Colors.black26,
+                                    ),
+                                    color: darkMode
+                                        ? const Color(0xFF2D281E)
+                                        : Colors.white,
+                                  ),
+                                  elevation: 0,
+                                ),
+                                iconStyleData: IconStyleData(
+                                  icon: SvgPicture.asset(
+                                      color: darkMode
+                                          ? Colors.white
+                                          : Colors.black,
+                                      "assets/svg/drop_down.svg"),
+                                  iconSize: 12,
+                                  iconEnabledColor: Colors.black,
+                                  iconDisabledColor: Colors.black,
+                                ),
+                                dropdownStyleData: DropdownStyleData(
+                                  maxHeight: 200,
+                                  width: (screenWidth *
+                                      (156 / AppConfig().screenWidth)),
+                                  decoration: BoxDecoration(
+                                    color: darkMode
+                                        ? const Color(0xFF2D281E)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(0),
+                                  ),
+                                  offset: const Offset(0, -10),
+                                ),
+                                menuItemStyleData: const MenuItemStyleData(
+                                  height: 30,
+                                  padding: EdgeInsets.only(left: 20, right: 14),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         Row(
                           children: [
-                            const Text(
-                              "Change Edition",
-                              style: TextStyle(
-                                  color: Color(
-                                    0xFFAF6A06,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Editions/Transilations",
+                                  style: TextStyle(
+                                    color: darkMode
+                                        ? const Color(0xFFAF6A06)
+                                        : const Color(0xFF623301),
+                                    fontSize: 12,
                                   ),
-                                  fontSize: 12),
+                                ),
+                                SizedBox(
+                                  height: (screenHeight *
+                                      (5 / AppConfig().screenHeight)),
+                                ),
+                                DropdownButtonHideUnderline(
+                                  child: DropdownButton2<String>(
+                                    isExpanded: true,
+                                    hint: Row(
+                                      children: [
+                                        const SizedBox(
+                                          width: 4,
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            AppConfig().all,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: darkMode
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    items: items
+                                        .map((String item) =>
+                                            DropdownMenuItem<String>(
+                                              value: item,
+                                              child: Text(
+                                                item,
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: darkMode
+                                                      ? Colors.white
+                                                      : Colors.black,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ))
+                                        .toList(),
+                                    value: selectedChapter,
+                                    onChanged: (String? value) {
+                                      setState(() {
+                                        selectedChapter = value;
+                                      });
+                                    },
+                                    buttonStyleData: ButtonStyleData(
+                                      height: (screenHeight *
+                                          (40 / AppConfig().screenHeight)),
+                                      width: (screenWidth *
+                                          (156 / AppConfig().screenWidth)),
+                                      padding: const EdgeInsets.only(
+                                          left: 14, right: 14),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(0),
+                                        border: Border.all(
+                                          color: Colors.black26,
+                                        ),
+                                        color: darkMode
+                                            ? const Color(0xFF2D281E)
+                                            : Colors.white,
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                    iconStyleData: IconStyleData(
+                                      icon: SvgPicture.asset(
+                                          color: darkMode
+                                              ? Colors.white
+                                              : Colors.black,
+                                          "assets/svg/drop_down.svg"),
+                                      iconSize: 12,
+                                      iconEnabledColor: Colors.black,
+                                      iconDisabledColor: Colors.black,
+                                    ),
+                                    dropdownStyleData: DropdownStyleData(
+                                      maxHeight: 200,
+                                      width: (screenWidth *
+                                          (156 / AppConfig().screenWidth)),
+                                      decoration: BoxDecoration(
+                                        color: darkMode
+                                            ? const Color(0xFF2D281E)
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(0),
+                                      ),
+                                      offset: const Offset(0, -10),
+                                    ),
+                                    menuItemStyleData: const MenuItemStyleData(
+                                      height: 30,
+                                      padding:
+                                          EdgeInsets.only(left: 20, right: 14),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            SvgPicture.asset(
-                                "assets/svg/down_arrow_colored.svg")
                           ],
                         )
                       ],
@@ -356,7 +588,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                       style:
                                           TextStyle(color: Color(0xFFAF6A06)),
                                     ),
-                                    SvgPicture.asset("assets/svg/mic_icon.svg")
+                                    GestureDetector(
+                                        onTap: () {
+                                          speak();
+                                          checkedIndex = index;
+                                        },
+                                        child: SvgPicture.asset(
+                                            isPlaying && checkedIndex == index
+                                                ? "assets/svg/speaker_on.svg"
+                                                : "assets/svg/mic_icon.svg"))
                                   ],
                                 ),
                               ),

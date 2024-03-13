@@ -1447,22 +1447,27 @@ class _SigninScreenState extends State<SigninScreen> {
                       // mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          //LanguageTextFile().getDashboardScreenBottomContentText(),
-                          copyRightContentTextFutureMethod,
-                          textScaler: const TextScaler.linear(1.0),
-                          // textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: screenHeight *
-                                  (AppConfig()
-                                          .dashboardScreenCopyRightTextSize /
-                                      AppConfig().screenHeight),
-                              color: darkMode
-                                  ? AppConfig()
-                                      .dashboardScreenBottomCopyRightTextDarkColor
-                                  : AppConfig()
-                                      .dashboardScreenBottomCopyRightTextLightColor,
-                              fontFamily: AppConfig().outfitFontRegular),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              bottom: (screenHeight *
+                                  (20 / AppConfig().screenHeight))),
+                          child: Text(
+                            //LanguageTextFile().getDashboardScreenBottomContentText(),
+                            copyRightContentTextFutureMethod,
+                            textScaler: const TextScaler.linear(1.0),
+                            // textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: screenHeight *
+                                    (AppConfig()
+                                            .dashboardScreenCopyRightTextSize /
+                                        AppConfig().screenHeight),
+                                color: darkMode
+                                    ? AppConfig()
+                                        .dashboardScreenBottomCopyRightTextDarkColor
+                                    : AppConfig()
+                                        .dashboardScreenBottomCopyRightTextLightColor,
+                                fontFamily: AppConfig().outfitFontRegular),
+                          ),
                         ),
                       ],
                     ),

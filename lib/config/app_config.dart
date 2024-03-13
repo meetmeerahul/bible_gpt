@@ -231,7 +231,7 @@ class AppConfig {
   Color dashboardScreenGradiantStartBackgroundDarkColor =
       const Color(0xFF010101);
   Color dashboardScreenGradiantEndBackgroundDarkColor = const Color(0xFF523806);
-  Color dashboardScreenBottomContentTextDarkColor = const Color(0xFFFFFFFF);
+  Color dashboardScreenBottomContentTextDarkColor = const Color(0xFF999999);
   Color dashboardScreenBottomCopyRightTextDarkColor = const Color(0xFFFFFFFF);
 
   //Padding

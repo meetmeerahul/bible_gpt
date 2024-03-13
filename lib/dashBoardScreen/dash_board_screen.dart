@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../chapterScreen/bottomNavigationBarScreen.dart';
+import '../chapterScreen/chapterScreen.dart';
 import '../class/LanguageMethod.dart';
 import '../class/change_language_local.dart';
 import '../class/change_theme_local.dart';
@@ -45,10 +46,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String profilePictureUrl = "";
   String profileName = "Guest";
+  //String getLanguageCode = "en";
 
   //String selectedLanguage = "";
   //List<LanguageClass> getLanguageClassList = [];
   List<String> getLanguageList = LanguageTextFile().getLanguageList();
+
   late ChangeLanguageLocal languageLocal;
   bool userLoggedIn = false;
   bool isDeleteAPILoading = false;
@@ -186,10 +189,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   initialData() {
     setState(() {
       languageLocal = Provider.of<ChangeLanguageLocal>(context);
-      getSelectedLanguageCode = languageMethod(context);
+      //  getLanguageCode = languageMethod(context);
       //getLanguageClassList.clear();
-      //getLanguageClassList.add(LanguageClass(languageId: LanguageTextFile().getEnglishLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameEnglishText(0), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownEnglishText(0), languageSelected: false));
-      //getLanguageClassList.add(LanguageClass(languageId: AppConfig().languageSettingArabicLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameArabicText(0), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownArabicText(0), languageSelected: false));
+      //getLanguageClassList.add(LanguageClass(languageId: AppConfig().languageSettingEnglishLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameEnglishText(getLanguageType), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownEnglishText(getLanguageType), languageSelected: false));
+      //getLanguageClassList.add(LanguageClass(languageId: AppConfig().languageSettingArabicLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameArabicText(getLanguageType), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownArabicText(getLanguageType), languageSelected: false));
       languageChange(getSelectedLanguageCode);
     });
   }
@@ -237,6 +240,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     theme = Provider.of<ChangeThemeLocal>(context);
     darkMode = themeMethod(context);
     themeChange();
+    initialData();
+
     print(darkMode);
     //print(getSelectedLanguageCode);
     return WillPopScope(
@@ -257,7 +262,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             screenHeight: screenHeight,
             statusBarHeight: statusBarHeight,
             getDarkMode: darkMode,
-            getLanguageCode: "en",
+            getLanguageCode: getSelectedLanguageCode,
             profilePictureUrl: profilePictureUrl,
             profileName: profileName,
             currentCategory: 4,
@@ -292,7 +297,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               languageLocal.setLanguage(getSelectedLanguage);
               SharedPreference.instance
                   .setSelectedLanguage("language", getSelectedLanguage);
-              futureFunctionMethod();
               languageChange(getSelectedLanguage);
             },
           ),

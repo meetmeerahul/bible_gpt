@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 class LanguageTextFile {
+  
   String getHindiLanguageCode = "hi";
   String getEnglishLanguageCode = "en";
 

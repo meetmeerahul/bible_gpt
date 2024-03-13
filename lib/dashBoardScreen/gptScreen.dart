@@ -295,6 +295,7 @@ class _GptScreenState extends State<GptScreen> {
                             textScaler: const TextScaler.linear(1.0),
                             textAlign: TextAlign.center,
                             style: TextStyle(
+                                
                                 fontSize: screenHeight *
                                     (AppConfig()
                                             .dashboardScreenBottomContentTextSize /
@@ -611,6 +612,17 @@ class _GptScreenState extends State<GptScreen> {
                                       ),
                                     ],
                                   ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          textAlign: TextAlign.start,
+                          "The Bible is a sacred scripture in the Christian religion,\nbelieved to be inspired by God. It is a collection of books\nwritten by various authors over a span of centuries. It is\ndivided into two main parts: the Old Testament (which is\nalso a sacred text in Judaism) and the New Testament.\nThe Old Testament contains books such as Genesis,\nExodus, Psalms, among others, and tells stories of\nancient prophets, kings, and the teachings they shared.\nThe New Testament contains the four Gospels (Matthew,\nMark, Luke, and John), which tell the story of Jesus\nChrist's life, teachings, death, and resurrection, as well as\nother books like Acts, which describes the early Christian\nchurch, and Revelation, which shares prophetic visions.\nThe Bible is considered the holy guideline by\nChristians by which they should live.",
+                          style: TextStyle(
+                              color: const Color(0xFFFFFFFF),
+                              fontSize: (screenHeight *
+                                  (14 / AppConfig().screenHeight))),
+                        )
                       ],
                     ),
                   ),
