@@ -654,6 +654,9 @@ class AppConfig {
 
   // BOOK PAGE
   //1.Texts
+  
+
+  
   String oldTestament = "Old Testament";
   String newTestament = "New Testament";
   String theBookOf = " The Book Of";
@@ -661,6 +664,8 @@ class AppConfig {
   String languageDropdown = "Language";
   String trasilationsEditions = "Trasilations/Editions";
   String all = "All";
+
+
 //2.Paddings
 
   double testmentBoxTop = 40;

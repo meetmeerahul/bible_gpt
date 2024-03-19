@@ -1,7 +1,10 @@
 import 'dart:ui';
 
+import 'package:bible_gpt/class/change_language_local.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 class LanguageTextFile {
-  
   String getHindiLanguageCode = "hi";
   String getEnglishLanguageCode = "en";
 
@@ -109,8 +112,13 @@ class LanguageTextFile {
   }
 
   //Search GPT Widget
-  String getSearchGPTWidgetHintText() {
-    return "Tell us how can we help you!";
+  String getSearchGPTWidgetHintText(String language) {
+    if (language == 'en') {
+      return "Tell us how can we help you!";
+    } else if (language == 'hi') {
+      return "हमें बताएं कि हम आपकी कैसे मदद कर सकते हैं!";
+    }
+    return "";
   }
 
   //Dashboard Screen
@@ -118,8 +126,22 @@ class LanguageTextFile {
     return "BOOK";
   }
 
-  String getDashboardScreenBottomContentText() {
-    return "Free Research Preview. Bible GPT may produce inaccurate information about people, places, or facts.";
+  String getDashboardButtonText(String language) {
+    if (language == 'en') {
+      return "BOOKS";
+    } else if (language == 'hi') {
+      return "किताब";
+    }
+    return '';
+  }
+
+  String getDashboardScreenBottomContentText(String language) {
+    if (language == 'en') {
+      return "Free Research Preview. Bible GPT may produce inaccurate information about people, places, or facts.";
+    } else if (language == 'hi') {
+      return 'निःशुल्क अनुसंधान पूर्वावलोकन. बाइबिल जीपीटी लोगों, स्थानों या तथ्यों के बारे में गलत जानकारी उत्पन्न कर सकता है।';
+    }
+    return '';
   }
 
   String getDashboardScreenCopyRightText() {
@@ -127,16 +149,26 @@ class LanguageTextFile {
   }
 
   //Bottom Navigation Bar
-  String getBottomNavigationChapterText() {
-    return "Book";
+  String getBottomNavigationChapterText(String language) {
+    if (language == 'en') {
+      return "Book";
+    } else if (language == 'hi') {
+      return 'किताब';
+    }
+    return '';
   }
 
   String getBottomNavigationSettingText() {
     return "Settings";
   }
 
-  String getBottomNavigationContentText() {
-    return "Free Research Preview. Bible GPT may produce inaccurate information about people, places, or facts.";
+  String getBottomNavigationContentText(String language) {
+    if (language == 'en') {
+      return "© 2023 Copyright by Bible GPT";
+    } else if (language == 'hi') {
+      return "© 2023 कॉपीराइट बाइबिल जीपीटी द्वारा";
+    }
+    return "";
   }
 
   //Chapter Screen
@@ -156,16 +188,31 @@ class LanguageTextFile {
     return " / Books";
   }
 
-  String getChapterScreenRecentChapterText() {
-    return "Recent Chapters";
+  String getChapterScreenRecentChapterText(String language) {
+    if (language == 'en') {
+      return "Recent Chapters";
+    } else if (language == 'hi') {
+      return "हाल के अध्याय";
+    }
+    return '';
   }
 
-  String getChapterScreenClearAllText() {
-    return "Clear All";
+  String getChapterScreenClearAllText(String language) {
+    if (language == 'en') {
+      return "Clear All";
+    } else if (language == 'hi') {
+      return "सभी साफ करें";
+    }
+    return '';
   }
 
-  String getChapterScreenAllChapterText() {
-    return "All  Books";
+  String getChapterScreenAllChapterText(String language) {
+    if (language == 'en') {
+      return "All  Books";
+    } else if (language == 'hi') {
+      return 'सभी पुस्तकें';
+    }
+    return '';
   }
 
   //Category Detail Screen
@@ -215,32 +262,64 @@ class LanguageTextFile {
   }
 
   //Setting Screen
-  String getLanguageSettingTitleText() {
-    return "Settings";
+  String getLanguageSettingTitleText(String language) {
+    if (language == 'en') {
+      return "Settings";
+    } else if (language == 'hi') {
+      return 'समायोजन';
+    }
+    return '';
   }
 
-  String getLanguageSettingLanguageChangeText() {
-    return "Language change";
+  String getLanguageSettingLanguageChangeText(String language) {
+    if (language == 'en') {
+      return "Language change";
+    } else if (language == 'hi') {
+      return 'भाषा परिवर्तन';
+    }
+    return '';
   }
 
-  String getLanguageSettingDarkModeText() {
-    return "Enable dark mode";
+  String getLanguageSettingDarkModeText(String language) {
+    if (language == 'en') {
+      return "Enable dark mode";
+    } else if (language == 'hi') {
+      return 'डार्क मोड सक्षम करें';
+    }
+    return '';
   }
 
   String getLanguageSettingReportText() {
     return "Report";
   }
 
-  String getLanguageSettingTermPrivacyText() {
-    return "About & Policies";
+  String getLanguageSettingTermPrivacyText(String language) {
+    if (language == 'en') {
+      return "About & Policies";
+    } else if (language == 'hi') {
+      return 'नीतियों के बारे में';
+    }
+
+    return "";
   }
 
-  String getLanguageSettingContactText() {
-    return "Contact Us";
+  String getLanguageSettingContactText(String language) {
+    if (language == 'en') {
+      return "Contact Us";
+    } else if (language == 'hi') {
+      return 'संपर्क करें';
+    }
+    return "";
   }
 
-  String getLanguageSettingRateUsText() {
-    return "Rate us";
+  String getLanguageSettingRateUsText(String language) {
+    if (language == 'en') {
+      return "Rate us";
+    } else if (language == 'hi') {
+      return 'हमें रेटिंग दें';
+    }
+
+    return "";
   }
 
   String getLanguageSettingDeleteAccountText() {
@@ -252,37 +331,82 @@ class LanguageTextFile {
     return "Terms of use";
   }
 
-  String getSignInScreenFirstNameHintText() {
-    return "First Name";
+  String getSignInScreenFirstNameHintText(String language) {
+    if (language == 'en') {
+      return "First Name";
+    } else if (language == "hi") {
+      return "पहला नाम";
+    }
+    return "";
   }
 
-  String getSignInScreenLastNameHintText() {
-    return "Last Name";
+  String getSignInScreenLastNameHintText(String language) {
+    if (language == 'en') {
+      return "Last Name";
+    } else if (language == "hi") {
+      return "उपनाम";
+    }
+
+    return "";
   }
 
   //SignIn Screen
-  String getSignInScreenEmailHintText() {
-    return "Email";
+  String getSignInScreenEmailHintText(String language) {
+    if (language == 'en') {
+      return "Email";
+    } else if (language == "hi") {
+      return "ईमेल";
+    }
+
+    return "";
   }
 
-  String getSignInScreenNumberHintText() {
-    return "Number";
+  String getSignInScreenNumberHintText(String language) {
+    if (language == 'en') {
+      return "Number";
+    } else if (language == "hi") {
+      return "संख्या";
+    }
+    return "";
   }
 
-  String getSignInScreenPasswordHintText() {
-    return "Password";
+  String getSignInScreenPasswordHintText(String language) {
+    if (language == 'en') {
+      return "Password";
+    } else if (language == "hi") {
+      return "पासवर्ड";
+    }
+
+    return "";
   }
 
-  String getSignInScreenConfirmPasswordHintText() {
-    return "Confirm password";
+  String getSignInScreenConfirmPasswordHintText(String language) {
+    if (language == 'en') {
+      return "Confirm password";
+    } else if (language == "hi") {
+      return "पासवर्ड की पुष्टि कीजिये";
+    }
+    return "";
   }
 
-  String getSignInScreenLogInButtonText() {
-    return "LOGIN";
+  String getSignInScreenLogInButtonText(String language) {
+    if (language == 'en') {
+      return "LOGIN";
+    } else if (language == "hi") {
+      return "लॉग इन करें";
+    }
+
+    return "";
   }
 
-  String getSignInScreenRegisterButtonText() {
-    return "REGISTER";
+  String getSignInScreenRegisterButtonText(String language) {
+    if (language == 'en') {
+      return "REGISTER";
+    } else if (language == "hi") {
+      return "पंजीकरण करवाना";
+    }
+
+    return "";
   }
 
   String getSignInScreenLogInAppleButtonText() {
@@ -293,44 +417,98 @@ class LanguageTextFile {
     return "SIGN UP WITH APPLE";
   }
 
-  String getSignInScreenLogInGoogleButtonText() {
-    return "LOG IN WITH GOOGLE";
+  String getSignInScreenLogInGoogleButtonText(String language) {
+    if (language == 'en') {
+      return "LOG IN WITH GOOGLE";
+    } else if (language == "hi") {
+      return "गूगल से लॉग इन करें";
+    }
+    return "";
   }
 
-  String getSignInScreenRegisterGoogleButtonText() {
-    return "SIGN UP WITH GOOGLE";
+  String getSignInScreenRegisterGoogleButtonText(String language) {
+    if (language == 'en') {
+      return "SIGN UP WITH GOOGLE";
+    } else if (language == "hi") {
+      return "गूगल के साथ साइन अप करें";
+    }
+    return "";
   }
 
-  String getSignInScreenSwitchLogInText1() {
-    return "Don’t have an Account ? ";
+  String getSignInScreenSwitchLogInText1(String language) {
+    if (language == 'en') {
+      return "Don’t have an Account ?  ";
+    } else if (language == "hi") {
+      return "कोई खाता नहीं है ? ";
+    }
+
+    return "";
   }
 
-  String getSignInScreenSwitchLogInText2() {
-    return "Register";
+  String getSignInScreenSwitchLogInText2(String language) {
+    if (language == 'en') {
+      return "Register ";
+    } else if (language == "hi") {
+      return "पंजीकरण करवाना";
+    }
+    return "";
   }
 
-  String getSignInScreenSwitchRegisterText1() {
+  String getSignInScreenSwitchRegisterText1(String language) {
+    if (language == 'en') {
+      return "Already have an Account ? ";
+    } else if (language == "hi") {
+      return "क्या आपके पास पहले से एक खाता मौजूद है ?";
+    }
+
     return "Already have an Account ? ";
   }
 
-  String getSignInScreenSwitchRegisterText2() {
-    return "Login";
+  String getSignInScreenSwitchRegisterText2(String language) {
+    if (language == 'en') {
+      return "Login";
+    } else if (language == "hi") {
+      return "लॉग इन करें";
+    }
+
+    return "";
   }
 
-  String getSignInScreenCopyRightText() {
-    return "© 2023 Copyright by Bible GPT";
+  String getSignInScreenCopyRightText(String language) {
+    if (language == 'en') {
+      return "© 2023 Copyright by Bible GPT";
+    } else if (language == "hi") {
+      return "© 2023 कॉपीराइट बाइबिल जीपीटी द्वारा";
+    }
+    return "";
   }
 
-  String getSignInScreenGoogleContentText() {
-    return "or login with";
+  String getSignInScreenGoogleContentText(String language) {
+    if (language == 'en') {
+      return "or login with";
+    } else if (language == "hi") {
+      return "या के साथ लॉगिन करें";
+    }
+
+    return "";
   }
 
-  String getSignInScreenNumberButtonText() {
-    return "By Phone number";
+  String getSignInScreenNumberButtonText(String language) {
+    if (language == 'en') {
+      return "By Phone number";
+    } else if (language == "hi") {
+      return "फ़ोन नंबर द्वारा";
+    }
+    return "";
   }
 
-  String getSignInScreenEmailButtonText() {
-    return "By Email";
+  String getSignInScreenEmailButtonText(String language) {
+    if (language == 'en') {
+      return "By Email";
+    } else if (language == "hi") {
+      return "ईमेल द्वारा";
+    }
+    return "";
   }
 
   //Profile Screen
@@ -351,15 +529,80 @@ class LanguageTextFile {
   }
 
   //No Network Screen
-  String getNoInternetScreenTitleText() {
-    return "NO INTERNET CONNECTION";
+  String getNoInternetScreenTitleText(String language) {
+    if (language == "en") {
+      return "NO INTERNET CONNECTION";
+    } else if (language == 'hi') {
+      return "कोई इंटरनेट कनेक्शन नहीं";
+    }
+    return "";
   }
 
-  String getNoInternetScreenContentText() {
-    return "There was a problem connecting to the internet. Please hit Retry to connect again";
+  String getNoInternetScreenContentText(String language) {
+    if (language == 'en') {
+      return "There was a problem connecting to the internet. Please hit Retry to connect again";
+    } else if (language == 'hi') {
+      return "इंटरनेट से कनेक्ट होने में समस्या थी. कृपया पुनः कनेक्ट करने के लिए पुनः प्रयास करें दबाएँ";
+    }
+    return "";
   }
 
-  String getNoInternetScreenRetryButtonText() {
-    return "RETRY";
+  String getNoInternetScreenRetryButtonText(String language) {
+    if (language == 'en') {
+      return "RETRY";
+    } else if (language == 'hi') {
+      return "पुन: प्रयास";
+    }
+    return "";
+  }
+
+  String oldTestament = "Old Testament";
+
+  String bottomNavOldTestment(String language) {
+    if (language == 'en') {
+      return 'Old Testament';
+    } else if (language == 'hi') {
+      return 'पुराना वसीयतनामा';
+    }
+    return '';
+  }
+
+  String bottomNavNewTestment(String language) {
+    if (language == 'en') {
+      return 'New Testament';
+    } else if (language == 'hi') {
+      return 'नया करार';
+    }
+    return '';
+  }
+
+  String theBookOf = " The Book Of";
+  String bible = "Bible";
+
+  String bottomNavLanguageDropDown(String language) {
+    if (language == 'en') {
+      return 'Language';
+    } else if (language == 'hi') {
+      return 'भाषा';
+    }
+    return '';
+  }
+
+  String bottomNavEditionDropDown(String language) {
+    if (language == 'en') {
+      return 'Trasilations/Editions';
+    } else if (language == 'hi') {
+      return 'अनुवाद/संस्करण';
+    }
+    return '';
+  }
+
+  String bottomNavAll(String language) {
+    if (language == 'en') {
+      return 'All';
+    } else if (language == 'hi') {
+      return 'सभी';
+    }
+    return '';
   }
 }

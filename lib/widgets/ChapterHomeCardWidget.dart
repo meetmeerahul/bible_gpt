@@ -73,8 +73,8 @@ Widget ChapterHomeCardWidget(
                 child: Stack(
                   children: [
                     SizedBox(
-                      //  height: (screenHeight * (300 / AppConfig().screenHeight)),
-                      width: (screenWidth * (160 / AppConfig().screenWidth)),
+                      //height: (screenHeight * (200 / AppConfig().screenHeight)),
+                      // width: (screenWidth * (200 / AppConfig().screenWidth)),
                       child: SvgPicture.asset("assets/svg/book_cover.svg"),
                     ),
                     Padding(
@@ -96,7 +96,9 @@ Widget ChapterHomeCardWidget(
                                   (20 / AppConfig().screenWidth)),
                               "assets/svg/cross.svg"),
                           Text(
-                            AppConfig().theBookOf,
+                            getLanguageCode == 'en'
+                                ? "The Book of"
+                                : "की किताब",
                             style: TextStyle(
                               fontSize: (screenHeight *
                                   (10 / AppConfig().screenHeight)),
@@ -108,13 +110,13 @@ Widget ChapterHomeCardWidget(
                               Color(0xFFFFD05B),
                               Color(0xFFBE7C12),
                             ],
-                            'Judges',
+                            getLanguageCode == 'en' ? 'Judges' : "न्यायाधीशों",
                             style: TextStyle(
                                 fontSize: (screenHeight *
                                     (16 / AppConfig().screenHeight))),
                           ),
                           Text(
-                            AppConfig().bible,
+                            getLanguageCode == 'en' ? "Bible" : "बाइबिल",
                             style: TextStyle(
                               fontSize: (screenHeight *
                                   (10 / AppConfig().screenHeight)),

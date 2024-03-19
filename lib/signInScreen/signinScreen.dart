@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../class/LanguageMethod.dart';
 import '../class/country_class.dart';
+import '../class/google_auth.dart';
 import '../class/theme_method.dart';
 import '../config/app_config.dart';
 import '../config/language_text_file.dart';
@@ -44,9 +46,9 @@ class _SigninScreenState extends State<SigninScreen> {
   CountryClass? selectedCountry;
   List<CountryClass> countryList = [];
 
-  String copyRightContentTextFutureMethod = "© 2023 Copyright by Bible GPT";
+  //String copyRightContentTextFutureMethod = "© 2023 Copyright by Bible GPT";
 
-  String getSelectedLanguageCode = "en";
+  late String getLanguageCode;
 
   ScrollController pageScrollController = ScrollController();
   double statusBarHeight = 0;
@@ -184,7 +186,8 @@ class _SigninScreenState extends State<SigninScreen> {
     scaleFactor = MediaQuery.of(context).textScaleFactor;
     darkMode = themeMethod(context);
 
-    //getLanguageCode = languageMethod(context);
+    getLanguageCode = languageMethod(context);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: SizedBox(
@@ -197,7 +200,7 @@ class _SigninScreenState extends State<SigninScreen> {
               screenWidth: screenWidth,
               screenHeight: screenHeight,
               getDarkMode: darkMode,
-              getLanguageCode: getSelectedLanguageCode,
+              getLanguageCode: getLanguageCode,
               imageWidget: true,
               imageWidth: 400,
               imageHeight: 280,
@@ -328,7 +331,8 @@ class _SigninScreenState extends State<SigninScreen> {
                                     //     getSoftWrap: true),
                                     child: Text(
                                       LanguageTextFile()
-                                          .getSignInScreenEmailButtonText(),
+                                          .getSignInScreenEmailButtonText(
+                                              getLanguageCode),
                                       textScaler: const TextScaler.linear(1.0),
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
@@ -379,7 +383,8 @@ class _SigninScreenState extends State<SigninScreen> {
                                     //     getSoftWrap: true),
                                     child: Text(
                                       LanguageTextFile()
-                                          .getSignInScreenEmailButtonText(),
+                                          .getSignInScreenEmailButtonText(
+                                              getLanguageCode),
                                       textScaler: const TextScaler.linear(1.0),
                                       textAlign: TextAlign.end,
                                       style: TextStyle(
@@ -438,7 +443,8 @@ class _SigninScreenState extends State<SigninScreen> {
                                     //       getSoftWrap: true),
                                     child: Text(
                                       LanguageTextFile()
-                                          .getSignInScreenNumberButtonText(),
+                                          .getSignInScreenNumberButtonText(
+                                              getLanguageCode),
                                       textScaler: const TextScaler.linear(1.0),
                                       textAlign: TextAlign.end,
                                       style: TextStyle(
@@ -506,7 +512,8 @@ class _SigninScreenState extends State<SigninScreen> {
                                     //     getSoftWrap: true),
                                     child: Text(
                                       LanguageTextFile()
-                                          .getSignInScreenNumberButtonText(),
+                                          .getSignInScreenNumberButtonText(
+                                              getLanguageCode),
                                       textScaler: const TextScaler.linear(1.0),
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
@@ -541,8 +548,8 @@ class _SigninScreenState extends State<SigninScreen> {
                             firstNameController,
                             false,
                             false,
-                            LanguageTextFile()
-                                .getSignInScreenFirstNameHintText(),
+                            LanguageTextFile().getSignInScreenFirstNameHintText(
+                                getLanguageCode),
                             TextInputAction.next,
                             TextInputType.name,
                             darkMode,
@@ -569,8 +576,8 @@ class _SigninScreenState extends State<SigninScreen> {
                             lastNameController,
                             false,
                             false,
-                            LanguageTextFile()
-                                .getSignInScreenLastNameHintText(),
+                            LanguageTextFile().getSignInScreenLastNameHintText(
+                                getLanguageCode),
                             TextInputAction.next,
                             TextInputType.name,
                             darkMode,
@@ -596,7 +603,8 @@ class _SigninScreenState extends State<SigninScreen> {
                             emailController,
                             false,
                             false,
-                            LanguageTextFile().getSignInScreenEmailHintText(),
+                            LanguageTextFile()
+                                .getSignInScreenEmailHintText(getLanguageCode),
                             TextInputAction.next,
                             TextInputType.emailAddress,
                             darkMode,
@@ -850,7 +858,8 @@ class _SigninScreenState extends State<SigninScreen> {
                                     false,
                                     false,
                                     LanguageTextFile()
-                                        .getSignInScreenNumberHintText(),
+                                        .getSignInScreenNumberHintText(
+                                            getLanguageCode),
                                     TextInputAction.next,
                                     TextInputType.number,
                                     darkMode,
@@ -878,7 +887,8 @@ class _SigninScreenState extends State<SigninScreen> {
                         passwordController,
                         true,
                         showPassword,
-                        LanguageTextFile().getSignInScreenPasswordHintText(),
+                        LanguageTextFile()
+                            .getSignInScreenPasswordHintText(getLanguageCode),
                         logInScreen
                             ? TextInputAction.done
                             : TextInputAction.next,
@@ -914,7 +924,8 @@ class _SigninScreenState extends State<SigninScreen> {
                             true,
                             showConfirmPassword,
                             LanguageTextFile()
-                                .getSignInScreenConfirmPasswordHintText(),
+                                .getSignInScreenConfirmPasswordHintText(
+                                    getLanguageCode),
                             TextInputAction.done,
                             TextInputType.visiblePassword,
                             darkMode,
@@ -971,9 +982,10 @@ class _SigninScreenState extends State<SigninScreen> {
                         getDarkMode: false,
                         buttonText: logInScreen
                             ? LanguageTextFile()
-                                .getSignInScreenLogInButtonText()
+                                .getSignInScreenLogInButtonText(getLanguageCode)
                             : LanguageTextFile()
-                                .getSignInScreenRegisterButtonText(),
+                                .getSignInScreenRegisterButtonText(
+                                    getLanguageCode),
                         getLanguageCode: "en",
                         isAPILoading: isAPILoading,
                         iconPath: null,
@@ -1219,7 +1231,8 @@ class _SigninScreenState extends State<SigninScreen> {
                             //     getSoftWrap: true),
                             child: Text(
                               LanguageTextFile()
-                                  .getSignInScreenGoogleContentText(),
+                                  .getSignInScreenGoogleContentText(
+                                      getLanguageCode),
                               textScaler: const TextScaler.linear(1.0),
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -1295,16 +1308,19 @@ class _SigninScreenState extends State<SigninScreen> {
                             AppConfig().signInScreenGoogleButtonHeight,
                         buttonText: logInScreen
                             ? LanguageTextFile()
-                                .getSignInScreenLogInGoogleButtonText()
+                                .getSignInScreenLogInGoogleButtonText(
+                                    getLanguageCode)
                             : LanguageTextFile()
-                                .getSignInScreenRegisterGoogleButtonText(),
+                                .getSignInScreenRegisterGoogleButtonText(
+                                    getLanguageCode),
                         getLanguageCode: "en",
                         isAPILoading: isAPILoading,
                         buttonPressedFunction: (isClick) {
                           if (isClick) {
                             if (isAPILoading) {
                             } else {
-                              //  googleClick();
+                              print("Google clicked");
+                              googleClick();
                             }
                           }
                         }),
@@ -1348,9 +1364,11 @@ class _SigninScreenState extends State<SigninScreen> {
                               child: Text(
                                 logInScreen
                                     ? LanguageTextFile()
-                                        .getSignInScreenSwitchLogInText1()
+                                        .getSignInScreenSwitchLogInText1(
+                                            getLanguageCode)
                                     : LanguageTextFile()
-                                        .getSignInScreenSwitchRegisterText1(),
+                                        .getSignInScreenSwitchRegisterText1(
+                                            getLanguageCode),
                                 textScaler: const TextScaler.linear(1.0),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
@@ -1408,9 +1426,11 @@ class _SigninScreenState extends State<SigninScreen> {
                               child: Text(
                                 logInScreen
                                     ? LanguageTextFile()
-                                        .getSignInScreenSwitchLogInText2()
+                                        .getSignInScreenSwitchLogInText2(
+                                            getLanguageCode)
                                     : LanguageTextFile()
-                                        .getSignInScreenSwitchRegisterText2(),
+                                        .getSignInScreenSwitchRegisterText2(
+                                            getLanguageCode),
                                 textScaler: const TextScaler.linear(1.0),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
@@ -1453,7 +1473,8 @@ class _SigninScreenState extends State<SigninScreen> {
                                   (20 / AppConfig().screenHeight))),
                           child: Text(
                             //LanguageTextFile().getDashboardScreenBottomContentText(),
-                            copyRightContentTextFutureMethod,
+                            LanguageTextFile()
+                                .getSignInScreenCopyRightText(getLanguageCode),
                             textScaler: const TextScaler.linear(1.0),
                             // textAlign: TextAlign.center,
                             style: TextStyle(
@@ -1489,5 +1510,19 @@ class _SigninScreenState extends State<SigninScreen> {
         ),
       ),
     );
+  }
+
+  Future googleClick() async {
+    final user = await GoogleAuth.login();
+
+    if (user == null) {
+
+      ToastMessage(screenHeight, "No user found", false);
+      
+    } else {
+      String userDetails = "${user.displayName!} ${user.email}";
+
+      ToastMessage(screenHeight, userDetails, true);
+    }
   }
 }

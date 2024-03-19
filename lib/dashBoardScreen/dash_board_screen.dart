@@ -60,12 +60,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   late ChangeThemeLocal theme;
   late String bottomNavigationContent;
   late String chapterButtonText;
-  String bottomNavigationChapterText = "Books";
+  late String bottomNavigationChapterText;
   // String profileNameText;
 
   String copyRightContentTextFutureMethod = "© 2023 Copyright by Bible GPT";
 
-  String searchGptHintText = "Tell us how can we help you!";
+  //String searchGptHintText = "Tell us how can we help you!";
 
   navigateToGPTScreen() {
     Navigator.push(
@@ -189,11 +189,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   initialData() {
     setState(() {
       languageLocal = Provider.of<ChangeLanguageLocal>(context);
+      print("Initial data");
+      getSelectedLanguageCode = languageLocal.selectedLanguageCode!;
+      print("Selected language is ${languageLocal.selectedLanguageCode}");
       //  getLanguageCode = languageMethod(context);
       //getLanguageClassList.clear();
       //getLanguageClassList.add(LanguageClass(languageId: AppConfig().languageSettingEnglishLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameEnglishText(getLanguageType), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownEnglishText(getLanguageType), languageSelected: false));
       //getLanguageClassList.add(LanguageClass(languageId: AppConfig().languageSettingArabicLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameArabicText(getLanguageType), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownArabicText(getLanguageType), languageSelected: false));
       languageChange(getSelectedLanguageCode);
+      bottomNavigationChapterText = LanguageTextFile()
+          .getBottomNavigationChapterText(getSelectedLanguageCode);
     });
   }
 
@@ -265,7 +270,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             getLanguageCode: getSelectedLanguageCode,
             profilePictureUrl: profilePictureUrl,
             profileName: profileName,
-            currentCategory: 4,
+            currentCategory: 1,
             getLanguageList: getLanguageList,
             isDeleteAPILoading: isDeleteAPILoading,
             isUserLoggedIn: userLoggedIn,
@@ -316,7 +321,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     imageHeight: 280,
                     bottomImagePadding: 30,
                     bottomCopyRightsContentPadding: 34,
-                    imageContentFuture: copyRightContentTextFutureMethod),
+                    imageContentFuture: LanguageTextFile()
+                        .getBottomNavigationContentText(
+                            getSelectedLanguageCode)),
                 SizedBox(
                   width: screenWidth,
                   height: screenHeight,
@@ -427,7 +434,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
                           scaleFactor: scaleFactor,
-                          getHintText: searchGptHintText,
+                          getHintText: LanguageTextFile()
+                              .getSearchGPTWidgetHintText(
+                                  getSelectedLanguageCode),
                           readOnly: true,
                           textEditingController: editingController,
                           isListening: false,
@@ -474,7 +483,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         //child:languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getSelectedLanguageCode, getText: LanguageTextFile().getDashboardScreenBottomContentText(0), getTextStyle: TextStyle(fontSize: screenHeight*(AppConfig().dashboardScreenBottomContentTextSize/AppConfig().screenHeight),color: darkMode?AppConfig().dashboardScreenBottomContentTextDarkColor:AppConfig().dashboardScreenBottomContentTextLightColor,fontFamily: AppConfig().outfitFontRegular)),
                         child: Text(
                           LanguageTextFile()
-                              .getDashboardScreenBottomContentText(),
+                              .getDashboardScreenBottomContentText(
+                                  getSelectedLanguageCode),
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -506,7 +516,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               AppConfig().dashboardScreenCategoryBorderWidth,
                           buttonHeight:
                               AppConfig().dashboardScreenCategoryBorderHeight,
-                          buttonText: "BOOKS",
+                          buttonText: LanguageTextFile()
+                              .getDashboardButtonText(getSelectedLanguageCode),
                           getDarkMode: darkMode,
                           getLanguageCode: getSelectedLanguageCode,
                           isAPILoading: false,

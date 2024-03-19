@@ -53,13 +53,13 @@ ElevatedButton PrimaryButton(
           ],
           tileMode: TileMode.mirror,
         ),
-        border: Border.all(
-            // color: getDarkMode
-            //     ? AppConfig().primaryButtonOuterBorderDarkLineColor
-            //     : AppConfig().primaryButtonOuterBorderLineColor,
-            width: screenWidth *
-                (AppConfig().primaryButtonOuterBorderLineHeight /
-                    AppConfig().screenWidth)),
+        // border: Border.all(
+        //     color: getDarkMode
+        //         ? AppConfig().primaryButtonOuterBorderDarkLineColor
+        //         : AppConfig().primaryButtonOuterBorderLineColor,
+        //     width: screenWidth *
+        //         (AppConfig().primaryButtonOuterBorderLineHeight /
+        //             AppConfig().screenWidth)),
         borderRadius: BorderRadius.all(Radius.circular(screenHeight *
             (AppConfig().primaryButtonCurveSize / AppConfig().screenHeight))),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../class/LanguageMethod.dart';
 import '../class/theme_method.dart';
 import '../config/app_config.dart';
 import '../config/language_text_file.dart';
@@ -22,11 +23,11 @@ class NoInternetPage extends State<NoInternetScreen> {
   double screenHeight = 0;
   late bool darkMode;
   //late int getLanguageType;
-  String getLanguageCode = "en";
-  String titleText = LanguageTextFile().getNoInternetScreenTitleText();
-  String contentText = LanguageTextFile().getNoInternetScreenContentText();
-  String retryButtonText =
-      LanguageTextFile().getNoInternetScreenRetryButtonText();
+  late String getLanguageCode;
+  //String titleText = LanguageTextFile().getNoInternetScreenTitleText();
+  // String contentText = LanguageTextFile().getNoInternetScreenContentText(getLanguageCode);
+  // String retryButtonText =
+  //     LanguageTextFile().getNoInternetScreenRetryButtonText(getLanguageCode);
 
   // futureFunctionMethod() async {
   //   SchedulerBinding.instance.addPostFrameCallback((_) async {
@@ -56,7 +57,7 @@ class NoInternetPage extends State<NoInternetScreen> {
     screenHeight = MediaQuery.of(context).size.height;
     darkMode = themeMethod(context);
 
-    //  getLanguageCode = languageMethod(context);
+    getLanguageCode = languageMethod(context);
     AppConfig().getStatusBar(darkMode);
     return WillPopScope(
       onWillPop: () async {
@@ -128,7 +129,8 @@ class NoInternetPage extends State<NoInternetScreen> {
                     //         .getTextDirection(getLanguageCode),
                     //     getSoftWrap: true),
                     child: Text(
-                      LanguageTextFile().getNoInternetScreenTitleText(),
+                      LanguageTextFile()
+                          .getNoInternetScreenTitleText(getLanguageCode),
                       textScaler: const TextScaler.linear(1.0),
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -175,7 +177,8 @@ class NoInternetPage extends State<NoInternetScreen> {
                     //         .getTextDirection(getLanguageCode),
                     //     getSoftWrap: true),
                     child: Text(
-                      LanguageTextFile().getNoInternetScreenContentText(),
+                      LanguageTextFile()
+                          .getNoInternetScreenContentText(getLanguageCode),
                       textScaler: const TextScaler.linear(1.0),
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -200,7 +203,8 @@ class NoInternetPage extends State<NoInternetScreen> {
                       buttonWidth: 130,
                       buttonHeight: AppConfig().signInScreenButtonHeight,
                       getDarkMode: false,
-                      buttonText: retryButtonText
+                      buttonText: LanguageTextFile()
+                          .getNoInternetScreenRetryButtonText(getLanguageCode)
                       // retryButtonTextFutureMethod ??
                       //     languageTranslatorMethod(
                       //         getText: LanguageTextFile()
@@ -221,8 +225,12 @@ class NoInternetPage extends State<NoInternetScreen> {
                           if (checkInternet) {
                             Navigator.pop(context, true);
                           } else {
-                            ToastMessage(screenHeight,
-                                "Check your Internet connection", false);
+                            ToastMessage(
+                                screenHeight,
+                                getLanguageCode == 'en'
+                                    ? "Check your Internet connection"
+                                    : "अपना इंटरनेट संपर्क जांचे",
+                                false);
                           }
                         }
                       }),

@@ -8,6 +8,7 @@ ToastMessage(
   String getMessage,
   bool toastType,
 ) {
+  
   return Fluttertoast.showToast(
     msg: getMessage,
     toastLength: Toast.LENGTH_SHORT,

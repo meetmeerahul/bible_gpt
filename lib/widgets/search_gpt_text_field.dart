@@ -96,29 +96,22 @@ Widget SearchGptTextFieldWidget({
                     hintTextDirection:
                         LanguageTextFile().getTextDirection(getLanguageCode),
                     border: InputBorder.none,
-                    //contentPadding: EdgeInsets.zero,
+
                     contentPadding: EdgeInsets.only(
-                        left: screenWidth *
-                            (AppConfig()
-                                    .searchGptWidgetEdittextInnerHorizontalPadding /
-                                AppConfig().screenWidth),
+                        left: screenWidth * (23 / AppConfig().screenWidth),
                         right: screenWidth *
-                            ((AppConfig()
-                                        .searchGptWidgetEnterOuterButtonIconWidth +
+                            ((23 +
                                     AppConfig()
                                         .searchGptWidgetEnterOuterButtonIconWidth) /
                                 AppConfig().screenWidth),
-                        top: (((screenWidth *
-                                    (AppConfig()
-                                            .searchGptWidgetEnterOuterButtonIconWidth /
-                                        AppConfig().screenWidth)) /
+                        top: (((screenWidth * (40 / AppConfig().screenWidth)) /
                                 2) -
                             screenHeight *
                                 (AppConfig().searchGptWidgetEdittextTextSize /
                                     (AppConfig().screenHeight *
                                         scaleFactor)))), // add padding to adjust text
                     isDense: true,
-                    //filled: true,
+                    // filled: true,
                     hintText: getHintText,
                     hintStyle: TextStyle(
                         fontSize: screenHeight *

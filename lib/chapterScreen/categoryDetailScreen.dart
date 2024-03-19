@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import '../Class/ChapterDetailListClass.dart';
-import '../class/ChapterTranslationListClass.dart';
+
 import '../config/app_config.dart';
 
 class categoryDetailScreen extends StatefulWidget {
@@ -50,8 +50,7 @@ class categoryDetailPage extends State<categoryDetailScreen> {
   bool isEditionAPILoading = false;
   ChapterDetailListClass? selectedChapterClass;
   ScrollController pageScrollController = ScrollController();
-  ChapterTranslationListClass? selectedEdition;
-  List<ChapterTranslationListClass> editionList = [];
+
   int numberOfTime = 0;
   int listviewLength = 0;
   //TtsState ttsState = TtsState.stopped;

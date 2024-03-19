@@ -33,7 +33,7 @@ Widget MenuBarSettingWidget({
         Container(
           //child: languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getLanguageCode,getLanguageTranslatorMethod: languageTranslatorMethod(getText: LanguageTextFile().getLanguageSettingTitleText(), getLanguageCode: getLanguageCode), getFontSize: 18, getDarkMode: getDarkMode, getTextAlign: TextAlign.start, getTextColor: getDarkMode?const Color(0xFFDB7F5E):const Color(0xFFDB7F5E), getFontFamily: AppConfig().outfitFontRegular, getTextDirection: LanguageTextFile().getTextDirection(getLanguageCode), getSoftWrap: true),
           child: Text(
-            LanguageTextFile().getLanguageSettingTitleText(),
+            LanguageTextFile().getLanguageSettingTitleText(getLanguageCode),
             textScaler: const TextScaler.linear(1.0),
             textAlign: TextAlign.start,
             style: TextStyle(
@@ -105,7 +105,8 @@ Widget MenuBarSettingWidget({
                         //     getSoftWrap: true),
                         child: Text(
                           LanguageTextFile()
-                              .getLanguageSettingLanguageChangeText(),
+                              .getLanguageSettingLanguageChangeText(
+                                  getLanguageCode),
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.start,
                           style: TextStyle(
@@ -228,7 +229,8 @@ Widget MenuBarSettingWidget({
                         //         .getTextDirection(getLanguageCode),
                         //     getSoftWrap: true),
                         child: Text(
-                          LanguageTextFile().getLanguageSettingDarkModeText(),
+                          LanguageTextFile()
+                              .getLanguageSettingDarkModeText(getLanguageCode),
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.start,
                           style: TextStyle(
@@ -358,8 +360,8 @@ Widget MenuBarSettingWidget({
                         //         .getTextDirection(getLanguageCode),
                         //     getSoftWrap: true),
                         child: Text(
-                          LanguageTextFile()
-                              .getLanguageSettingTermPrivacyText(),
+                          LanguageTextFile().getLanguageSettingTermPrivacyText(
+                              getLanguageCode),
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.start,
                           style: TextStyle(
@@ -428,7 +430,8 @@ Widget MenuBarSettingWidget({
                         //         .getTextDirection(getLanguageCode),
                         //     getSoftWrap: true),
                         child: Text(
-                          LanguageTextFile().getLanguageSettingContactText(),
+                          LanguageTextFile()
+                              .getLanguageSettingContactText(getLanguageCode),
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.start,
                           style: TextStyle(
@@ -497,7 +500,8 @@ Widget MenuBarSettingWidget({
                         //         .getTextDirection(getLanguageCode),
                         //     getSoftWrap: true),
                         child: Text(
-                          LanguageTextFile().getLanguageSettingRateUsText(),
+                          LanguageTextFile()
+                              .getLanguageSettingRateUsText(getLanguageCode),
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.start,
                           style: TextStyle(

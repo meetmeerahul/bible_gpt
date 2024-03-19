@@ -6,8 +6,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:provider/provider.dart';
 
+import '../APIRequest/api_handler.dart';
+import '../class/LanguageMethod.dart';
 import '../class/change_language_local.dart';
 import '../class/change_theme_local.dart';
+import '../class/languages_and_transilations.dart';
 import '../class/theme_method.dart';
 import '../config/app_config.dart';
 import '../config/language_text_file.dart';
@@ -50,7 +53,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   late bool darkMode;
   //late VideoPlayerController _controller;
   //late int getLanguageType;
-  String getLanguageCode = "en";
+  late String getLanguageCode;
   ScrollController pageScrollController = ScrollController();
   double statusBarHeight = 0;
   bool statusBarVisible = false;
@@ -72,29 +75,12 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   late String bottomNavigationChapterText;
   late String profileNameText;
 
-  final List<String> items = [
-    'Item1',
-    'Item2',
-    'Item3',
-    'Item4',
-    'Item5',
-    'Item6',
-    'Item7',
-    'Item8',
-  ];
-  final List<String> edition = [
-    'Edition1',
-    'Edition2',
-    'Edition3',
-    'Edition4',
-    'Edition5',
-    'Edition6',
-    'Edition7',
-    'Edition8',
-  ];
-
   bool showLanguage = false;
   bool showEditions = false;
+
+  Future<List<LanguagesAndTransilations>>? _languagesFuture;
+  LanguagesAndTransilations? _selectedLanguage;
+  List<Translations>? _selectedTranslations;
 
   String? selectedLanguage;
   String? selectedEdition;
@@ -230,6 +216,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
       theme.setTheme(switchValue);
       themeChange();
       SharedPreference.instance.setOnDarkMode("darkMode", darkMode);
+      print("language code in theme : $getLanguageCode");
       _chapterkey.currentState?.callReBuildWidget(darkMode, getLanguageCode);
     });
   }
@@ -239,11 +226,13 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
       if (getSelectedSetting == 2) {
         changeTheme();
       } else if (getSelectedSetting == 3) {
-        navigateToWebViewScreen(AppConfig().aboutUsUrl,
-            LanguageTextFile().getLanguageSettingTermPrivacyText());
+        navigateToWebViewScreen(
+            AppConfig().aboutUsUrl,
+            LanguageTextFile()
+                .getLanguageSettingTermPrivacyText(getLanguageCode));
       } else if (getSelectedSetting == 4) {
         navigateToWebViewScreen(AppConfig().contactUsUrl,
-            LanguageTextFile().getLanguageSettingContactText());
+            LanguageTextFile().getLanguageSettingContactText(getLanguageCode));
       } else if (getSelectedSetting == 5) {
         navigateToStore();
       } else if (getSelectedSetting == 6) {
@@ -266,7 +255,8 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
           getLanguageClassList[i].languageSelected = false;
         }
       }*/
-      // _chapterkey.currentState?.callReBuildWidget(darkMode, getLanguageCode);
+      print("language code in language : $getLanguageCode");
+      _chapterkey.currentState?.callReBuildWidget(darkMode, getLanguageCode);
     });
   }
 
@@ -308,7 +298,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   initialData() {
     setState(() {
       languageLocal = Provider.of<ChangeLanguageLocal>(context);
-      //  getLanguageCode = languageMethod(context);
+      getLanguageCode = languageMethod(context);
       //getLanguageClassList.clear();
       //getLanguageClassList.add(LanguageClass(languageId: AppConfig().languageSettingEnglishLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameEnglishText(getLanguageType), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownEnglishText(getLanguageType), languageSelected: false));
       //getLanguageClassList.add(LanguageClass(languageId: AppConfig().languageSettingArabicLanguageCode, languageName: LanguageTextFile().getLanguageSettingLanguageNameArabicText(getLanguageType), languageDropDownName: LanguageTextFile().getLanguageSettingLanguageDropdownArabicText(getLanguageType), languageSelected: false));
@@ -317,11 +307,11 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   }
 
   futureFunctionMethod() {
-    bottomNavigationContent =
-        LanguageTextFile().getBottomNavigationContentText();
+    // bottomNavigationContent =
+    //     LanguageTextFile().getBottomNavigationContentText(context);
     chapterButtonText = LanguageTextFile().getChapterScreenChapterText();
     bottomNavigationChapterText =
-        LanguageTextFile().getBottomNavigationChapterText();
+        LanguageTextFile().getBottomNavigationChapterText(getLanguageCode);
     profileNameText = profileName;
 
     // bottomNavigationContentFuture = languageTranslatorMethod(
@@ -373,6 +363,15 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
     // TODO: implement initState
     super.initState();
     callInitState();
+    _languagesFuture = ApiHandler.getLanguages();
+    // Set default language and translations to English
+    _languagesFuture!.then((languages) {
+      setState(() {
+        _selectedLanguage =
+            languages.firstWhere((lang) => lang.language == 'English');
+        _selectedTranslations = _selectedLanguage!.translations;
+      });
+    });
   }
 
   @override
@@ -392,6 +391,8 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
     themeChange();
     initialData();
     addContextInScreen();
+
+    print(_selectedLanguage);
 
     AppConfig().getStatusBar(darkMode);
     return WillPopScope(
@@ -632,7 +633,8 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                       screenHeight: screenHeight,
                                       scaleFactor: scaleFactor,
                                       getHintText: LanguageTextFile()
-                                          .getSearchGPTWidgetHintText(),
+                                          .getSearchGPTWidgetHintText(
+                                              getLanguageCode),
                                       readOnly: true,
                                       textEditingController: editingController,
                                       isListening: false,
@@ -684,7 +686,8 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                     //     getSoftWrap: true),
                                     child: Text(
                                       LanguageTextFile()
-                                          .getBottomNavigationContentText(),
+                                          .getDashboardScreenBottomContentText(
+                                              getLanguageCode),
                                       textScaler: const TextScaler.linear(1.0),
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
@@ -763,7 +766,9 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                         .spaceEvenly,
                                                 children: [
                                                   Text(
-                                                    AppConfig().oldTestament,
+                                                    LanguageTextFile()
+                                                        .bottomNavOldTestment(
+                                                            getLanguageCode),
                                                     style: TextStyle(
                                                         color: darkMode
                                                             ? const Color(
@@ -821,7 +826,9 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                   MainAxisAlignment.spaceEvenly,
                                               children: [
                                                 Text(
-                                                  AppConfig().newTestament,
+                                                  LanguageTextFile()
+                                                      .bottomNavNewTestment(
+                                                          getLanguageCode),
                                                   style: TextStyle(
                                                       color: darkMode
                                                           ? const Color(
@@ -877,8 +884,9 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                               .start,
                                                       children: [
                                                         Text(
-                                                          AppConfig()
-                                                              .languageDropdown,
+                                                          LanguageTextFile()
+                                                              .bottomNavLanguageDropDown(
+                                                                  getLanguageCode),
                                                           style: TextStyle(
                                                               color: darkMode
                                                                   ? const Color(
@@ -890,156 +898,176 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                       AppConfig()
                                                                           .screenHeight))),
                                                         ),
-                                                        DropdownButtonHideUnderline(
-                                                          child:
-                                                              DropdownButton2<
-                                                                  String>(
-                                                            isExpanded: true,
-                                                            hint: Row(
-                                                              children: [
-                                                                const SizedBox(
-                                                                  width: 4,
-                                                                ),
-                                                                Expanded(
-                                                                  child: Text(
-                                                                    AppConfig()
-                                                                        .all,
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontSize:
+                                                        FutureBuilder<
+                                                                List<
+                                                                    LanguagesAndTransilations>>(
+                                                            future:
+                                                                _languagesFuture,
+                                                            builder: (context,
+                                                                snapshot) {
+                                                              if (snapshot
+                                                                      .connectionState ==
+                                                                  ConnectionState
+                                                                      .waiting) {
+                                                                return const CircularProgressIndicator(
+                                                                  color: Colors
+                                                                      .black,
+                                                                );
+                                                              } else {
+                                                                _selectedLanguage ??=
+                                                                    snapshot
+                                                                        .data!
+                                                                        .first;
+                                                                _selectedTranslations =
+                                                                    _selectedLanguage!
+                                                                        .translations;
+                                                                return DropdownButtonHideUnderline(
+                                                                  child: DropdownButton2<
+                                                                      LanguagesAndTransilations>(
+                                                                    isExpanded:
+                                                                        true,
+                                                                    hint: Row(
+                                                                      children: [
+                                                                        SizedBox(
+                                                                          width:
+                                                                              (screenWidth * (4 / AppConfig().screenWidth)),
+                                                                        ),
+                                                                        Expanded(
+                                                                          child:
+                                                                              Text(
+                                                                            LanguageTextFile().bottomNavAll(getLanguageCode),
+                                                                            style:
+                                                                                TextStyle(
+                                                                              fontSize: 12,
+                                                                              color: darkMode ? const Color(0xFFFFFFFF) : Colors.black,
+                                                                            ),
+                                                                            overflow:
+                                                                                TextOverflow.ellipsis,
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    items: snapshot
+                                                                        .data!
+                                                                        .map((LanguagesAndTransilations
+                                                                            value) {
+                                                                      return DropdownMenuItem<
+                                                                          LanguagesAndTransilations>(
+                                                                        value:
+                                                                            value,
+                                                                        child:
+                                                                            Text(
+                                                                          value.language ??
+                                                                              "",
+                                                                          style:
+                                                                              TextStyle(
+                                                                            fontSize:
+                                                                                (screenHeight * (12 / AppConfig().screenHeight)),
+                                                                            color: darkMode
+                                                                                ? const Color(0xFFFFFFFF)
+                                                                                : Colors.black,
+                                                                          ),
+                                                                          overflow:
+                                                                              TextOverflow.ellipsis,
+                                                                        ),
+                                                                      );
+                                                                    }).toList(),
+                                                                    value:
+                                                                        _selectedLanguage,
+                                                                    onChanged:
+                                                                        (LanguagesAndTransilations?
+                                                                            newValue) {
+                                                                      setState(
+                                                                          () {
+                                                                        print(newValue!
+                                                                            .language);
+                                                                        _selectedLanguage =
+                                                                            newValue;
+                                                                        _selectedTranslations =
+                                                                            newValue.translations;
+                                                                      });
+                                                                    },
+                                                                    buttonStyleData:
+                                                                        ButtonStyleData(
+                                                                      height: (screenHeight *
+                                                                          (40 /
+                                                                              AppConfig().screenHeight)),
+                                                                      width: (screenWidth *
+                                                                          (189 /
+                                                                              AppConfig().screenWidth)),
+                                                                      padding: const EdgeInsets
+                                                                          .only(
+                                                                          left:
+                                                                              14,
+                                                                          right:
+                                                                              14),
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(0),
+                                                                        border:
+                                                                            Border.all(
+                                                                          color: darkMode
+                                                                              ? const Color(0xffFFCA8C)
+                                                                              : Colors.black26,
+                                                                        ),
+                                                                        color: darkMode
+                                                                            ? const Color(0xFF2D281E)
+                                                                            : Colors.white,
+                                                                      ),
+                                                                      elevation:
+                                                                          0,
+                                                                    ),
+                                                                    iconStyleData:
+                                                                        IconStyleData(
+                                                                      icon: SvgPicture.asset(
+                                                                          color: darkMode
+                                                                              ? const Color(0xffFFCA8C)
+                                                                              : Colors.black26,
+                                                                          "assets/svg/drop_down.svg"),
+                                                                      iconSize:
                                                                           12,
-                                                                      color: darkMode
-                                                                          ? const Color(
-                                                                              0xFFFFFFFF)
-                                                                          : Colors
+                                                                      iconEnabledColor:
+                                                                          Colors
+                                                                              .black,
+                                                                      iconDisabledColor:
+                                                                          Colors
                                                                               .black,
                                                                     ),
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            items: items
-                                                                .map((String
-                                                                        item) =>
-                                                                    DropdownMenuItem<
-                                                                        String>(
-                                                                      value:
-                                                                          item,
-                                                                      child:
-                                                                          Text(
-                                                                        item,
-                                                                        style:
-                                                                            TextStyle(
-                                                                          fontSize:
-                                                                              12,
-                                                                          color: darkMode
-                                                                              ? const Color(0xFFFFFFFF)
-                                                                              : Colors.black,
-                                                                        ),
-                                                                        overflow:
-                                                                            TextOverflow.ellipsis,
+                                                                    dropdownStyleData:
+                                                                        DropdownStyleData(
+                                                                      maxHeight:
+                                                                          200,
+                                                                      width: (screenWidth *
+                                                                          (189 /
+                                                                              AppConfig().screenWidth)),
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: darkMode
+                                                                            ? const Color(0xFF2D281E)
+                                                                            : Colors.white,
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(0),
                                                                       ),
-                                                                    ))
-                                                                .toList(),
-                                                            value:
-                                                                selectedLanguage,
-                                                            onChanged: (String?
-                                                                value) {
-                                                              setState(() {
-                                                                selectedLanguage =
-                                                                    value;
-                                                              });
-                                                            },
-                                                            buttonStyleData:
-                                                                ButtonStyleData(
-                                                              height: (screenHeight *
-                                                                  (40 /
-                                                                      AppConfig()
-                                                                          .screenHeight)),
-                                                              width: (screenWidth *
-                                                                  (189 /
-                                                                      AppConfig()
-                                                                          .screenWidth)),
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      left: 14,
-                                                                      right:
-                                                                          14),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            0),
-                                                                border:
-                                                                    Border.all(
-                                                                  color: darkMode
-                                                                      ? const Color(
-                                                                          0xffFFCA8C)
-                                                                      : Colors
-                                                                          .black26,
-                                                                ),
-                                                                color: darkMode
-                                                                    ? const Color(
-                                                                        0xFF2D281E)
-                                                                    : Colors
-                                                                        .white,
-                                                              ),
-                                                              elevation: 0,
-                                                            ),
-                                                            iconStyleData:
-                                                                IconStyleData(
-                                                              icon: SvgPicture.asset(
-                                                                  color: darkMode
-                                                                      ? const Color(
-                                                                          0xffFFCA8C)
-                                                                      : Colors
-                                                                          .black26,
-                                                                  "assets/svg/drop_down.svg"),
-                                                              iconSize: 12,
-                                                              iconEnabledColor:
-                                                                  Colors.black,
-                                                              iconDisabledColor:
-                                                                  Colors.black,
-                                                            ),
-                                                            dropdownStyleData:
-                                                                DropdownStyleData(
-                                                              maxHeight: 200,
-                                                              width: (screenWidth *
-                                                                  (189 /
-                                                                      AppConfig()
-                                                                          .screenWidth)),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: darkMode
-                                                                    ? const Color(
-                                                                        0xFF2D281E)
-                                                                    : Colors
-                                                                        .white,
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            0),
-                                                              ),
-                                                              offset:
-                                                                  const Offset(
-                                                                      0, -10),
-                                                            ),
-                                                            menuItemStyleData:
-                                                                const MenuItemStyleData(
-                                                              height: 30,
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      left: 20,
-                                                                      right:
-                                                                          14),
-                                                            ),
-                                                          ),
-                                                        ),
+                                                                      offset:
+                                                                          const Offset(
+                                                                              0,
+                                                                              -10),
+                                                                    ),
+                                                                    menuItemStyleData:
+                                                                        const MenuItemStyleData(
+                                                                      height:
+                                                                          30,
+                                                                      padding: EdgeInsets.only(
+                                                                          left:
+                                                                              20,
+                                                                          right:
+                                                                              14),
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              }
+                                                            })
                                                       ],
                                                     ),
                                                     Column(
@@ -1048,8 +1076,9 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                               .start,
                                                       children: [
                                                         Text(
-                                                          AppConfig()
-                                                              .trasilationsEditions,
+                                                          LanguageTextFile()
+                                                              .bottomNavEditionDropDown(
+                                                                  getLanguageCode),
                                                           style: TextStyle(
                                                               color: darkMode
                                                                   ? const Color(
@@ -1061,24 +1090,58 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                       AppConfig()
                                                                           .screenHeight))),
                                                         ),
-                                                        DropdownButtonHideUnderline(
-                                                          child:
-                                                              DropdownButton2<
-                                                                  String>(
-                                                            isExpanded: true,
-                                                            hint: Row(
-                                                              children: [
-                                                                const SizedBox(
-                                                                  width: 4,
-                                                                ),
-                                                                Expanded(
+                                                        if (_selectedTranslations !=
+                                                            null)
+                                                          DropdownButtonHideUnderline(
+                                                            child:
+                                                                DropdownButton2<
+                                                                    Translations>(
+                                                              isExpanded: true,
+                                                              hint: Row(
+                                                                children: [
+                                                                  SizedBox(
+                                                                    width: (screenWidth *
+                                                                        (4 /
+                                                                            AppConfig().screenWidth)),
+                                                                  ),
+                                                                  Expanded(
+                                                                    child: Text(
+                                                                      LanguageTextFile()
+                                                                          .bottomNavAll(
+                                                                              getLanguageCode),
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            (screenHeight *
+                                                                                (12 / AppConfig().screenHeight)),
+                                                                        color: darkMode
+                                                                            ? const Color(0xFFFFFFFF)
+                                                                            : Colors.black,
+                                                                      ),
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              items: _selectedTranslations!
+                                                                  .map((Translations
+                                                                      value) {
+                                                                return DropdownMenuItem<
+                                                                    Translations>(
+                                                                  value: value,
                                                                   child: Text(
-                                                                    AppConfig()
-                                                                        .all,
+                                                                    value.fullName ??
+                                                                        '',
                                                                     style:
                                                                         TextStyle(
                                                                       fontSize:
-                                                                          12,
+                                                                          (screenHeight *
+                                                                              (12 / AppConfig().screenHeight)),
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
                                                                       color: darkMode
                                                                           ? const Color(
                                                                               0xFFFFFFFF)
@@ -1089,130 +1152,113 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                         TextOverflow
                                                                             .ellipsis,
                                                                   ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            items: edition
-                                                                .map((String
-                                                                        edition) =>
-                                                                    DropdownMenuItem<
-                                                                        String>(
-                                                                      value:
-                                                                          edition,
-                                                                      child:
-                                                                          Text(
-                                                                        edition,
-                                                                        style:
-                                                                            TextStyle(
-                                                                          fontSize:
-                                                                              12,
-                                                                          fontWeight:
-                                                                              FontWeight.bold,
-                                                                          color: darkMode
-                                                                              ? const Color(0xFFFFFFFF)
-                                                                              : Colors.black,
-                                                                        ),
-                                                                        overflow:
-                                                                            TextOverflow.ellipsis,
-                                                                      ),
-                                                                    ))
-                                                                .toList(),
-                                                            value:
-                                                                selectedEdition,
-                                                            onChanged: (String?
-                                                                value) {
-                                                              setState(() {
-                                                                selectedEdition =
-                                                                    value;
-                                                              });
-                                                            },
-                                                            buttonStyleData:
-                                                                ButtonStyleData(
-                                                              height: (screenHeight *
-                                                                  (40 /
-                                                                      AppConfig()
-                                                                          .screenHeight)),
-                                                              width: (screenWidth *
-                                                                  (189 /
-                                                                      AppConfig()
-                                                                          .screenWidth)),
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      left: 14,
-                                                                      right:
-                                                                          14),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            0),
-                                                                border:
-                                                                    Border.all(
+                                                                );
+                                                              }).toList(),
+                                                              value: _selectedTranslations!
+                                                                      .isNotEmpty
+                                                                  ? _selectedTranslations!
+                                                                      .first
+                                                                  : null,
+                                                              onChanged:
+                                                                  (Translations?
+                                                                      newValue) {
+                                                                // Handle selection of translation
+                                                              },
+                                                              buttonStyleData:
+                                                                  ButtonStyleData(
+                                                                height: (screenHeight *
+                                                                    (40 /
+                                                                        AppConfig()
+                                                                            .screenHeight)),
+                                                                width: (screenWidth *
+                                                                    (189 /
+                                                                        AppConfig()
+                                                                            .screenWidth)),
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .only(
+                                                                        left:
+                                                                            14,
+                                                                        right:
+                                                                            14),
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              0),
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: darkMode
+                                                                        ? const Color(
+                                                                            0xffFFCA8C)
+                                                                        : Colors
+                                                                            .black26,
+                                                                  ),
                                                                   color: darkMode
                                                                       ? const Color(
-                                                                          0xffFFCA8C)
+                                                                          0xFF2D281E)
                                                                       : Colors
-                                                                          .black26,
+                                                                          .white,
                                                                 ),
-                                                                color: darkMode
-                                                                    ? const Color(
-                                                                        0xFF2D281E)
-                                                                    : Colors
-                                                                        .white,
+                                                                elevation: 0,
                                                               ),
-                                                              elevation: 0,
-                                                            ),
-                                                            iconStyleData:
-                                                                IconStyleData(
-                                                              icon: SvgPicture.asset(
+                                                              iconStyleData:
+                                                                  IconStyleData(
+                                                                icon: SvgPicture.asset(
+                                                                    color: darkMode
+                                                                        ? const Color(
+                                                                            0xffFFCA8C)
+                                                                        : Colors
+                                                                            .black26,
+                                                                    "assets/svg/drop_down.svg"),
+                                                                iconSize: 14,
+                                                                iconEnabledColor:
+                                                                    Colors
+                                                                        .green,
+                                                                iconDisabledColor:
+                                                                    Colors
+                                                                        .black,
+                                                              ),
+                                                              dropdownStyleData:
+                                                                  DropdownStyleData(
+                                                                maxHeight: 200,
+                                                                width: (screenWidth *
+                                                                    (189 /
+                                                                        AppConfig()
+                                                                            .screenWidth)),
+                                                                decoration:
+                                                                    BoxDecoration(
                                                                   color: darkMode
                                                                       ? const Color(
-                                                                          0xffFFCA8C)
+                                                                          0xFF2D281E)
                                                                       : Colors
-                                                                          .black26,
-                                                                  "assets/svg/drop_down.svg"),
-                                                              iconSize: 14,
-                                                              iconEnabledColor:
-                                                                  Colors.green,
-                                                              iconDisabledColor:
-                                                                  Colors.black,
-                                                            ),
-                                                            dropdownStyleData:
-                                                                DropdownStyleData(
-                                                              maxHeight: 200,
-                                                              width: (screenWidth *
-                                                                  (189 /
-                                                                      AppConfig()
-                                                                          .screenWidth)),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: darkMode
-                                                                    ? const Color(
-                                                                        0xFF2D281E)
-                                                                    : Colors
-                                                                        .white,
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            0),
+                                                                          .white,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              0),
+                                                                ),
+                                                                offset:
+                                                                    const Offset(
+                                                                        0, -10),
                                                               ),
-                                                              offset:
-                                                                  const Offset(
-                                                                      0, -10),
-                                                            ),
-                                                            menuItemStyleData:
-                                                                const MenuItemStyleData(
-                                                              height: 30,
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      left: 20,
-                                                                      right:
-                                                                          14),
+                                                              menuItemStyleData:
+                                                                  MenuItemStyleData(
+                                                                height: (screenHeight *
+                                                                    (30 /
+                                                                        AppConfig()
+                                                                            .screenHeight)),
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .only(
+                                                                        left:
+                                                                            20,
+                                                                        right:
+                                                                            14),
+                                                              ),
                                                             ),
                                                           ),
-                                                        ),
                                                       ],
                                                     ),
                                                   ],
@@ -1239,6 +1285,10 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                             !swippedDown
                                                 ? const SizedBox()
                                                 : SvgPicture.asset(
+                                                    width:
+                                                        (MediaQuery.of(context)
+                                                            .size
+                                                            .width),
                                                     "assets/svg/rectangle.svg"),
                                             !swippedDown
                                                 ? const SizedBox()
@@ -1252,8 +1302,23 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                             (4 /
                                                                 AppConfig()
                                                                     .screenHeight))),
-                                                    child: SvgPicture.asset(
-                                                        "assets/svg/swipe_down.svg"),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        SvgPicture.asset(
+                                                            height: (screenHeight *
+                                                                (11 /
+                                                                    AppConfig()
+                                                                        .screenHeight)),
+                                                            width: (screenWidth *
+                                                                (41 /
+                                                                    AppConfig()
+                                                                        .screenWidth)),
+                                                            "assets/svg/swipe_down.svg"),
+                                                      ],
+                                                    ),
                                                   )
                                           ],
                                         ),
@@ -1279,6 +1344,9 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                       children: [
                                         !swippedDown
                                             ? SvgPicture.asset(
+                                                width: (MediaQuery.of(context)
+                                                    .size
+                                                    .width),
                                                 "assets/svg/rectangle.svg")
                                             : const SizedBox(),
                                         !swippedDown
@@ -1292,8 +1360,22 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                         (4 /
                                                             AppConfig()
                                                                 .screenHeight))),
-                                                child: SvgPicture.asset(
-                                                  "assets/svg/swipe_up.svg",
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                      height: (screenHeight *
+                                                          (11 /
+                                                              AppConfig()
+                                                                  .screenHeight)),
+                                                      width: (screenWidth *
+                                                          (41 /
+                                                              AppConfig()
+                                                                  .screenWidth)),
+                                                      "assets/svg/swipe_up.svg",
+                                                    ),
+                                                  ],
                                                 ),
                                               )
                                             : const SizedBox(),
@@ -1317,7 +1399,9 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                           children: [
                             swippedDown
                                 ? Text(
-                                    "Swipe down",
+                                    getLanguageCode == 'en'
+                                        ? "Swipe down"
+                                        : "नीचे ढकेलें",
                                     style: TextStyle(
                                       color: const Color(0xFF999999),
                                       fontSize: (screenHeight *
@@ -1330,7 +1414,9 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                           (188 / AppConfig().screenWidth)),
                                     ),
                                     child: Text(
-                                      "Swipe up",
+                                      getLanguageCode == 'en'
+                                          ? "Swipe up"
+                                          : "ऊपर ढकेलें",
                                       style: TextStyle(
                                         color: const Color(0xFF999999),
                                         fontSize: (screenHeight *

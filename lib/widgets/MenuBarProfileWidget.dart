@@ -1,3 +1,4 @@
+import 'package:bible_gpt/signInScreen/profile_page.dart';
 import 'package:bible_gpt/signInScreen/signinScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -23,6 +24,7 @@ Widget MenuBarProfileWidget(
       onPressed: () {
         print("Profile Click");
         profileClick(true);
+        print(darkMode);
         Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const SigninScreen()));
       },

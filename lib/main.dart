@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
   double screenHeight = 0;
   late var theme;
   //late int selectedLanguage;
-  late String selectedLanguageCode;
+  String selectedLanguageCode = "en";
   late var language;
   // late bool darkMode;
 
@@ -112,7 +112,8 @@ class _MyHomePageState extends State<MyHomePage> {
     screenHeight = MediaQuery.of(context).size.height;
     theme = Provider.of<ChangeThemeLocal>(context);
     language = Provider.of<ChangeLanguageLocal>(context);
-    
+    // selectedLanguageCode = language.getLanguage;
+
     // darkMode = themeMethod(context);
 
     AppConfig().getStatusBar(false);

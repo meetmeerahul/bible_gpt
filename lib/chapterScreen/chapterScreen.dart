@@ -46,7 +46,7 @@ class chapterPage extends State<chapterScreen> {
   late bool darkMode;
   //late ChangeLanguageLocal languageLocal;
   //late int getLanguageType;
-  String getLanguageCode = "en";
+  late String getLanguageCode;
   String recentChapter = "";
   String clearAll = "";
   String chapterAll = "";
@@ -309,8 +309,8 @@ class chapterPage extends State<chapterScreen> {
                         //         .getTextDirection(getLanguageCode),
                         //     getSoftWrap: true),
                         child: Text(
-                          LanguageTextFile()
-                              .getChapterScreenRecentChapterText(),
+                          LanguageTextFile().getChapterScreenRecentChapterText(
+                              getLanguageCode),
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.start,
                           style: TextStyle(
@@ -353,8 +353,12 @@ class chapterPage extends State<chapterScreen> {
                               };
                               SharedPreference.instance.setRecentChapter(
                                   "chapter", deleteChapterMap);
-                              ToastMessage(screenHeight,
-                                  "Recent Chapter cleared successfully", true);
+                              ToastMessage(
+                                  screenHeight,
+                                  getLanguageCode == 'en'
+                                      ? "Recent Chapter cleared successfully"
+                                      : "हालिया अध्याय सफलतापूर्वक साफ़ हो गया",
+                                  true);
                             });
                           },
                           style: TextButton.styleFrom(
@@ -389,7 +393,8 @@ class chapterPage extends State<chapterScreen> {
                             //         .getTextDirection(getLanguageCode),
                             //     getSoftWrap: true),
                             child: Text(
-                              LanguageTextFile().getChapterScreenClearAllText(),
+                              LanguageTextFile().getChapterScreenClearAllText(
+                                  getLanguageCode),
                               textScaler: const TextScaler.linear(1.0),
                               textAlign: TextAlign.start,
                               style: TextStyle(
@@ -466,20 +471,27 @@ class chapterPage extends State<chapterScreen> {
                   //     getTextDirection: LanguageTextFile()
                   //         .getTextDirection(getLanguageCode),
                   //     getSoftWrap: true),
-                  child: Text(
-                    LanguageTextFile().getChapterScreenAllChapterText(),
-                    textScaler: const TextScaler.linear(1.0),
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                        fontSize: screenHeight *
-                            (AppConfig().chapterScreenAllChapterTextSize /
-                                AppConfig().screenHeight),
-                        color: darkMode
-                            ? AppConfig().chapterScreenAllChapterTextDarkColor
-                            : AppConfig().chapterScreenAllChapterTextLightColor,
-                        fontFamily: AppConfig().outfitFontRegular),
-                    textDirection:
-                        LanguageTextFile().getTextDirection(getLanguageCode),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: (screenHeight * (10 / AppConfig().screenHeight)),
+                    ),
+                    child: Text(
+                      LanguageTextFile()
+                          .getChapterScreenAllChapterText(getLanguageCode),
+                      textScaler: const TextScaler.linear(1.0),
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                          fontSize: screenHeight *
+                              (AppConfig().chapterScreenAllChapterTextSize /
+                                  AppConfig().screenHeight),
+                          color: darkMode
+                              ? AppConfig().chapterScreenAllChapterTextDarkColor
+                              : AppConfig()
+                                  .chapterScreenAllChapterTextLightColor,
+                          fontFamily: AppConfig().outfitFontRegular),
+                      textDirection:
+                          LanguageTextFile().getTextDirection(getLanguageCode),
+                    ),
                   ),
                 ),
                 SizedBox(

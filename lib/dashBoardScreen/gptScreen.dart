@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:bible_gpt/signInScreen/signinScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
+import '../class/change_language_local.dart';
 import '../class/theme_method.dart';
 import '../config/app_config.dart';
 import '../config/language_text_file.dart';
@@ -34,8 +37,9 @@ class _GptScreenState extends State<GptScreen> {
   bool isLoading = false;
   bool isListening = false;
   late bool darkMode;
+  late ChangeLanguageLocal languageLocal;
   //late int getLanguageType;
-  String getLanguageCode = "en";
+  late String getLanguageCode;
   String searchResult = "";
   /*FlutterTts flutterTts = FlutterTts();
   int previousRunningLength = 0;
@@ -80,11 +84,25 @@ class _GptScreenState extends State<GptScreen> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  loadInitialData() {
+    languageLocal = Provider.of<ChangeLanguageLocal>(context);
+    getLanguageCode = languageLocal.selectedLanguageCode!;
+    _speech = stt.SpeechToText();
+    print(getLanguageCode);
+  }
+
+  @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
     scaleFactor = MediaQuery.of(context).textScaleFactor;
     darkMode = themeMethod(context);
+    loadInitialData();
     // getLanguageCode = languageMethod(context);
     AppConfig().getStatusBar(darkMode);
     return WillPopScope(
@@ -111,6 +129,9 @@ class _GptScreenState extends State<GptScreen> {
                       color: darkMode ? Colors.black : Colors.white),
                 ),
                 Image(
+                    fit: BoxFit.cover,
+                    height: (screenHeight * (350 / AppConfig().screenHeight)),
+                    width: double.infinity,
                     image: AssetImage(darkMode
                         ? "assets/png/book_image_dark.png"
                         : "assets/png/book_image.png")),
@@ -217,7 +238,8 @@ class _GptScreenState extends State<GptScreen> {
                               screenWidth: screenWidth,
                               screenHeight: screenHeight,
                               scaleFactor: scaleFactor,
-                              getHintText: searchGptHintText,
+                              getHintText: LanguageTextFile()
+                                  .getSearchGPTWidgetHintText(getLanguageCode),
                               readOnly: false,
                               textEditingController: textEditingController,
                               isListening: isListening,
@@ -238,8 +260,12 @@ class _GptScreenState extends State<GptScreen> {
                                   //   callSearchGPTAPI(
                                   //       textEditingController.text.toString());
                                   // } else {
-                                  ToastMessage(screenHeight,
-                                      "Please enter in search field", false);
+                                  ToastMessage(
+                                      screenHeight,
+                                      getLanguageCode == 'en'
+                                          ? "Please enter in search field"
+                                          : "कृपया खोज फ़ील्ड में दर्ज करें",
+                                      false);
                                   //}
                                 });
                               },
@@ -253,6 +279,7 @@ class _GptScreenState extends State<GptScreen> {
                                       _speech.stop();
                                     } else {
                                       isListening = true;
+
                                       Listen();
                                     }
                                   }
@@ -291,11 +318,11 @@ class _GptScreenState extends State<GptScreen> {
                           //child:languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getSelectedLanguageCode, getText: LanguageTextFile().getDashboardScreenBottomContentText(0), getTextStyle: TextStyle(fontSize: screenHeight*(AppConfig().dashboardScreenBottomContentTextSize/AppConfig().screenHeight),color: darkMode?AppConfig().dashboardScreenBottomContentTextDarkColor:AppConfig().dashboardScreenBottomContentTextLightColor,fontFamily: AppConfig().outfitFontRegular)),
                           child: Text(
                             LanguageTextFile()
-                                .getDashboardScreenBottomContentText(),
+                                .getDashboardScreenBottomContentText(
+                                    getLanguageCode),
                             textScaler: const TextScaler.linear(1.0),
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                
                                 fontSize: screenHeight *
                                     (AppConfig()
                                             .dashboardScreenBottomContentTextSize /
@@ -612,17 +639,33 @@ class _GptScreenState extends State<GptScreen> {
                                       ),
                                     ],
                                   ),
-                        const SizedBox(
-                          height: 20,
+                        SizedBox(
+                          height:
+                              (screenHeight * (20 / AppConfig().screenHeight)),
                         ),
-                        Text(
-                          textAlign: TextAlign.start,
-                          "The Bible is a sacred scripture in the Christian religion,\nbelieved to be inspired by God. It is a collection of books\nwritten by various authors over a span of centuries. It is\ndivided into two main parts: the Old Testament (which is\nalso a sacred text in Judaism) and the New Testament.\nThe Old Testament contains books such as Genesis,\nExodus, Psalms, among others, and tells stories of\nancient prophets, kings, and the teachings they shared.\nThe New Testament contains the four Gospels (Matthew,\nMark, Luke, and John), which tell the story of Jesus\nChrist's life, teachings, death, and resurrection, as well as\nother books like Acts, which describes the early Christian\nchurch, and Revelation, which shares prophetic visions.\nThe Bible is considered the holy guideline by\nChristians by which they should live.",
-                          style: TextStyle(
-                              color: const Color(0xFFFFFFFF),
-                              fontSize: (screenHeight *
-                                  (14 / AppConfig().screenHeight))),
-                        )
+                        Padding(
+                            padding: EdgeInsets.only(
+                                top: (screenHeight *
+                                    (60 / AppConfig().screenHeight))),
+                            child: textEditingController.text.isNotEmpty
+                                ? AnimatedTextKit(
+                                    animatedTexts: [
+                                      TypewriterAnimatedText(
+                                        textAlign: TextAlign.start,
+                                        "The Bible is a sacred scripture in the Christian religion,\nbelieved to be inspired by God. It is a collection of books\nwritten by various authors over a span of centuries. It is\ndivided into two main parts: the Old Testament (which is\nalso a sacred text in Judaism) and the New Testament.\nThe Old Testament contains books such as Genesis,\nExodus, Psalms, among others, and tells stories of\nancient prophets, kings, and the teachings they shared.\nThe New Testament contains the four Gospels (Matthew,\nMark, Luke, and John), which tell the story of Jesus\nChrist's life, teachings, death, and resurrection, as well as\nother books like Acts, which describes the early Christian\nchurch, and Revelation, which shares prophetic visions.\nThe Bible is considered the holy guideline by\nChristians by which they should live.",
+                                        textStyle: TextStyle(
+                                          color: darkMode
+                                              ? const Color(0xffffffff)
+                                              : const Color(0xff0000000),
+                                          fontSize: (screenHeight *
+                                              (12 / AppConfig().screenHeight)),
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                    totalRepeatCount: 1,
+                                  )
+                                : const Text(""))
                       ],
                     ),
                   ),

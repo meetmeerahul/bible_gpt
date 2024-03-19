@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bible_gpt/class/theme_method.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -70,7 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
     scaleFactor = MediaQuery.of(context).textScaleFactor;
-    // darkMode = themeMethod(context);
+    darkMode = themeMethod(context);
     //getLanguageCode = languageMethod(context);
     // AppConfig().getStatusBar(darkMode);
     return WillPopScope(
@@ -100,7 +101,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           .signInScreenBackgroundImageCopyRightPadding,
                       bottomCopyRightsContentPadding:
                           AppConfig().signInScreenBottomCopyRightsPadding,
-                      imageContentFuture: copyRightContentTextFutureMethod!),
+                      imageContentFuture: LanguageTextFile()
+                          .getSignInScreenCopyRightText(getLanguageCode)),
                   SizedBox(
                     width: screenWidth,
                     height: screenHeight,
