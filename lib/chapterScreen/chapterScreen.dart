@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bible_gpt/chapterScreen/bookDetailScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Class/ChapterHomeAllListClass.dart';
 import '../Class/ChapterHomeListClass.dart';
@@ -46,7 +47,7 @@ class chapterPage extends State<chapterScreen> {
   late bool darkMode;
   //late ChangeLanguageLocal languageLocal;
   //late int getLanguageType;
-  late String getLanguageCode;
+  late String getLanguageCode = "en";
   String recentChapter = "";
   String clearAll = "";
   String chapterAll = "";
@@ -194,6 +195,7 @@ class chapterPage extends State<chapterScreen> {
 
   callReBuildWidget(bool getDakMode, String getLanguageChange) {
     print("rebuild widget");
+    //getSpString();
     setState(() {
       darkMode = getDakMode;
       getLanguageCode = getLanguageChange;
@@ -243,6 +245,7 @@ class chapterPage extends State<chapterScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
     setState(() {
       // theme = Provider.of<ChangeThemeLocal>(context);
       // languageLocal = Provider.of<ChangeLanguageLocal>(context);

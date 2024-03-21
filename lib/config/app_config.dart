@@ -654,9 +654,7 @@ class AppConfig {
 
   // BOOK PAGE
   //1.Texts
-  
 
-  
   String oldTestament = "Old Testament";
   String newTestament = "New Testament";
   String theBookOf = " The Book Of";
@@ -665,10 +663,13 @@ class AppConfig {
   String trasilationsEditions = "Trasilations/Editions";
   String all = "All";
 
-
 //2.Paddings
 
   double testmentBoxTop = 40;
   double firstLeft = 66;
   double secondLeft = 23;
+
+//
+
+  String shorNameForBook = "";
 }

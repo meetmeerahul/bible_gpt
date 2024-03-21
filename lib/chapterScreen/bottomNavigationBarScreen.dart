@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:bible_gpt/class/book_details.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../APIRequest/api_handler.dart';
 import '../class/LanguageMethod.dart';
@@ -13,6 +15,7 @@ import '../class/change_theme_local.dart';
 import '../class/languages_and_transilations.dart';
 import '../class/theme_method.dart';
 import '../config/app_config.dart';
+import '../config/changable.dart';
 import '../config/language_text_file.dart';
 import '../config/shared_preferences.dart';
 import '../dashBoardScreen/gptScreen.dart';
@@ -75,15 +78,22 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   late String bottomNavigationChapterText;
   late String profileNameText;
 
-  bool showLanguage = false;
-  bool showEditions = false;
-
   Future<List<LanguagesAndTransilations>>? _languagesFuture;
+
   LanguagesAndTransilations? _selectedLanguage;
+
   List<Translations>? _selectedTranslations;
 
-  String? selectedLanguage;
-  String? selectedEdition;
+  Translations? userSelectedTranslation;
+
+  Future<List<BookDetails>>? _bookDetailsFuture;
+
+  String shortName = "YLT";
+
+  int oldT = 39;
+  int newT = 27;
+  String? _defaultShortName;
+  bool languageSelected = false;
 
   getUserToken() async {
     getToken = await SharedPreference.instance.getUserToken('token');
@@ -358,20 +368,43 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
     }
   }
 
+  void getBookDetails(String shortName) async {
+    List<BookDetails> bookDetails =
+        await ApiHandler.getBookDetails(shortName: shortName);
+    int count = bookDetails.length; // Retrieve the count directly
+    print('Number of result maps: $count');
+
+    if (count == 66) {
+      setState(() {
+        newT = 27;
+        oldT = 39;
+      });
+    } else {
+      setState(() {
+        oldT = 39;
+        newT = 0;
+      });
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     callInitState();
     _languagesFuture = ApiHandler.getLanguages();
-    // Set default language and translations to English
+
     _languagesFuture!.then((languages) {
-      setState(() {
-        _selectedLanguage =
-            languages.firstWhere((lang) => lang.language == 'English');
-        _selectedTranslations = _selectedLanguage!.translations;
-      });
+      _selectedLanguage =
+          languages.firstWhere((lang) => lang.language == 'English');
+      _selectedTranslations = _selectedLanguage!.translations;
     });
+
+    print("---Book details---");
+    _bookDetailsFuture = ApiHandler.getBookDetails(shortName: "YLT");
+    changableShortName = "YLT";
+    // setShortname(shortName);
+    print("$_bookDetailsFuture");
   }
 
   @override
@@ -491,7 +524,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                     children: [
                       Container(
                         height: swippedDown
-                            ? (screenHeight * (379 / AppConfig().screenHeight))
+                            ? (screenHeight * (390 / AppConfig().screenHeight))
                             : (screenHeight * (520 / AppConfig().screenHeight)),
 
                         decoration: const BoxDecoration(),
@@ -790,7 +823,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                             0xFF673602)
                                                         : const Color(
                                                             0xFFD69E0B),
-                                                    child: Text("39",
+                                                    child: Text(oldT.toString(),
                                                         style: TextStyle(
                                                             color: const Color(
                                                                 0xFFFFFFFF),
@@ -848,7 +881,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                   backgroundColor: darkMode
                                                       ? const Color(0xFF673602)
                                                       : const Color(0xFFD69E0B),
-                                                  child: Text("39",
+                                                  child: Text(newT.toString(),
                                                       style: TextStyle(
                                                           color: const Color(
                                                               0xFFFFFFFF),
@@ -977,15 +1010,30 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                     onChanged:
                                                                         (LanguagesAndTransilations?
                                                                             newValue) {
-                                                                      setState(
-                                                                          () {
-                                                                        print(newValue!
-                                                                            .language);
-                                                                        _selectedLanguage =
-                                                                            newValue;
-                                                                        _selectedTranslations =
-                                                                            newValue.translations;
-                                                                      });
+                                                                      print(newValue!
+                                                                          .language);
+
+                                                                      _selectedLanguage =
+                                                                          newValue;
+                                                                      _selectedTranslations =
+                                                                          newValue
+                                                                              .translations;
+                                                                      userSelectedTranslation =
+                                                                          null;
+
+                                                                      _defaultShortName = _selectedLanguage!
+                                                                          .translations!
+                                                                          .first
+                                                                          .shortName!;
+
+                                                                      getBookDetails(
+                                                                          _defaultShortName!);
+
+                                                                      changableShortName =
+                                                                          _defaultShortName!;
+
+                                                                      print(
+                                                                          "Default shortname : $_defaultShortName");
                                                                     },
                                                                     buttonStyleData:
                                                                         ButtonStyleData(
@@ -1154,15 +1202,24 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                   ),
                                                                 );
                                                               }).toList(),
-                                                              value: _selectedTranslations!
-                                                                      .isNotEmpty
-                                                                  ? _selectedTranslations!
-                                                                      .first
-                                                                  : null,
+                                                              value: userSelectedTranslation ??
+                                                                  _selectedTranslations!
+                                                                      .first,
+                                                              // Set the value directly
                                                               onChanged:
                                                                   (Translations?
                                                                       newValue) {
-                                                                // Handle selection of translation
+                                                                // setState(() {
+                                                                // Update selected translation
+                                                                // });
+                                                                userSelectedTranslation =
+                                                                    newValue;
+                                                                changableShortName =
+                                                                    newValue!
+                                                                        .shortName!;
+                                                                getBookDetails(
+                                                                    newValue
+                                                                        .shortName!); // Retrieve book details
                                                               },
                                                               buttonStyleData:
                                                                   ButtonStyleData(
@@ -1205,13 +1262,15 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                               ),
                                                               iconStyleData:
                                                                   IconStyleData(
-                                                                icon: SvgPicture.asset(
-                                                                    color: darkMode
-                                                                        ? const Color(
-                                                                            0xffFFCA8C)
-                                                                        : Colors
-                                                                            .black26,
-                                                                    "assets/svg/drop_down.svg"),
+                                                                icon: SvgPicture
+                                                                    .asset(
+                                                                  color: darkMode
+                                                                      ? const Color(
+                                                                          0xffFFCA8C)
+                                                                      : Colors
+                                                                          .black26,
+                                                                  "assets/svg/drop_down.svg",
+                                                                ),
                                                                 iconSize: 14,
                                                                 iconEnabledColor:
                                                                     Colors
@@ -1294,10 +1353,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                 ? const SizedBox()
                                                 : Padding(
                                                     padding: EdgeInsets.symmetric(
-                                                        horizontal: (screenWidth *
-                                                            (194 /
-                                                                AppConfig()
-                                                                    .screenWidth)),
+                                                        horizontal: 0,
                                                         vertical: (screenHeight *
                                                             (4 /
                                                                 AppConfig()
@@ -1352,10 +1408,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                         !swippedDown
                                             ? Padding(
                                                 padding: EdgeInsets.symmetric(
-                                                    horizontal: (screenWidth *
-                                                        (194 /
-                                                            AppConfig()
-                                                                .screenWidth)),
+                                                    horizontal: 0,
                                                     vertical: (screenHeight *
                                                         (4 /
                                                             AppConfig()

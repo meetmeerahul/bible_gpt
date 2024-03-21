@@ -106,6 +106,7 @@ Widget ChapterHomeCardWidget(
                             ),
                           ),
                           GradientText(
+                            textAlign: TextAlign.center,
                             colors: const [
                               Color(0xFFFFD05B),
                               Color(0xFFBE7C12),
