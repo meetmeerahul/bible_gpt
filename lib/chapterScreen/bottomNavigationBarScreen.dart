@@ -78,6 +78,8 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   late String bottomNavigationChapterText;
   late String profileNameText;
 
+  bool isRebuild = true;
+
   Future<List<LanguagesAndTransilations>>? _languagesFuture;
 
   LanguagesAndTransilations? _selectedLanguage;
@@ -201,11 +203,19 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
     }
   }
 
-  addContextInScreen() {
-    screens.add(chapterScreen(
-      key: _chapterkey,
-      context: context,
-    ));
+  addContextInScreen({bool oldTest = false, bool newTest = false}) {
+    print("rebuild");
+    print("**** $oldTest");
+    setState(() {
+      isRebuild = false;
+      
+      screens.add(chapterScreen(
+        key: _chapterkey,
+        context: context,
+        newTest: newTest,
+        oldTest: oldTest,
+      ));
+    });
   }
 
   themeChange() {
@@ -423,7 +433,10 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
     darkMode = themeMethod(context);
     themeChange();
     initialData();
-    addContextInScreen();
+
+    if (isRebuild) {
+      addContextInScreen();
+    }
 
     print(_selectedLanguage);
 
@@ -773,34 +786,109 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          Container(
-                                            width: (screenWidth *
-                                                (143 /
-                                                    AppConfig().screenWidth)),
-                                            height: (screenHeight *
-                                                (40 /
-                                                    AppConfig().screenHeight)),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: darkMode
-                                                      ? const Color(0xFFFFCA8C)
-                                                      : const Color(0xFF754003),
-                                                  width: 1),
-                                              color: Colors.transparent,
-                                              borderRadius:
-                                                  const BorderRadiusDirectional
-                                                      .all(
-                                                Radius.circular(100),
+                                          InkWell(
+                                            onTap: () {
+                                              print("Hello");
+                                              addContextInScreen(oldTest: true);
+                                            },
+                                            child: Container(
+                                              width: (screenWidth *
+                                                  (143 /
+                                                      AppConfig().screenWidth)),
+                                              height: (screenHeight *
+                                                  (40 /
+                                                      AppConfig()
+                                                          .screenHeight)),
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: darkMode
+                                                        ? const Color(
+                                                            0xFFFFCA8C)
+                                                        : const Color(
+                                                            0xFF754003),
+                                                    width: 1),
+                                                color: Colors.transparent,
+                                                borderRadius:
+                                                    const BorderRadiusDirectional
+                                                        .all(
+                                                  Radius.circular(100),
+                                                ),
                                               ),
+                                              child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: [
+                                                    Text(
+                                                      LanguageTextFile()
+                                                          .bottomNavOldTestment(
+                                                              getLanguageCode),
+                                                      style: TextStyle(
+                                                          color: darkMode
+                                                              ? const Color(
+                                                                  0xFFFFCA8C)
+                                                              : const Color(
+                                                                  0xFF754003),
+                                                          fontSize: (screenHeight *
+                                                              (12 /
+                                                                  AppConfig()
+                                                                      .screenHeight))),
+                                                    ),
+                                                    CircleAvatar(
+                                                      radius: (screenHeight *
+                                                          (14.5 /
+                                                              AppConfig()
+                                                                  .screenHeight)),
+                                                      backgroundColor: darkMode
+                                                          ? const Color(
+                                                              0xFF673602)
+                                                          : const Color(
+                                                              0xFFD69E0B),
+                                                      child: Text(oldT.toString(),
+                                                          style: TextStyle(
+                                                              color: const Color(
+                                                                  0xFFFFFFFF),
+                                                              fontSize: (screenHeight *
+                                                                  (14 /
+                                                                      AppConfig()
+                                                                          .screenHeight)))),
+                                                    )
+                                                  ]),
                                             ),
-                                            child: Row(
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {},
+                                            child: Container(
+                                              width: (screenWidth *
+                                                  (143 /
+                                                      AppConfig().screenWidth)),
+                                              height: (screenHeight *
+                                                  (40 /
+                                                      AppConfig()
+                                                          .screenHeight)),
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: darkMode
+                                                        ? const Color(
+                                                            0xFFFFCA8C)
+                                                        : const Color(
+                                                            0xFF754003),
+                                                    width: 1),
+                                                color: Colors.transparent,
+                                                borderRadius:
+                                                    const BorderRadiusDirectional
+                                                        .all(
+                                                  Radius.circular(100),
+                                                ),
+                                              ),
+                                              child: Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment
                                                         .spaceEvenly,
                                                 children: [
                                                   Text(
                                                     LanguageTextFile()
-                                                        .bottomNavOldTestment(
+                                                        .bottomNavNewTestment(
                                                             getLanguageCode),
                                                     style: TextStyle(
                                                         color: darkMode
@@ -823,7 +911,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                             0xFF673602)
                                                         : const Color(
                                                             0xFFD69E0B),
-                                                    child: Text(oldT.toString(),
+                                                    child: Text(newT.toString(),
                                                         style: TextStyle(
                                                             color: const Color(
                                                                 0xFFFFFFFF),
@@ -832,65 +920,8 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                     AppConfig()
                                                                         .screenHeight)))),
                                                   )
-                                                ]),
-                                          ),
-                                          Container(
-                                            width: (screenWidth *
-                                                (143 /
-                                                    AppConfig().screenWidth)),
-                                            height: (screenHeight *
-                                                (40 /
-                                                    AppConfig().screenHeight)),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: darkMode
-                                                      ? const Color(0xFFFFCA8C)
-                                                      : const Color(0xFF754003),
-                                                  width: 1),
-                                              color: Colors.transparent,
-                                              borderRadius:
-                                                  const BorderRadiusDirectional
-                                                      .all(
-                                                Radius.circular(100),
+                                                ],
                                               ),
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Text(
-                                                  LanguageTextFile()
-                                                      .bottomNavNewTestment(
-                                                          getLanguageCode),
-                                                  style: TextStyle(
-                                                      color: darkMode
-                                                          ? const Color(
-                                                              0xFFFFCA8C)
-                                                          : const Color(
-                                                              0xFF754003),
-                                                      fontSize: (screenHeight *
-                                                          (12 /
-                                                              AppConfig()
-                                                                  .screenHeight))),
-                                                ),
-                                                CircleAvatar(
-                                                  radius: (screenHeight *
-                                                      (14.5 /
-                                                          AppConfig()
-                                                              .screenHeight)),
-                                                  backgroundColor: darkMode
-                                                      ? const Color(0xFF673602)
-                                                      : const Color(0xFFD69E0B),
-                                                  child: Text(newT.toString(),
-                                                      style: TextStyle(
-                                                          color: const Color(
-                                                              0xFFFFFFFF),
-                                                          fontSize: (screenHeight *
-                                                              (14 /
-                                                                  AppConfig()
-                                                                      .screenHeight)))),
-                                                )
-                                              ],
                                             ),
                                           )
                                         ],

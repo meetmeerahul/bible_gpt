@@ -37,14 +37,13 @@ class ApiHandler {
     return BookDetails.bookDetailsFromApi(tempList);
   }
 
-  static Future<List<Map<String, dynamic>>> getChaptersInBooks(
-      String shortName) async {
+  static getChaptersInBooks(String shortName) async {
     Map<String, dynamic> getChapterHomeResponse = {"data": []};
 
     String url = "https://bolls.life/get-books/$shortName/";
     final response = await http.get(Uri.parse(url));
 
-    List<Map<String, dynamic>> dataList = [];
+    var dataList = [];
     try {
       List<dynamic> decodedList = jsonDecode(response.body);
       for (var item in decodedList) {
@@ -56,18 +55,6 @@ class ApiHandler {
       print('Error decoding JSON data: $e');
     }
 
-    for (var item in dataList) {
-      int bookId = item['bookid'];
-      String name = item['name'];
-      int chronOrder = item['chronorder'];
-      int chapters = item['chapters'];
-
-      print('Book ID: $bookId');
-      print('Name: $name');
-      print('Chronological Order: $chronOrder');
-      print('Chapters: $chapters');
-      print('------------------------------------');
-    }
     return dataList;
   }
 }

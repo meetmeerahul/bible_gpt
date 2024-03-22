@@ -72,10 +72,14 @@ Widget ChapterHomeCardWidget(
                 ),
                 child: Stack(
                   children: [
-                    SizedBox(
-                      //height: (screenHeight * (200 / AppConfig().screenHeight)),
-                      // width: (screenWidth * (200 / AppConfig().screenWidth)),
-                      child: SvgPicture.asset("assets/svg/book_cover.svg"),
+                    Container(
+                      decoration: const BoxDecoration(),
+                      child: SvgPicture.asset(
+                          height:
+                              (screenHeight * (300 / AppConfig().screenHeight)),
+                          width:
+                              (screenWidth * (200 / AppConfig().screenWidth)),
+                          "assets/svg/book_cover.svg"),
                     ),
                     Padding(
                       padding: EdgeInsets.only(
@@ -105,16 +109,22 @@ Widget ChapterHomeCardWidget(
                               color: const Color(0xFFA49A78),
                             ),
                           ),
-                          GradientText(
-                            textAlign: TextAlign.center,
-                            colors: const [
-                              Color(0xFFFFD05B),
-                              Color(0xFFBE7C12),
-                            ],
-                            getLanguageCode == 'en' ? 'Judges' : "न्यायाधीशों",
-                            style: TextStyle(
-                                fontSize: (screenHeight *
-                                    (16 / AppConfig().screenHeight))),
+                          SizedBox(
+                            width:
+                                (screenWidth * (60 / AppConfig().screenWidth)),
+                            child: GradientText(
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.clip,
+                              colors: const [
+                                Color(0xFFFFD05B),
+                                Color(0xFFBE7C12),
+                              ],
+                              getChapterHomeClass.name ??
+                                  '', // Provide a default value if getChapterHomeClass.name is null
+                              style: TextStyle(
+                                  fontSize: (screenHeight *
+                                      (16 / AppConfig().screenHeight))),
+                            ),
                           ),
                           Text(
                             getLanguageCode == 'en' ? "Bible" : "बाइबिल",

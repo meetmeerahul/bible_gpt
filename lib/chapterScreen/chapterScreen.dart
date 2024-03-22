@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:bible_gpt/APIRequest/api_handler.dart';
 import 'package:bible_gpt/chapterScreen/bookDetailScreen.dart';
+import 'package:bible_gpt/config/changable.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,23 +23,35 @@ import 'categoryDetailScreen.dart';
 
 class chapterScreen extends StatefulWidget {
   final BuildContext context;
+  final bool newTest;
+  final bool oldTest;
   //final bool darkMode;
   const chapterScreen({
     super.key,
     required this.context,
+    required this.newTest,
+    required this.oldTest,
   });
 
   @override
   State<StatefulWidget> createState() {
-    return chapterPage(context: context);
+    return chapterPage(context: context, oldTest: oldTest, newTest: newTest);
   }
 }
 
 class chapterPage extends State<chapterScreen> {
   @override
   final BuildContext context;
+
+  final bool oldTest;
+  final bool newTest;
   //final bool darkMode;
-  chapterPage({Key? key, required this.context});
+  chapterPage(
+      {Key? key,
+      required this.context,
+      required this.oldTest,
+      required this.newTest});
+
   double screenWidth = 0;
   double screenHeight = 0;
   double scaleFactor = 0;
@@ -93,7 +108,7 @@ class chapterPage extends State<chapterScreen> {
       bool itemAlreadyAdded = false;
       for (int a = 0; a < getChapterRecentList.length; a++) {
         Map<String, dynamic> getChapterItem = getChapterRecentList[a];
-        if (getChapterItem["id"] == getResult.id) {
+        if (getChapterItem["bookid"] == getResult.bookid) {
           itemAlreadyAdded = true;
           getChapterRecentList.remove(getChapterItem);
           getChapterRecentList.insert(0, getChapterItem);
@@ -140,42 +155,54 @@ class chapterPage extends State<chapterScreen> {
     }
   }
 
-  // callChapterAPI() async {
-  //   setState(() {
-  //     isAPILoading = true;
-  //   });
-  //   bool internetConnectCheck = await CheckInternetConnectionMethod();
-  //   if (internetConnectCheck) {
-  //     var getHomeChapterAPIResponse =
-  //         await AllAPIMethod().getAllChapterDataAPI();
-  //     print(getHomeChapterAPIResponse);
-  //     if (getHomeChapterAPIResponse["status"]) {
-  //       setState(() {
-  //         allChapterList.clear();
-  //         List<ChapterHomeListClass> getResponseData =
-  //             getHomeChapterAPIResponse["data"];
-  //         List<ChapterHomeListClass> getChapterHomeList = [];
-  //         for (int i = 0; i < getResponseData.length; i++) {
-  //           getChapterHomeList.add(getResponseData[i]);
-  //           if ((i == (getResponseData.length - 1)) || ((i + 1) % 3 == 0)) {
-  //             allChapterList.add(ChapterHomeAllListClass(
-  //                 getAllChapterList: List.from(getChapterHomeList)));
-  //             getChapterHomeList.clear();
-  //           }
-  //         }
-  //       });
-  //     } else {
-  //       ToastMessage(screenHeight, getHomeChapterAPIResponse["message"],
-  //           getHomeChapterAPIResponse["status"]);
-  //     }
-  //   } else {
-  //     navigateToNoInternetScreen(null);
-  //   }
-  //   setState(() {
-  //     isAPILoading = false;
-  //   });
-  //   recentData();
-  // }
+  callChapterAPI() async {
+    setState(() {
+      isAPILoading = true;
+    });
+
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+    if (internetConnectCheck) {
+      var getHomeChapterAPIResponse =
+          await ApiHandler.getChaptersInBooks(changableShortName);
+
+      // print(getHomeChapterAPIResponse);
+
+      if (getHomeChapterAPIResponse.isNotEmpty) {
+        setState(() {
+          allChapterList.clear();
+
+          List<ChapterHomeListClass> getResponseData = [];
+
+          for (var item in getHomeChapterAPIResponse) {
+            // Convert each map in the response to a ChapterHomeListClass object
+            getResponseData.add(ChapterHomeListClass.fromJson(item));
+          }
+
+          List<ChapterHomeListClass> getChapterHomeList = [];
+          print("*******++++++value= $oldTest");
+          for (int i = 0; i < getResponseData.length; i++) {
+            //print(" response length ${getResponseData.length}");
+            getChapterHomeList.add(getResponseData[i]);
+            if ((i == (getResponseData.length - 1)) || ((i + 1) % 3 == 0)) {
+              allChapterList.add(ChapterHomeAllListClass(
+                  getAllChapterList: List.from(getChapterHomeList)));
+              getChapterHomeList.clear();
+            }
+          }
+        });
+      } else {
+        ToastMessage(screenHeight, "Error", false);
+      }
+    } else {
+      navigateToNoInternetScreen(null);
+    }
+
+    setState(() {
+      isAPILoading = false;
+    });
+
+    recentData();
+  }
 
   /*localData(){
     allChapterList.clear();
@@ -199,7 +226,12 @@ class chapterPage extends State<chapterScreen> {
     setState(() {
       darkMode = getDakMode;
       getLanguageCode = getLanguageChange;
-      futureFunctionMethod();
+
+      // futureFunctionMethod();
+      // if (!isAPILoading) {
+      //   callChapterAPI();
+      // }
+      
     });
   }
 
@@ -216,30 +248,30 @@ class chapterPage extends State<chapterScreen> {
     setState(() {});
   }
 
-  localData() {
-    allChapterList.clear();
-    setState(() {
-      for (int i = 0; i < 10; i++) {
-        List<ChapterHomeListClass> getChapterHomeAllListClass = [];
-        for (int j = 0; j < 3; j++) {
-          int getValue = (i * 3) + (j + 1);
-          ChapterHomeListClass getChapterItem = ChapterHomeListClass(
-              id: getValue,
-              isSelected: false,
-              isRecentSelected: false,
-              chapterName: '',
-              chapterNumber: 0,
-              chapterNameMeaning: '',
-              slockCount: 1);
-          getChapterHomeAllListClass.add(getChapterItem);
-        }
-        allChapterList.add(ChapterHomeAllListClass(
-            getAllChapterList: getChapterHomeAllListClass.toList()));
-      }
-    });
+  // localData() {
+  //   allChapterList.clear();
+  //   setState(() {
+  //     for (int i = 0; i < 10; i++) {
+  //       List<ChapterHomeListClass> getChapterHomeAllListClass = [];
+  //       for (int j = 0; j < 3; j++) {
+  //         int getValue = (i * 3) + (j + 1);
+  //         ChapterHomeListClass getChapterItem = ChapterHomeListClass(
+  //             id: getValue,
+  //             isSelected: false,
+  //             isRecentSelected: false,
+  //             chapterName: '',
+  //             chapterNumber: 0,
+  //             chapterNameMeaning: '',
+  //             slockCount: 1);
+  //         getChapterHomeAllListClass.add(getChapterItem);
+  //       }
+  //       allChapterList.add(ChapterHomeAllListClass(
+  //           getAllChapterList: getChapterHomeAllListClass.toList()));
+  //     }
+  //   });
 
-    print("Clapter Lenght : ${allChapterList.length}");
-  }
+  //   print("Clapter Lenght : ${allChapterList.length}");
+  // }
 
   @override
   void initState() {
@@ -251,8 +283,8 @@ class chapterPage extends State<chapterScreen> {
       // languageLocal = Provider.of<ChangeLanguageLocal>(context);
       // darkMode = theme.getTheme();
       // getLanguageCode = languageLocal.getLanguage();
-      // callChapterAPI();
-      localData();
+      callChapterAPI();
+      // localData();
     });
   }
 
@@ -262,7 +294,8 @@ class chapterPage extends State<chapterScreen> {
     screenHeight = MediaQuery.of(context).size.height;
     scaleFactor = MediaQuery.of(context).textScaleFactor;
     darkMode = themeMethod(context);
-
+    print("NewT inside chapters $newTest");
+    print(" chapter length : ${allChapterList.length}");
     return
         //  (clearAllFutureMethod == null)
         //     ? const SizedBox()
@@ -534,11 +567,11 @@ class chapterPage extends State<chapterScreen> {
         recent: true,
         getCallBackFunction: (getResult) {
           for (int i = 0; i < recentChapterList.length; i++) {
-            if (recentChapterList[i].id == getResult.id) {
+            if (recentChapterList[i].bookid == getResult.bookid) {
               setState(() {
                 recentChapterList[i].isRecentSelected = true;
               });
-              navigateToCategoryDetailScreen(getResult.id.toString());
+              navigateToCategoryDetailScreen(getResult.bookid.toString());
             } else {
               setState(() {
                 recentChapterList[i].isRecentSelected = false;
@@ -558,10 +591,14 @@ class chapterPage extends State<chapterScreen> {
       recent: false,
       getCallBackFunction: (getResult) {
         for (int i = 0; i < allChapterList.length; i++) {
+          print("i = $i");
           for (int j = 0; j < allChapterList[i].getAllChapterList.length; j++) {
-            if (allChapterList[i].getAllChapterList[j].id == getResult.id) {
+            print(" j = $j");
+            if (allChapterList[i].getAllChapterList[j].bookid ==
+                getResult.bookid) {
               setState(() {
                 allChapterList[i].getAllChapterList[j].isSelected = true;
+
                 /*if(getPreviousRecentChapterList.contains(getResult.id)){
 
               }
@@ -577,8 +614,8 @@ class chapterPage extends State<chapterScreen> {
             }
           }
         }
-        getSharedPreferenceData(getResult);
-        navigateToCategoryDetailScreen(getResult.id.toString());
+        //   getSharedPreferenceData(getResult);
+        navigateToCategoryDetailScreen(getResult.bookid.toString());
       },
     );
   }
