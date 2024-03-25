@@ -5,6 +5,9 @@ import 'package:bible_gpt/class/languages_and_transilations.dart';
 
 import 'package:http/http.dart' as http;
 
+import '../chapterScreen/bookDetailScreen.dart';
+import '../class/book_chapter.dart';
+
 class ApiHandler {
   static Future<List<LanguagesAndTransilations>> getLanguages() async {
     const url = "https://bolls.life/static/bolls/app/views/languages.json";
@@ -38,12 +41,10 @@ class ApiHandler {
   }
 
   static getChaptersInBooks(String shortName) async {
-    Map<String, dynamic> getChapterHomeResponse = {"data": []};
-
     String url = "https://bolls.life/get-books/$shortName/";
     final response = await http.get(Uri.parse(url));
 
-    var dataList = [];
+    List dataList = [];
     try {
       List<dynamic> decodedList = jsonDecode(response.body);
       for (var item in decodedList) {
@@ -56,5 +57,28 @@ class ApiHandler {
     }
 
     return dataList;
+  }
+
+  static Future<List<BookChapters>> getChaptersContents(
+      String shortname, String bookid, String chapter) async {
+    print(" book id======$bookid  shortname=$shortname chapter = $chapter");
+    String url = "https://bolls.life/get-chapter/$shortname/$bookid/$chapter/";
+
+    print(url);
+    final response = await http.get(Uri.parse(url));
+
+    List dataList = [];
+    try {
+      List decodedList = jsonDecode(response.body);
+      for (var item in decodedList) {
+        if (item is Map<String, dynamic>) {
+          dataList.add(item);
+        }
+      }
+    } catch (e) {
+      print('Error decoding JSON data: $e');
+    }
+
+    return BookChapters.bookDataFromAPi(dataList);
   }
 }

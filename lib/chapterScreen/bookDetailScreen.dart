@@ -4,8 +4,12 @@ import 'dart:typed_data';
 
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:bible_gpt/APIRequest/api_handler.dart';
+import 'package:bible_gpt/class/book_chapter.dart';
 import 'package:bible_gpt/config/app_config.dart';
+import 'package:bible_gpt/config/changable.dart';
 import 'package:bible_gpt/dashBoardScreen/gptScreen.dart';
+import 'package:bible_gpt/loader/screen/DetailLoaderScreen.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -23,16 +27,34 @@ import 'package:http/http.dart' as http;
 import '../widgets/check_internet_method.dart';
 
 class BookDetailScreen extends StatefulWidget {
-  const BookDetailScreen({Key? key}) : super(key: key);
+  final String bookid;
+  final String chapterCOunt;
+  final String chapterName;
+  const BookDetailScreen(
+      {super.key,
+      required this.bookid,
+      required this.chapterCOunt,
+      required this.chapterName});
 
   @override
-  State<BookDetailScreen> createState() => _BookDetailScreenState();
+  State<BookDetailScreen> createState() => BookDetail(
+      bookid: bookid, chapterCOunt: chapterCOunt, chapterName: chapterName);
 }
 
-class _BookDetailScreenState extends State<BookDetailScreen> {
+class BookDetail extends State<BookDetailScreen> {
   double screenWidth = 0;
   double screenHeight = 0;
   late bool darkMode;
+
+  String bookid;
+  String chapterCOunt;
+  String chapterName;
+
+  BookDetail(
+      {Key? key,
+      required this.bookid,
+      required this.chapterCOunt,
+      required this.chapterName});
 
   bool statusBarVisible = true;
   ScrollController pageScrollController = ScrollController();
@@ -57,6 +79,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   bool isPlaying = false;
   bool isPause = false;
 
+  bool apiIsloading = true;
+
   final List<String> items = [
     'Item1',
     'Item2',
@@ -77,6 +101,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   late var activeSource;
 
+  late Future<List<BookChapters>> _booksFuture;
+
   // Uint8List audioData =
   //     Uint8List.fromList(base64.decode(await fluttertts.speak(demoVerse)));
   // activeSource = BytesSource(audioData);
@@ -95,6 +121,11 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     // TODO: implement initState
     super.initState();
     scrollinit();
+    _booksFuture = getBookChapters(0);
+
+    setState(() {
+      apiIsloading = false;
+    });
 
     _audioPlayer.onPlayerStateChanged.listen((event) {
       if (event == PlayerState.playing) {
@@ -145,6 +176,30 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     }
   }
 
+  Future<List<BookChapters>> getBookChapters(int chapter) async {
+    late String chapterNumber;
+
+    if (chapter == 0) {
+      chapterNumber = 1.toString();
+
+      setState(() {
+        apiIsloading = true;
+      });
+
+      return await ApiHandler.getChaptersContents(
+          changableShortName, bookid, chapterNumber);
+    } else {
+      chapterNumber = chapter.toString();
+
+      setState(() {
+        apiIsloading = true;
+      });
+
+      return await ApiHandler.getChaptersContents(
+          changableShortName, bookid, chapterNumber);
+    }
+  }
+
   Future<void> playAudio() async {
     final response = await http.get(Uri.parse(
         'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3'));
@@ -173,9 +228,13 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     screenHeight = MediaQuery.of(context).size.height;
     statusBarHeight = MediaQuery.of(context).padding.top;
     darkMode = themeMethod(context);
+
     getLanguage();
     print(darkMode);
-
+    print(("ook id : ${widget.bookid}"));
+    print(" BookId-------${widget.chapterCOunt}");
+    print("book name $chapterName");
+    // print(" Chapters-------${widget.chapterCount}");
     return Scaffold(
       body: Container(
         child: Stack(
@@ -219,9 +278,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                     "assets/svg/back_arrow.svg"),
                               ),
                               Text(
-                                getLanguageCode == 'en'
-                                    ? "Judges"
-                                    : "न्यायाधीशों",
+                                chapterName,
                                 style: TextStyle(
                                     color: darkMode
                                         ? const Color(0xffffffff)
@@ -261,9 +318,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                               style: const TextStyle(color: Color(0XFFAF6A06)),
                             ),
                             Text(
-                              getLanguageCode == 'en'
-                                  ? " Judges  "
-                                  : " न्यायाधीशों ",
+                              chapterName,
                               style: const TextStyle(color: Color(0XFFAF6A06)),
                             ),
                           ],
@@ -350,26 +405,35 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                         ),
                                       ],
                                     ),
-                                    items: items
-                                        .map((String item) =>
-                                            DropdownMenuItem<String>(
-                                              value: item,
-                                              child: Text(
-                                                item,
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: darkMode
-                                                      ? Colors.white
-                                                      : Colors.black,
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ))
-                                        .toList(),
+                                    items: List.generate(
+                                        int.parse(chapterCOunt), (index) {
+                                      return DropdownMenuItem<String>(
+                                        value: (index + 1)
+                                            .toString(), // Assuming chapter numbering starts from 1
+                                        child: Text(
+                                          (index + 1)
+                                              .toString(), // Assuming chapter numbering starts from 1
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: darkMode
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      );
+                                    }),
                                     value: selectedChapter,
                                     onChanged: (String? value) {
                                       setState(() {
                                         selectedChapter = value;
+                                        apiIsloading = !apiIsloading;
+                                        _booksFuture = getBookChapters(
+                                            int.parse(selectedChapter!));
+                                      });
+
+                                      setState(() {
+                                        apiIsloading = false;
                                       });
                                     },
                                     buttonStyleData: ButtonStyleData(
@@ -392,16 +456,18 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                     ),
                                     iconStyleData: IconStyleData(
                                       icon: SvgPicture.asset(
-                                          color: darkMode
-                                              ? Colors.white
-                                              : Colors.black,
-                                          "assets/svg/drop_down.svg"),
+                                        "assets/svg/drop_down.svg",
+                                        color: darkMode
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
                                       iconSize: 12,
                                       iconEnabledColor: Colors.black,
                                       iconDisabledColor: Colors.black,
                                     ),
                                     dropdownStyleData: DropdownStyleData(
-                                      maxHeight: 200,
+                                      maxHeight:
+                                          200, // Adjust this value as needed
                                       width: (screenWidth *
                                           (311 / AppConfig().screenWidth)),
                                       decoration: BoxDecoration(
@@ -459,102 +525,102 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                     height: (screenHeight *
                                         (5 / AppConfig().screenHeight)),
                                   ),
-                                  DropdownButtonHideUnderline(
-                                    child: DropdownButton2<String>(
-                                      isExpanded: true,
-                                      hint: Row(
-                                        children: [
-                                          const SizedBox(
-                                            width: 4,
-                                          ),
-                                          Expanded(
-                                            child: Text(
-                                              LanguageTextFile().bottomNavAll(
-                                                  getLanguageCode),
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: darkMode
-                                                    ? Colors.white
-                                                    : Colors.black,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      items: items
-                                          .map((String item) =>
-                                              DropdownMenuItem<String>(
-                                                value: item,
-                                                child: Text(
-                                                  item,
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: darkMode
-                                                        ? Colors.white
-                                                        : Colors.black,
-                                                  ),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ))
-                                          .toList(),
-                                      value: selectedChapter,
-                                      onChanged: (String? value) {
-                                        setState(() {
-                                          selectedChapter = value;
-                                        });
-                                      },
-                                      buttonStyleData: ButtonStyleData(
-                                        height: (screenHeight *
-                                            (40 / AppConfig().screenHeight)),
-                                        width: (screenWidth *
-                                            (156 / AppConfig().screenWidth)),
-                                        padding: const EdgeInsets.only(
-                                            left: 14, right: 14),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(0),
-                                          border: Border.all(
-                                            color: Colors.black26,
-                                          ),
-                                          color: darkMode
-                                              ? const Color(0xFF2D281E)
-                                              : Colors.white,
-                                        ),
-                                        elevation: 0,
-                                      ),
-                                      iconStyleData: IconStyleData(
-                                        icon: SvgPicture.asset(
-                                            color: darkMode
-                                                ? Colors.white
-                                                : Colors.black,
-                                            "assets/svg/drop_down.svg"),
-                                        iconSize: 12,
-                                        iconEnabledColor: Colors.black,
-                                        iconDisabledColor: Colors.black,
-                                      ),
-                                      dropdownStyleData: DropdownStyleData(
-                                        maxHeight: 200,
-                                        width: (screenWidth *
-                                            (156 / AppConfig().screenWidth)),
-                                        decoration: BoxDecoration(
-                                          color: darkMode
-                                              ? const Color(0xFF2D281E)
-                                              : Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(0),
-                                        ),
-                                        offset: const Offset(0, -10),
-                                      ),
-                                      menuItemStyleData:
-                                          const MenuItemStyleData(
-                                        height: 30,
-                                        padding: EdgeInsets.only(
-                                            left: 20, right: 14),
-                                      ),
-                                    ),
-                                  ),
+                                  // DropdownButtonHideUnderline(
+                                  //   child: DropdownButton2<String>(
+                                  //     isExpanded: true,
+                                  //     hint: Row(
+                                  //       children: [
+                                  //         const SizedBox(
+                                  //           width: 4,
+                                  //         ),
+                                  //         Expanded(
+                                  //           child: Text(
+                                  //             LanguageTextFile().bottomNavAll(
+                                  //                 getLanguageCode),
+                                  //             style: TextStyle(
+                                  //               fontSize: 12,
+                                  //               color: darkMode
+                                  //                   ? Colors.white
+                                  //                   : Colors.black,
+                                  //             ),
+                                  //             overflow: TextOverflow.ellipsis,
+                                  //           ),
+                                  //         ),
+                                  //       ],
+                                  //     ),
+                                  //     items: items
+                                  //         .map((String item) =>
+                                  //             DropdownMenuItem<String>(
+                                  //               value: item,
+                                  //               child: Text(
+                                  //                 item,
+                                  //                 style: TextStyle(
+                                  //                   fontSize: 12,
+                                  //                   color: darkMode
+                                  //                       ? Colors.white
+                                  //                       : Colors.black,
+                                  //                 ),
+                                  //                 overflow:
+                                  //                     TextOverflow.ellipsis,
+                                  //               ),
+                                  //             ))
+                                  //         .toList(),
+                                  //     value: selectedChapter,
+                                  //     onChanged: (String? value) {
+                                  //       setState(() {
+                                  //         selectedChapter = value;
+                                  //       });
+                                  //     },
+                                  //     buttonStyleData: ButtonStyleData(
+                                  //       height: (screenHeight *
+                                  //           (40 / AppConfig().screenHeight)),
+                                  //       width: (screenWidth *
+                                  //           (156 / AppConfig().screenWidth)),
+                                  //       padding: const EdgeInsets.only(
+                                  //           left: 14, right: 14),
+                                  //       decoration: BoxDecoration(
+                                  //         borderRadius:
+                                  //             BorderRadius.circular(0),
+                                  //         border: Border.all(
+                                  //           color: Colors.black26,
+                                  //         ),
+                                  //         color: darkMode
+                                  //             ? const Color(0xFF2D281E)
+                                  //             : Colors.white,
+                                  //       ),
+                                  //       elevation: 0,
+                                  //     ),
+                                  //     iconStyleData: IconStyleData(
+                                  //       icon: SvgPicture.asset(
+                                  //           color: darkMode
+                                  //               ? Colors.white
+                                  //               : Colors.black,
+                                  //           "assets/svg/drop_down.svg"),
+                                  //       iconSize: 12,
+                                  //       iconEnabledColor: Colors.black,
+                                  //       iconDisabledColor: Colors.black,
+                                  //     ),
+                                  //     dropdownStyleData: DropdownStyleData(
+                                  //       maxHeight: 200,
+                                  //       width: (screenWidth *
+                                  //           (156 / AppConfig().screenWidth)),
+                                  //       decoration: BoxDecoration(
+                                  //         color: darkMode
+                                  //             ? const Color(0xFF2D281E)
+                                  //             : Colors.white,
+                                  //         borderRadius:
+                                  //             BorderRadius.circular(0),
+                                  //       ),
+                                  //       offset: const Offset(0, -10),
+                                  //     ),
+                                  //     menuItemStyleData:
+                                  //         const MenuItemStyleData(
+                                  //       height: 30,
+                                  //       padding: EdgeInsets.only(
+                                  //           left: 20, right: 14),
+                                  //     ),
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                               Row(
@@ -578,107 +644,107 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                         height: (screenHeight *
                                             (5 / AppConfig().screenHeight)),
                                       ),
-                                      DropdownButtonHideUnderline(
-                                        child: DropdownButton2<String>(
-                                          isExpanded: true,
-                                          hint: Row(
-                                            children: [
-                                              const SizedBox(
-                                                width: 4,
-                                              ),
-                                              Expanded(
-                                                child: Text(
-                                                  LanguageTextFile()
-                                                      .bottomNavAll(
-                                                          getLanguageCode),
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: darkMode
-                                                        ? Colors.white
-                                                        : Colors.black,
-                                                  ),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          items: items
-                                              .map((String item) =>
-                                                  DropdownMenuItem<String>(
-                                                    value: item,
-                                                    child: Text(
-                                                      item,
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        color: darkMode
-                                                            ? Colors.white
-                                                            : Colors.black,
-                                                      ),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ))
-                                              .toList(),
-                                          value: selectedChapter,
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              selectedChapter = value;
-                                            });
-                                          },
-                                          buttonStyleData: ButtonStyleData(
-                                            height: (screenHeight *
-                                                (40 /
-                                                    AppConfig().screenHeight)),
-                                            width: (screenWidth *
-                                                (156 /
-                                                    AppConfig().screenWidth)),
-                                            padding: const EdgeInsets.only(
-                                                left: 14, right: 14),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(0),
-                                              border: Border.all(
-                                                color: Colors.black26,
-                                              ),
-                                              color: darkMode
-                                                  ? const Color(0xFF2D281E)
-                                                  : Colors.white,
-                                            ),
-                                            elevation: 0,
-                                          ),
-                                          iconStyleData: IconStyleData(
-                                            icon: SvgPicture.asset(
-                                                color: darkMode
-                                                    ? Colors.white
-                                                    : Colors.black,
-                                                "assets/svg/drop_down.svg"),
-                                            iconSize: 12,
-                                            iconEnabledColor: Colors.black,
-                                            iconDisabledColor: Colors.black,
-                                          ),
-                                          dropdownStyleData: DropdownStyleData(
-                                            maxHeight: 200,
-                                            width: (screenWidth *
-                                                (156 /
-                                                    AppConfig().screenWidth)),
-                                            decoration: BoxDecoration(
-                                              color: darkMode
-                                                  ? const Color(0xFF2D281E)
-                                                  : Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(0),
-                                            ),
-                                            offset: const Offset(0, -10),
-                                          ),
-                                          menuItemStyleData:
-                                              const MenuItemStyleData(
-                                            height: 30,
-                                            padding: EdgeInsets.only(
-                                                left: 20, right: 14),
-                                          ),
-                                        ),
-                                      ),
+                                      // DropdownButtonHideUnderline(
+                                      //   child: DropdownButton2<String>(
+                                      //     isExpanded: true,
+                                      //     hint: Row(
+                                      //       children: [
+                                      //         const SizedBox(
+                                      //           width: 4,
+                                      //         ),
+                                      //         Expanded(
+                                      //           child: Text(
+                                      //             LanguageTextFile()
+                                      //                 .bottomNavAll(
+                                      //                     getLanguageCode),
+                                      //             style: TextStyle(
+                                      //               fontSize: 12,
+                                      //               color: darkMode
+                                      //                   ? Colors.white
+                                      //                   : Colors.black,
+                                      //             ),
+                                      //             overflow:
+                                      //                 TextOverflow.ellipsis,
+                                      //           ),
+                                      //         ),
+                                      //       ],
+                                      //     ),
+                                      //     items: items
+                                      //         .map((String item) =>
+                                      //             DropdownMenuItem<String>(
+                                      //               value: item,
+                                      //               child: Text(
+                                      //                 item,
+                                      //                 style: TextStyle(
+                                      //                   fontSize: 12,
+                                      //                   color: darkMode
+                                      //                       ? Colors.white
+                                      //                       : Colors.black,
+                                      //                 ),
+                                      //                 overflow:
+                                      //                     TextOverflow.ellipsis,
+                                      //               ),
+                                      //             ))
+                                      //         .toList(),
+                                      //     value: selectedChapter,
+                                      //     onChanged: (String? value) {
+                                      //       setState(() {
+                                      //         selectedChapter = value;
+                                      //       });
+                                      //     },
+                                      //     buttonStyleData: ButtonStyleData(
+                                      //       height: (screenHeight *
+                                      //           (40 /
+                                      //               AppConfig().screenHeight)),
+                                      //       width: (screenWidth *
+                                      //           (156 /
+                                      //               AppConfig().screenWidth)),
+                                      //       padding: const EdgeInsets.only(
+                                      //           left: 14, right: 14),
+                                      //       decoration: BoxDecoration(
+                                      //         borderRadius:
+                                      //             BorderRadius.circular(0),
+                                      //         border: Border.all(
+                                      //           color: Colors.black26,
+                                      //         ),
+                                      //         color: darkMode
+                                      //             ? const Color(0xFF2D281E)
+                                      //             : Colors.white,
+                                      //       ),
+                                      //       elevation: 0,
+                                      //     ),
+                                      //     iconStyleData: IconStyleData(
+                                      //       icon: SvgPicture.asset(
+                                      //           color: darkMode
+                                      //               ? Colors.white
+                                      //               : Colors.black,
+                                      //           "assets/svg/drop_down.svg"),
+                                      //       iconSize: 12,
+                                      //       iconEnabledColor: Colors.black,
+                                      //       iconDisabledColor: Colors.black,
+                                      //     ),
+                                      //     dropdownStyleData: DropdownStyleData(
+                                      //       maxHeight: 200,
+                                      //       width: (screenWidth *
+                                      //           (156 /
+                                      //               AppConfig().screenWidth)),
+                                      //       decoration: BoxDecoration(
+                                      //         color: darkMode
+                                      //             ? const Color(0xFF2D281E)
+                                      //             : Colors.white,
+                                      //         borderRadius:
+                                      //             BorderRadius.circular(0),
+                                      //       ),
+                                      //       offset: const Offset(0, -10),
+                                      //     ),
+                                      //     menuItemStyleData:
+                                      //         const MenuItemStyleData(
+                                      //       height: 30,
+                                      //       padding: EdgeInsets.only(
+                                      //           left: 20, right: 14),
+                                      //     ),
+                                      //   ),
+                                      // ),
                                     ],
                                   ),
                                 ],
@@ -686,102 +752,141 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                             ],
                           ),
                         ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: 5,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: (screenWidth *
-                                      (8 / AppConfig().screenWidth)),
-                                  vertical: (screenHeight *
-                                      (8 / AppConfig().screenHeight))),
-                              child: Container(
-                                height: (screenHeight *
-                                    (207 / AppConfig().screenHeight)),
-                                width: (screenWidth *
-                                    (396 / AppConfig().screenWidth)),
-                                decoration: BoxDecoration(
-                                  color: darkMode
-                                      ? const Color(0xFF2D281E)
-                                      : Colors.transparent,
-                                  border: Border.all(
-                                      color: const Color(0xFFAF6A06)),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(6),
-                                  ),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                        right: (screenWidth *
-                                            (12 / AppConfig().screenWidth)),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const SizedBox(),
-                                          Text(
-                                            getLanguageCode == 'en'
-                                                ? "Verse"
-                                                : "कविता",
-                                            style: const TextStyle(
-                                              color: Color(0xFFAF6A06),
+                        FutureBuilder(
+                          future: _booksFuture,
+                          builder:
+                              (BuildContext context, AsyncSnapshot snapshot) {
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Text('Error: ${snapshot.error}'),
+                              );
+                            } else {
+                              return (!snapshot.hasData) ||
+                                      (snapshot.hasData && apiIsloading)
+                                  ? DetailLoaderScreen(
+                                      screenWidth, screenHeight, darkMode)
+                                  : ListView.builder(
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: snapshot.data.length,
+                                      primary: false,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        BookChapters item =
+                                            snapshot.data[index];
+                                        return Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: (screenWidth *
+                                                  (8 /
+                                                      AppConfig().screenWidth)),
+                                              vertical: (screenHeight *
+                                                  (8 /
+                                                      AppConfig()
+                                                          .screenHeight))),
+                                          child: Container(
+                                            height: (screenHeight *
+                                                (207 /
+                                                    AppConfig().screenHeight)),
+                                            width: (screenWidth *
+                                                (396 /
+                                                    AppConfig().screenWidth)),
+                                            decoration: BoxDecoration(
+                                              color: darkMode
+                                                  ? const Color(0xFF2D281E)
+                                                  : Colors.transparent,
+                                              border: Border.all(
+                                                  color:
+                                                      const Color(0xFFAF6A06)),
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                Radius.circular(6),
+                                              ),
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                    right: (screenWidth *
+                                                        (12 /
+                                                            AppConfig()
+                                                                .screenWidth)),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      const SizedBox(),
+                                                      Text(
+                                                        getLanguageCode == 'en'
+                                                            ? "Verse"
+                                                            : "कविता",
+                                                        style: const TextStyle(
+                                                          color:
+                                                              Color(0xFFAF6A06),
+                                                        ),
+                                                      ),
+                                                      GestureDetector(
+                                                        onTap: () async {
+                                                          print(_audioPlayer
+                                                              .state);
+                                                          if (isPlaying) {
+                                                            await _audioPlayer
+                                                                .stop();
+                                                            setState(() {
+                                                              isPlaying = false;
+                                                            });
+                                                          } else if (_audioState ==
+                                                                  "Pause" ||
+                                                              !isPlaying) {
+                                                            setState(() {
+                                                              isPlaying = true;
+                                                            });
+                                                            playAudio();
+                                                          }
+                                                          checkedIndex = index;
+                                                        },
+                                                        child: SvgPicture.asset(
+                                                            isPlaying &&
+                                                                    checkedIndex ==
+                                                                        index
+                                                                ? "assets/svg/speaker_on.svg"
+                                                                : "assets/svg/mic_icon.svg"),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                SvgPicture.asset(
+                                                    "assets/svg/rect_bookdetail.svg"),
+                                                Text(
+                                                  textAlign: TextAlign.center,
+                                                  item.text!,
+                                                  style: TextStyle(
+                                                    color: darkMode
+                                                        ? const Color(
+                                                            0xFFFFFFFF)
+                                                        : const Color(
+                                                            0xFF353535),
+                                                    fontSize: (screenHeight *
+                                                        (14 /
+                                                            AppConfig()
+                                                                .screenHeight)),
+                                                  ),
+                                                ),
+                                                SvgPicture.asset(
+                                                    "assets/svg/narrow_line.svg"),
+                                              ],
                                             ),
                                           ),
-                                          GestureDetector(
-                                              onTap: () async {
-                                                print(_audioPlayer.state);
-                                                if (isPlaying) {
-                                                  await _audioPlayer.stop();
-                                                  setState(() {
-                                                    isPlaying = false;
-                                                  });
-                                                } else if (_audioState ==
-                                                        "Pause" ||
-                                                    !isPlaying) {
-                                                  setState(() {
-                                                    isPlaying = true;
-                                                  });
-
-                                                  playAudio();
-                                                }
-                                                checkedIndex = index;
-                                              },
-                                              child: SvgPicture.asset(isPlaying &&
-                                                      checkedIndex == index
-                                                  ? "assets/svg/speaker_on.svg"
-                                                  : "assets/svg/mic_icon.svg"))
-                                        ],
-                                      ),
-                                    ),
-                                    SvgPicture.asset(
-                                        "assets/svg/rect_bookdetail.svg"),
-                                    Text(
-                                      textAlign: TextAlign.center,
-                                      getLanguageCode == 'en'
-                                          ? "And the serpent hath been subtile above every beast of\nthe field which Jehovah God hath made, and he saith\nunto the woman, 'Is it true that God hath said, Ye do not\neat of every tree of the garden?"
-                                          : "और सांप मैदान के सब पशुओं से, जिन्हें यहोवा परमेश्वर ने बनाया है, \nप्रबल हो गया है, और उस ने स्त्री से कहा, क्या सच है, कि परमेश्वर \nने कहा है, कि तुम बाटिका के सब वृक्षों का फल नहीं खाते?",
-                                      style: TextStyle(
-                                          color: darkMode
-                                              ? const Color(0xFFFFFFFF)
-                                              : const Color(0xFF353535),
-                                          fontSize: (screenHeight *
-                                              (14 / AppConfig().screenHeight))),
-                                    ),
-                                    SvgPicture.asset(
-                                        "assets/svg/narrow_line.svg"),
-                                  ],
-                                ),
-                              ),
-                            );
+                                        );
+                                      },
+                                    );
+                            }
                           },
-                        ),
+                        )
                       ],
                     ),
                   ),
@@ -857,4 +962,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           : null,
     );
   }
+
+  // getLength(booksFuture) {
+  //   setState(() {
+  //     verseCountInChapters = booksFuture.length;
+  //   });
+  // }
 }

@@ -55,18 +55,19 @@ class SharedPreference {
     return getProfileMap;
   }
 
-  setRecentChapter(String key, Map<String, dynamic> recentChapterMap) async {
+  Future<void> setRecentChapter(
+      String key, Map<String, dynamic> recentChapterMap) async {
+    // print("******************Set recent called++++++++++++++");
     SharedPreferences myPrefs = await SharedPreferences.getInstance();
     String recentChapter = json.encode(recentChapterMap);
-    myPrefs.setString(key, recentChapter);
+    await myPrefs.setString(key, recentChapter);
   }
 
   Future<Map<String, dynamic>> getRecentChapter(String key) async {
     SharedPreferences myPrefs = await SharedPreferences.getInstance();
     String? getRecentChapterString = myPrefs.getString(key);
     Map<String, dynamic> getRecentChapterMap = {};
-    print("getRecent chapter : $getRecentChapterString");
-    //print("getRecent chapter length : ${getRecentChapterString!.length}");
+    // print("getRecent chapter : $getRecentChapterString");
     if (getRecentChapterString != null && getRecentChapterString.length > 2) {
       getRecentChapterMap = json.decode(getRecentChapterString);
     }

@@ -33,6 +33,7 @@ class categoryDetailPage extends State<categoryDetailScreen> {
       required this.screenType,
       required this.getValue,
       required this.languageCode});
+      
   double screenWidth = 0;
   double screenHeight = 0;
   double scaleFactor = 0;

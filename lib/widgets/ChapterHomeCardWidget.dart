@@ -22,15 +22,9 @@ Widget ChapterHomeCardWidget(
           child: Column(
             children: [
               Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(
-                      screenWidth * (6 / AppConfig().screenWidth))),
-                  child: SvgPicture.asset(
-                    darkMode
-                        ? AppConfig().darkCardBackgroundColor
-                        : AppConfig().cardBackgroundColor,
-                    fit: BoxFit.fill,
-                  ),
+                child: SvgPicture.asset(
+                  "assets/svg/book_cover.svg",
+                  fit: BoxFit.fill,
                 ),
               ),
             ],
@@ -39,6 +33,7 @@ Widget ChapterHomeCardWidget(
         Container(
           child: TextButton(
             onPressed: () {
+              print("Chhapter clicked : $getChapterHomeClass");
               isClick(getChapterHomeClass);
             },
             style: TextButton.styleFrom(
@@ -51,92 +46,76 @@ Widget ChapterHomeCardWidget(
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Container(
+              alignment: Alignment.topCenter,
               width: (screenWidth *
                       ((AppConfig().screenWidth -
                               AppConfig().chapterScreenLeftPadding -
                               AppConfig().chapterScreenRightPadding -
-                              24 -
-                              24) /
+                              16 -
+                              16) /
                           AppConfig().screenWidth)) /
                   3,
-              height: screenHeight * (134 / AppConfig().screenHeight),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(
-                    screenWidth * (6 / AppConfig().screenWidth))),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: darkMode
-                      ? const Color(0xFF000000)
-                      : const Color(0xFFFFF7D8),
-                ),
-                child: Stack(
+              //  height: screenHeight * (134 / AppConfig().screenHeight),
+              // decoration: BoxDecoration(
+              //   borderRadius: BorderRadius.all(Radius.circular(
+              //       screenWidth * (6 / AppConfig().screenWidth))),
+              // ),
+              child: Padding(
+                padding: EdgeInsets.only(
+                    left: (screenWidth * (10 / AppConfig().screenWidth))),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      decoration: const BoxDecoration(),
-                      child: SvgPicture.asset(
-                          height:
-                              (screenHeight * (300 / AppConfig().screenHeight)),
-                          width:
-                              (screenWidth * (200 / AppConfig().screenWidth)),
-                          "assets/svg/book_cover.svg"),
+                    SizedBox(
+                      height: (screenHeight * (50 / AppConfig().screenHeight)),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: (screenWidth * (14 / AppConfig().screenWidth)),
+                    SvgPicture.asset(
+                        height:
+                            (screenHeight * (20 / AppConfig().screenHeight)),
+                        width: (screenWidth * (20 / AppConfig().screenWidth)),
+                        "assets/svg/cross.svg"),
+                    Text(
+                      getLanguageCode == 'en' ? "The Book of" : "की किताब",
+                      style: TextStyle(
+                        fontSize:
+                            (screenHeight * (10 / AppConfig().screenHeight)),
+                        color: const Color(0xFFA49A78),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width:
-                                (screenWidth * (120 / AppConfig().screenWidth)),
-                          ),
-                          SvgPicture.asset(
-                              height: (screenHeight *
-                                  (20 / AppConfig().screenHeight)),
-                              width: (screenWidth *
-                                  (20 / AppConfig().screenWidth)),
-                              "assets/svg/cross.svg"),
-                          Text(
-                            getLanguageCode == 'en'
-                                ? "The Book of"
-                                : "की किताब",
-                            style: TextStyle(
+                    ),
+                    SizedBox(
+                      //width: (screenWidth * (30 / AppConfig().screenWidth)),
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                            left:
+                                (screenWidth * (15 / AppConfig().screenWidth)),
+                            right:
+                                (screenWidth * (15 / AppConfig().screenWidth))),
+                        child: GradientText(
+                          textAlign: TextAlign.center,
+                          colors: const [
+                            Color(0xFFFFD05B),
+                            Color(0xFFBE7C12),
+                          ],
+                          getChapterHomeClass.name ??
+                              '', // Provide a default value if getChapterHomeClass.name is null
+                          style: TextStyle(
                               fontSize: (screenHeight *
-                                  (10 / AppConfig().screenHeight)),
-                              color: const Color(0xFFA49A78),
-                            ),
-                          ),
-                          SizedBox(
-                            width:
-                                (screenWidth * (60 / AppConfig().screenWidth)),
-                            child: GradientText(
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.clip,
-                              colors: const [
-                                Color(0xFFFFD05B),
-                                Color(0xFFBE7C12),
-                              ],
-                              getChapterHomeClass.name ??
-                                  '', // Provide a default value if getChapterHomeClass.name is null
-                              style: TextStyle(
-                                  fontSize: (screenHeight *
-                                      (16 / AppConfig().screenHeight))),
-                            ),
-                          ),
-                          Text(
-                            getLanguageCode == 'en' ? "Bible" : "बाइबिल",
-                            style: TextStyle(
-                              fontSize: (screenHeight *
-                                  (10 / AppConfig().screenHeight)),
-                              color: const Color(0xFFA49A78),
-                            ),
-                          ),
-                        ],
+                                  (16 / AppConfig().screenHeight))),
+                        ),
                       ),
-                    )
+                    ),
+                    Text(
+                      getLanguageCode == 'en' ? "Bible" : "बाइबिल",
+                      style: TextStyle(
+                        fontSize:
+                            (screenHeight * (10 / AppConfig().screenHeight)),
+                        color: const Color(0xFFA49A78),
+                      ),
+                    ),
+                    SizedBox(
+                      height: (screenHeight * (20 / AppConfig().screenHeight)),
+                    ),
                   ],
                 ),
               ),

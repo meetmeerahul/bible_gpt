@@ -97,6 +97,9 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   String? _defaultShortName;
   bool languageSelected = false;
 
+  bool oldTest = false;
+  bool newTest = false;
+
   getUserToken() async {
     getToken = await SharedPreference.instance.getUserToken('token');
     setState(() {
@@ -203,17 +206,15 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
     }
   }
 
-  addContextInScreen({bool oldTest = false, bool newTest = false}) {
+  addContextInScreen() {
     print("rebuild");
-    print("**** $oldTest");
+
     setState(() {
       isRebuild = false;
-      
+
       screens.add(chapterScreen(
         key: _chapterkey,
         context: context,
-        newTest: newTest,
-        oldTest: oldTest,
       ));
     });
   }
@@ -237,7 +238,8 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
       themeChange();
       SharedPreference.instance.setOnDarkMode("darkMode", darkMode);
       print("language code in theme : $getLanguageCode");
-      _chapterkey.currentState?.callReBuildWidget(darkMode, getLanguageCode);
+      _chapterkey.currentState?.callReBuildWidget(
+          darkMode, getLanguageCode, oldTest, newTest, false);
     });
   }
 
@@ -276,7 +278,8 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
         }
       }*/
       print("language code in language : $getLanguageCode");
-      _chapterkey.currentState?.callReBuildWidget(darkMode, getLanguageCode);
+      _chapterkey.currentState?.callReBuildWidget(
+          darkMode, getLanguageCode, oldTest, newTest, false);
     });
   }
 
@@ -788,8 +791,19 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                         children: [
                                           InkWell(
                                             onTap: () {
-                                              print("Hello");
-                                              addContextInScreen(oldTest: true);
+                                              setState(() {
+                                                oldTest = !oldTest;
+                                                if (newTest) {
+                                                  newTest = !newTest;
+                                                }
+                                                _chapterkey.currentState
+                                                    ?.callReBuildWidget(
+                                                        darkMode,
+                                                        getLanguageCode,
+                                                        oldTest,
+                                                        newTest,
+                                                        true);
+                                              });
                                             },
                                             child: Container(
                                               width: (screenWidth *
@@ -857,7 +871,21 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                             ),
                                           ),
                                           GestureDetector(
-                                            onTap: () {},
+                                            onTap: () {
+                                              setState(() {
+                                                newTest = !newTest;
+                                                if (oldTest) {
+                                                  oldTest = !oldTest;
+                                                }
+                                                _chapterkey.currentState
+                                                    ?.callReBuildWidget(
+                                                        darkMode,
+                                                        getLanguageCode,
+                                                        oldTest,
+                                                        newTest,
+                                                        true);
+                                              });
+                                            },
                                             child: Container(
                                               width: (screenWidth *
                                                   (143 /
@@ -1063,6 +1091,13 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                       changableShortName =
                                                                           _defaultShortName!;
 
+                                                                      _chapterkey.currentState?.callReBuildWidget(
+                                                                          darkMode,
+                                                                          getLanguageCode,
+                                                                          false,
+                                                                          false,
+                                                                          true);
+
                                                                       print(
                                                                           "Default shortname : $_defaultShortName");
                                                                     },
@@ -1250,7 +1285,15 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                         .shortName!;
                                                                 getBookDetails(
                                                                     newValue
-                                                                        .shortName!); // Retrieve book details
+                                                                        .shortName!);
+                                                                _chapterkey
+                                                                    .currentState
+                                                                    ?.callReBuildWidget(
+                                                                        darkMode,
+                                                                        getLanguageCode,
+                                                                        false,
+                                                                        false,
+                                                                        true); // Retrieve book details
                                                               },
                                                               buttonStyleData:
                                                                   ButtonStyleData(

@@ -43,7 +43,7 @@ Widget AllChapterListviewWidget(
                         })
                     : const SizedBox(),
                 SizedBox(
-                  width: screenWidth * (24 / AppConfig().screenWidth),
+                  width: screenWidth * (16 / AppConfig().screenWidth),
                 ),
                 getChapterList.length > 1
                     ? ChapterHomeCardWidget(
@@ -58,7 +58,7 @@ Widget AllChapterListviewWidget(
                         })
                     : const SizedBox(),
                 SizedBox(
-                  width: screenWidth * (24 / AppConfig().screenWidth),
+                  width: screenWidth * (16 / AppConfig().screenWidth),
                 ),
                 getChapterList.length > 2
                     ? ChapterHomeCardWidget(

@@ -23,19 +23,16 @@ import 'categoryDetailScreen.dart';
 
 class chapterScreen extends StatefulWidget {
   final BuildContext context;
-  final bool newTest;
-  final bool oldTest;
+
   //final bool darkMode;
   const chapterScreen({
     super.key,
     required this.context,
-    required this.newTest,
-    required this.oldTest,
   });
 
   @override
   State<StatefulWidget> createState() {
-    return chapterPage(context: context, oldTest: oldTest, newTest: newTest);
+    return chapterPage(context: context);
   }
 }
 
@@ -43,14 +40,11 @@ class chapterPage extends State<chapterScreen> {
   @override
   final BuildContext context;
 
-  final bool oldTest;
-  final bool newTest;
   //final bool darkMode;
-  chapterPage(
-      {Key? key,
-      required this.context,
-      required this.oldTest,
-      required this.newTest});
+  chapterPage({
+    Key? key,
+    required this.context,
+  });
 
   double screenWidth = 0;
   double screenHeight = 0;
@@ -67,22 +61,28 @@ class chapterPage extends State<chapterScreen> {
   String clearAll = "";
   String chapterAll = "";
   bool isAPILoading = false;
+  bool oldTestNew = false;
+  bool newTestNew = false;
 
-  navigateToNoInternetScreen(String? getId) {
+  navigateToNoInternetScreen(String? getId, String chapterCount, String name) {
     Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetScreen()))
         .then((value) {
       if (value) {
         if (getId != null) {
-          navigateToCategoryDetailScreen(getId);
+          navigateToCategoryDetailScreen(getId, chapterCount, name);
         }
       }
     });
   }
 
-  navigateToCategoryDetailScreen(String getId) async {
+  navigateToCategoryDetailScreen(
+      String getId, String chaptersCOunt, String chapterName) async {
     bool checkInternet = await CheckInternetConnectionMethod();
+
+    print(getId);
     if (checkInternet) {
+      // ignore: use_build_context_synchronously
       Navigator.push(
           context,
           MaterialPageRoute(
@@ -92,66 +92,74 @@ class chapterPage extends State<chapterScreen> {
                   //   getValue: getId,
                   //   languageCode: null,
                   // ),
-                  const BookDetailScreen())).then((value) {
+                  BookDetailScreen(
+                    bookid: getId,
+                    chapterCOunt: chaptersCOunt,
+                    chapterName: chapterName,
+                  ))).then((value) {
         setState(() {});
       });
     } else {
-      navigateToNoInternetScreen(getId);
+      navigateToNoInternetScreen(getId, chaptersCOunt, chapterName);
     }
   }
 
-  getSharedPreferenceData(ChapterHomeListClass getResult) async {
+  Future<void> getSharedPreferenceData(ChapterHomeListClass getResult) async {
+    print("Setting recent data^^^^^^^^^^^^^**********");
     Map<String, dynamic> getChapterPreference =
         await SharedPreference.instance.getRecentChapter("chapter");
     if (getChapterPreference.isNotEmpty) {
-      List getChapterRecentList = getChapterPreference["data"] ?? [];
+      List<dynamic> getChapterRecentList =
+          List<dynamic>.from(getChapterPreference["data"]) ?? [];
       bool itemAlreadyAdded = false;
       for (int a = 0; a < getChapterRecentList.length; a++) {
-        Map<String, dynamic> getChapterItem = getChapterRecentList[a];
+        Map<String, dynamic> getChapterItem =
+            Map<String, dynamic>.from(getChapterRecentList[a]);
         if (getChapterItem["bookid"] == getResult.bookid) {
           itemAlreadyAdded = true;
           getChapterRecentList.remove(getChapterItem);
-          getChapterRecentList.insert(0, getChapterItem);
+          getChapterRecentList.insert(0, getResult.toJson());
         }
       }
-      if (itemAlreadyAdded) {
-      } else {
-        Map<String, dynamic> getChapterItem = getResult.toJson();
-        getChapterRecentList.insert(0, getChapterItem);
+      if (!itemAlreadyAdded) {
+        getChapterRecentList.insert(0, getResult.toJson());
       }
-      Map<String, dynamic> updatedRecentChapterResponse = {};
-      updatedRecentChapterResponse["data"] = getChapterRecentList;
-      SharedPreference.instance
+      Map<String, dynamic> updatedRecentChapterResponse = {
+        "data": getChapterRecentList,
+      };
+      await SharedPreference.instance
           .setRecentChapter("chapter", updatedRecentChapterResponse);
       recentData();
     } else {
-      List<Map<String, dynamic>> getChapterRecentList =
-          getChapterPreference["data"] ?? [];
+      List<Map<String, dynamic>> getChapterRecentList = [];
       Map<String, dynamic> getChapterItem = getResult.toJson();
       getChapterRecentList.insert(0, getChapterItem);
-      Map<String, dynamic> updatedRecentChapterResponse = {};
-      updatedRecentChapterResponse["data"] = getChapterRecentList;
-      SharedPreference.instance
+      Map<String, dynamic> updatedRecentChapterResponse = {
+        "data": getChapterRecentList,
+      };
+      await SharedPreference.instance
           .setRecentChapter("chapter", updatedRecentChapterResponse);
       recentData();
     }
   }
 
-  recentData() async {
+  Future<void> recentData() async {
     recentChapterList.clear();
     Map<String, dynamic> getChapterPreference =
         await SharedPreference.instance.getRecentChapter("chapter");
     print(getChapterPreference);
     if (getChapterPreference.isNotEmpty) {
-      List getChapterList = getChapterPreference["data"] ?? [];
-      setState(() {
-        for (int i = 0; i < getChapterList.length; i++) {
-          Map<String, dynamic> getRecentItem = getChapterList[i];
-          ChapterHomeListClass getChapterHomeItem =
-              ChapterHomeListClass.fromJson(getRecentItem);
+      List<dynamic> getChapterList =
+          List<dynamic>.from(getChapterPreference["data"]) ?? [];
+      for (int i = 0; i < getChapterList.length; i++) {
+        Map<String, dynamic> getRecentItem =
+            Map<String, dynamic>.from(getChapterList[i]);
+        ChapterHomeListClass getChapterHomeItem =
+            ChapterHomeListClass.fromJson(getRecentItem);
+        setState(() {
           recentChapterList.add(getChapterHomeItem);
-        }
-      });
+        });
+      }
     }
   }
 
@@ -179,22 +187,46 @@ class chapterPage extends State<chapterScreen> {
           }
 
           List<ChapterHomeListClass> getChapterHomeList = [];
-          print("*******++++++value= $oldTest");
-          for (int i = 0; i < getResponseData.length; i++) {
-            //print(" response length ${getResponseData.length}");
-            getChapterHomeList.add(getResponseData[i]);
-            if ((i == (getResponseData.length - 1)) || ((i + 1) % 3 == 0)) {
-              allChapterList.add(ChapterHomeAllListClass(
-                  getAllChapterList: List.from(getChapterHomeList)));
-              getChapterHomeList.clear();
+
+          if (oldTestNew == false && newTestNew == false) {
+            for (int i = 0; i < getResponseData.length; i++) {
+              getChapterHomeList.add(getResponseData[i]);
+              if ((i == (getResponseData.length - 1)) || ((i + 1) % 3 == 0)) {
+                allChapterList.add(ChapterHomeAllListClass(
+                    getAllChapterList: List.from(getChapterHomeList)));
+                getChapterHomeList.clear();
+              }
             }
+          } else if (oldTestNew == true && newTestNew == false) {
+            for (int i = 39; i < getResponseData.length; i++) {
+              getChapterHomeList.add(getResponseData[i]);
+              if ((i == (getResponseData.length - 1)) || ((i + 1) % 3 == 0)) {
+                allChapterList.add(ChapterHomeAllListClass(
+                    getAllChapterList: List.from(getChapterHomeList)));
+                getChapterHomeList.clear();
+              }
+            }
+          } else if (oldTestNew == false && newTestNew == true) {
+            int count = 0;
+            for (int i = 0; i <= 38; i++) {
+              count++;
+              getChapterHomeList.add(getResponseData[i]);
+              if ((i == (getResponseData.length - 1)) || ((i + 1) % 3 == 0)) {
+                allChapterList.add(ChapterHomeAllListClass(
+                    getAllChapterList: List.from(getChapterHomeList)));
+                getChapterHomeList.clear();
+              }
+            }
+
+            if (count == 0) {}
+            count = 0;
           }
         });
       } else {
         ToastMessage(screenHeight, "Error", false);
       }
     } else {
-      navigateToNoInternetScreen(null);
+      navigateToNoInternetScreen(null, "", "");
     }
 
     setState(() {
@@ -220,18 +252,19 @@ class chapterPage extends State<chapterScreen> {
 
   }*/
 
-  callReBuildWidget(bool getDakMode, String getLanguageChange) {
+  callReBuildWidget(bool getDakMode, String getLanguageChange, bool newTest,
+      bool oldTest, bool callApi) {
     print("rebuild widget");
     //getSpString();
     setState(() {
       darkMode = getDakMode;
       getLanguageCode = getLanguageChange;
-
-      // futureFunctionMethod();
-      // if (!isAPILoading) {
-      //   callChapterAPI();
-      // }
-      
+      oldTestNew = oldTest;
+      newTestNew = newTest;
+      futureFunctionMethod();
+      if (callApi) {
+        callChapterAPI();
+      }
     });
   }
 
@@ -294,7 +327,7 @@ class chapterPage extends State<chapterScreen> {
     screenHeight = MediaQuery.of(context).size.height;
     scaleFactor = MediaQuery.of(context).textScaleFactor;
     darkMode = themeMethod(context);
-    print("NewT inside chapters $newTest");
+
     print(" chapter length : ${allChapterList.length}");
     return
         //  (clearAllFutureMethod == null)
@@ -571,7 +604,8 @@ class chapterPage extends State<chapterScreen> {
               setState(() {
                 recentChapterList[i].isRecentSelected = true;
               });
-              navigateToCategoryDetailScreen(getResult.bookid.toString());
+              navigateToCategoryDetailScreen(getResult.bookid.toString(),
+                  getResult.chapters.toString(), getResult.name!);
             } else {
               setState(() {
                 recentChapterList[i].isRecentSelected = false;
@@ -590,32 +624,33 @@ class chapterPage extends State<chapterScreen> {
       getLanguageCode: getLanguageCode,
       recent: false,
       getCallBackFunction: (getResult) {
-        for (int i = 0; i < allChapterList.length; i++) {
-          print("i = $i");
-          for (int j = 0; j < allChapterList[i].getAllChapterList.length; j++) {
-            print(" j = $j");
-            if (allChapterList[i].getAllChapterList[j].bookid ==
-                getResult.bookid) {
-              setState(() {
-                allChapterList[i].getAllChapterList[j].isSelected = true;
+        print(getResult);
 
-                /*if(getPreviousRecentChapterList.contains(getResult.id)){
+        navigateToCategoryDetailScreen(getResult.bookid.toString(),
+            getResult.chapters.toString(), getResult.name!);
+        // for (int i = 0; i < allChapterList.length; i++) {
+        //   for (int j = 0; j < allChapterList[i].getAllChapterList.length; j++) {
+        //     if (allChapterList[i].getAllChapterList[j].bookid ==
+        //         getResult.bookid) {
+        //       setState(() {
+        //         allChapterList[i].getAllChapterList[j].isSelected = true;
 
-              }
-              else{
-                getPreviousRecentChapterList.insert(0,getResult.id);
-                recentChapterList.insert(0,getResult);
-              }*/
-              });
-            } else {
-              setState(() {
-                allChapterList[i].getAllChapterList[j].isSelected = false;
-              });
-            }
-          }
-        }
-        //   getSharedPreferenceData(getResult);
-        navigateToCategoryDetailScreen(getResult.bookid.toString());
+        //         /*if(getPreviousRecentChapterList.contains(getResult.id)){
+
+        //       }
+        //       else{
+        //         getPreviousRecentChapterList.insert(0,getResult.id);
+        //         recentChapterList.insert(0,getResult);
+        //       }*/
+        //       });
+        //     } else {
+        //       setState(() {
+        //         allChapterList[i].getAllChapterList[j].isSelected = false;
+        //       });
+        //     }
+        //   }
+        // }
+        //  getSharedPreferenceData(getResult);
       },
     );
   }
