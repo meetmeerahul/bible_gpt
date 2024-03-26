@@ -20,6 +20,7 @@ import '../config/language_text_file.dart';
 import '../config/shared_preferences.dart';
 import '../dashBoardScreen/gptScreen.dart';
 import '../dashBoardScreen/noInternetScreen.dart';
+import '../loader/widget/TextLoaderWidget.dart';
 import '../reuseable/button/BackArrowWidget.dart';
 import '../reuseable/button/PrimaryButton.dart';
 import '../signInScreen/profile_page.dart';
@@ -1001,10 +1002,16 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                       .connectionState ==
                                                                   ConnectionState
                                                                       .waiting) {
-                                                                return const CircularProgressIndicator(
-                                                                  color: Colors
-                                                                      .black,
-                                                                );
+                                                                return TextLoaderWidget(
+                                                                    200,
+                                                                    screenHeight *
+                                                                        (20 /
+                                                                            AppConfig()
+                                                                                .screenHeight),
+                                                                    screenHeight *
+                                                                        (0 /
+                                                                            AppConfig().screenHeight),
+                                                                    darkMode);
                                                               } else {
                                                                 _selectedLanguage ??=
                                                                     snapshot
@@ -1072,6 +1079,11 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                       print(newValue!
                                                                           .language);
 
+                                                                      changableLanguage =
+                                                                          newValue
+                                                                              .language!;
+                                                                      print(
+                                                                          "Selected language is ******** $changableLanguage");
                                                                       _selectedLanguage =
                                                                           newValue;
                                                                       _selectedTranslations =
@@ -1280,6 +1292,10 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                 // });
                                                                 userSelectedTranslation =
                                                                     newValue;
+                                                                setState(() {
+                                                                  userSelectedTrans =
+                                                                      newValue;
+                                                                });
                                                                 changableShortName =
                                                                     newValue!
                                                                         .shortName!;

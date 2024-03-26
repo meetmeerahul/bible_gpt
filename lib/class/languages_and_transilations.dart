@@ -29,6 +29,13 @@ class LanguagesAndTransilations {
         .map((json) => LanguagesAndTransilations.fromJson(json))
         .toList();
   }
+
+  List<Translations>? getTranslationsForLanguageName(String languageName) {
+    if (language == languageName) {
+      return translations;
+    }
+    return null;
+  }
 }
 
 class Translations {

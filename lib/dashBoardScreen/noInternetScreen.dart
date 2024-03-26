@@ -107,27 +107,7 @@ class NoInternetPage extends State<NoInternetScreen> {
                         horizontal: screenWidth *
                             (AppConfig().logInEdittextLeftPadding /
                                 AppConfig().screenWidth)),
-                    // child: languageFutureWidget(
-                    //     screenWidth: screenWidth,
-                    //     screenHeight: screenHeight,
-                    //     selectedLanguage: getLanguageCode,
-                    //     getLanguageTranslatorMethod: titleTextFutureMethod ??
-                    //         languageTranslatorMethod(
-                    //             getText: LanguageTextFile()
-                    //                 .getNoInternetScreenTitleText(),
-                    //             getLanguageCode:
-                    //                 LanguageTextFile().getEnglishLanguageCode),
-                    //     getFontSize: 25,
-                    //     getDarkMode: darkMode,
-                    //     getTextAlign: TextAlign.center,
-                    //     getTextColor: darkMode
-                    //         ? AppConfig().categoryDetailScreenTitleTextDarkColor
-                    //         : AppConfig()
-                    //             .categoryDetailScreenTitleTextLightColor,
-                    //     getFontFamily: AppConfig().outfitFontSemiBold,
-                    //     getTextDirection: LanguageTextFile()
-                    //         .getTextDirection(getLanguageCode),
-                    //     getSoftWrap: true),
+                    
                     child: Text(
                       LanguageTextFile()
                           .getNoInternetScreenTitleText(getLanguageCode),
@@ -155,27 +135,7 @@ class NoInternetPage extends State<NoInternetScreen> {
                             (AppConfig().logInEdittextLeftPadding *
                                 3 /
                                 AppConfig().screenWidth)),
-                    // child: languageFutureWidget(
-                    //     screenWidth: screenWidth,
-                    //     screenHeight: screenHeight,
-                    //     selectedLanguage: getLanguageCode,
-                    //     getLanguageTranslatorMethod: contentTextFutureMethod ??
-                    //         languageTranslatorMethod(
-                    //             getText: LanguageTextFile()
-                    //                 .getNoInternetScreenContentText(),
-                    //             getLanguageCode:
-                    //                 LanguageTextFile().getEnglishLanguageCode),
-                    //     getFontSize: 15,
-                    //     getDarkMode: darkMode,
-                    //     getTextAlign: TextAlign.center,
-                    //     getTextColor: darkMode
-                    //         ? AppConfig().categoryDetailScreenTitleTextDarkColor
-                    //         : AppConfig()
-                    //             .categoryDetailScreenTitleTextLightColor,
-                    //     getFontFamily: AppConfig().outfitFontRegular,
-                    //     getTextDirection: LanguageTextFile()
-                    //         .getTextDirection(getLanguageCode),
-                    //     getSoftWrap: true),
+                   
                     child: Text(
                       LanguageTextFile()
                           .getNoInternetScreenContentText(getLanguageCode),
@@ -204,14 +164,8 @@ class NoInternetPage extends State<NoInternetScreen> {
                       buttonHeight: AppConfig().signInScreenButtonHeight,
                       getDarkMode: false,
                       buttonText: LanguageTextFile()
-                          .getNoInternetScreenRetryButtonText(getLanguageCode)
-                      // retryButtonTextFutureMethod ??
-                      //     languageTranslatorMethod(
-                      //         getText: LanguageTextFile()
-                      //             .getNoInternetScreenRetryButtonText(),
-                      //         getLanguageCode:
-                      //             LanguageTextFile().getEnglishLanguageCode)
-                      ,
+                          .getNoInternetScreenRetryButtonText(getLanguageCode),
+                    
                       getLanguageCode: getLanguageCode,
                       isAPILoading: false,
                       iconPath: null,

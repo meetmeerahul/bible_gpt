@@ -20,6 +20,7 @@ import '../widgets/RecentChapterListviewWidget.dart';
 import '../widgets/check_internet_method.dart';
 import '../widgets/toast_message.dart';
 import 'categoryDetailScreen.dart';
+import 'recent_chapter_view.dart';
 
 class chapterScreen extends StatefulWidget {
   final BuildContext context;
@@ -86,13 +87,7 @@ class chapterPage extends State<chapterScreen> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) =>
-                  // categoryDetailScreen(
-                  //   screenType: 0,
-                  //   getValue: getId,
-                  //   languageCode: null,
-                  // ),
-                  BookDetailScreen(
+              builder: (context) => RecentBookDetailScreen(
                     bookid: getId,
                     chapterCOunt: chaptersCOunt,
                     chapterName: chapterName,
@@ -218,7 +213,12 @@ class chapterPage extends State<chapterScreen> {
               }
             }
 
-            if (count == 0) {}
+            if (count == 0) {
+              const Text(
+                "No Books Avilable For New Tesaments",
+                style: TextStyle(color: Colors.red),
+              );
+            }
             count = 0;
           }
         });
@@ -599,6 +599,7 @@ class chapterPage extends State<chapterScreen> {
         getLanguageCode: getLanguageCode,
         recent: true,
         getCallBackFunction: (getResult) {
+          print(getResult);
           for (int i = 0; i < recentChapterList.length; i++) {
             if (recentChapterList[i].bookid == getResult.bookid) {
               setState(() {
@@ -628,29 +629,29 @@ class chapterPage extends State<chapterScreen> {
 
         navigateToCategoryDetailScreen(getResult.bookid.toString(),
             getResult.chapters.toString(), getResult.name!);
-        // for (int i = 0; i < allChapterList.length; i++) {
-        //   for (int j = 0; j < allChapterList[i].getAllChapterList.length; j++) {
-        //     if (allChapterList[i].getAllChapterList[j].bookid ==
-        //         getResult.bookid) {
-        //       setState(() {
-        //         allChapterList[i].getAllChapterList[j].isSelected = true;
+        for (int i = 0; i < allChapterList.length; i++) {
+          for (int j = 0; j < allChapterList[i].getAllChapterList.length; j++) {
+            if (allChapterList[i].getAllChapterList[j].bookid ==
+                getResult.bookid) {
+              setState(() {
+                allChapterList[i].getAllChapterList[j].isSelected = true;
 
-        //         /*if(getPreviousRecentChapterList.contains(getResult.id)){
+                /*if(getPreviousRecentChapterList.contains(getResult.id)){
 
-        //       }
-        //       else{
-        //         getPreviousRecentChapterList.insert(0,getResult.id);
-        //         recentChapterList.insert(0,getResult);
-        //       }*/
-        //       });
-        //     } else {
-        //       setState(() {
-        //         allChapterList[i].getAllChapterList[j].isSelected = false;
-        //       });
-        //     }
-        //   }
-        // }
-        //  getSharedPreferenceData(getResult);
+              }
+              else{
+                getPreviousRecentChapterList.insert(0,getResult.id);
+                recentChapterList.insert(0,getResult);
+              }*/
+              });
+            } else {
+              setState(() {
+                allChapterList[i].getAllChapterList[j].isSelected = false;
+              });
+            }
+          }
+        }
+        getSharedPreferenceData(getResult);
       },
     );
   }

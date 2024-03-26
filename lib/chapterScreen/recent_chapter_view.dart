@@ -29,22 +29,22 @@ import '../dashBoardScreen/noInternetScreen.dart';
 import '../loader/widget/TextLoaderWidget.dart';
 import '../widgets/check_internet_method.dart';
 
-class BookDetailScreen extends StatefulWidget {
+class RecentBookDetailScreen extends StatefulWidget {
   final String bookid;
   final String chapterCOunt;
   final String chapterName;
-  const BookDetailScreen(
+  const RecentBookDetailScreen(
       {super.key,
       required this.bookid,
       required this.chapterCOunt,
       required this.chapterName});
 
   @override
-  State<BookDetailScreen> createState() => BookDetail(
+  State<RecentBookDetailScreen> createState() => RecentBookDetail(
       bookid: bookid, chapterCOunt: chapterCOunt, chapterName: chapterName);
 }
 
-class BookDetail extends State<BookDetailScreen> {
+class RecentBookDetail extends State<RecentBookDetailScreen> {
   double screenWidth = 0;
   double screenHeight = 0;
   late bool darkMode;
@@ -53,7 +53,7 @@ class BookDetail extends State<BookDetailScreen> {
   String chapterCOunt;
   String chapterName;
 
-  BookDetail(
+  RecentBookDetail(
       {Key? key,
       required this.bookid,
       required this.chapterCOunt,

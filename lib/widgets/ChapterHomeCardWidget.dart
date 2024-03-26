@@ -18,15 +18,15 @@ Widget ChapterHomeCardWidget(
   return Container(
     child: Stack(
       children: [
-        Positioned.fill(
+        const Positioned.fill(
           child: Column(
             children: [
-              Expanded(
-                child: SvgPicture.asset(
-                  "assets/svg/book_cover.svg",
-                  fit: BoxFit.fill,
-                ),
-              ),
+              // Expanded(
+              //   child: SvgPicture.asset(
+              //     "assets/svg/book_cover.svg",
+              //     fit: BoxFit.fill,
+              //   ),
+              // ),
             ],
           ),
         ),
