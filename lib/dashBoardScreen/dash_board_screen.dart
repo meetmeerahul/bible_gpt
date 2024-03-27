@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:launch_review/launch_review.dart';
 import 'package:provider/provider.dart';
 
 import '../chapterScreen/bottomNavigationBarScreen.dart';
@@ -11,11 +12,13 @@ import '../class/change_language_local.dart';
 import '../class/change_theme_local.dart';
 import '../class/theme_method.dart';
 import '../config/app_config.dart';
+import '../config/changable.dart';
 import '../config/language_text_file.dart';
 import '../config/shared_preferences.dart';
 import '../reuseable/button/PrimaryButton.dart';
 import '../signInScreen/profile_page.dart';
 import '../signInScreen/signinScreen.dart';
+import '../signInScreen/webViewScreen.dart';
 import '../widgets/MenuBarDrawer.dart';
 import '../widgets/app_logo_widget.dart';
 import '../widgets/background_color_widget.dart';
@@ -120,12 +123,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   callInitState() async {
     bool internetConnectCheck = await CheckInternetConnectionMethod();
+
+    setState(() {
+      changableLanguage = "English";
+    });
     if (internetConnectCheck) {
       futureFunctionMethod();
       // getUserData();
     } else {
       print("No internet");
       navigateToNoInternetScreen(true);
+    }
+  }
+
+  navigateToWebViewScreen(String getWebViewUrl, String getWebViewTitle) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => webViewScreen(
+                webViewUrl: getWebViewUrl,
+                webViewTitle: getWebViewTitle))).then((value) {});
+  }
+
+  callSocialMediaClick(int getSelectedSocialMedia) {
+    if (getSelectedSocialMedia == 1) {
+      print("Youtube Click");
+    } else if (getSelectedSocialMedia == 2) {
+      print("Facebook Click");
+      navigateToWebViewScreen(AppConfig().facebookLink, "");
+    } else if (getSelectedSocialMedia == 3) {
+      print("Twitter Click");
+      navigateToWebViewScreen(AppConfig().twitterLink, "");
+    } else {
+      navigateToWebViewScreen(AppConfig().instagramLink, "");
+      print("Instagram Click");
     }
   }
 
@@ -150,23 +181,59 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  callDeleteAccountAPI(String getToken) async {
+    setState(() {
+      isDeleteAPILoading = true;
+    });
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+
+    if (internetConnectCheck) {
+      //   var getDeleteAccountAPIResponse = await AllAPIMethod().deleteAccountAPI(
+      //     getToken: getToken,
+      //   );
+      //   print(getDeleteAccountAPIResponse);
+      //   if (getDeleteAccountAPIResponse["status"]) {
+      //     String getResponseMessage = getDeleteAccountAPIResponse["message"];
+      //     logOutUser(getResponseMessage);
+      //   } else {
+      //     ToastMessage(screenHeight, getDeleteAccountAPIResponse["message"],
+      //         getDeleteAccountAPIResponse["status"]);
+      //   }
+      // } else {
+      //   navigateToNoInternetScreen(false);
+      // }
+      setState(() {
+        isDeleteAPILoading = false;
+      });
+    }
+  }
+
+  navigateToStore() {
+    LaunchReview.launch(
+      androidAppId: AppConfig().googleStoreId,
+      iOSAppId: AppConfig().appleStoreId,
+    );
+  }
+
   callSettingControl(int getSelectedSetting) {
     setState(() {
       if (getSelectedSetting == 2) {
         changeTheme();
+      } else if (getSelectedSetting == 3) {
+        navigateToWebViewScreen(
+            AppConfig().aboutUsUrl,
+            LanguageTextFile()
+                .getLanguageSettingTermPrivacyText(getSelectedLanguageCode));
+      } else if (getSelectedSetting == 4) {
+        navigateToWebViewScreen(
+            AppConfig().contactUsUrl,
+            LanguageTextFile()
+                .getLanguageSettingContactText(getSelectedLanguageCode));
+      } else if (getSelectedSetting == 5) {
+        navigateToStore();
+      } else if (getSelectedSetting == 6) {
+        //callDeleteAccountAPI(getToken);
       }
-
-      // } else if (getSelectedSetting == 3) {
-      //   navigateToWebViewScreen(AppConfig().aboutUsUrl,
-      //       LanguageTextFile().getLanguageSettingTermPrivacyText());
-      // } else if (getSelectedSetting == 4) {
-      //   navigateToWebViewScreen(AppConfig().contactUsUrl,
-      //       LanguageTextFile().getLanguageSettingContactText());
-      // } else if (getSelectedSetting == 5) {
-      //   navigateToStore();
-      // } else if (getSelectedSetting == 6) {
-      //   callDeleteAccountAPI(getToken);
-      // }
     });
   }
 
@@ -525,6 +592,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           iconWidth: null,
                           iconHeight: null,
                           buttonPressedFunction: (isClicked) {
+                            setState(() {
+                              changableLanguage = "English";
+                            });
                             print("1");
                             navigateToChapterScreen(0);
                           }),

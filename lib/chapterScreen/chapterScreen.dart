@@ -19,8 +19,6 @@ import '../widgets/AllChapterListviewWidget.dart';
 import '../widgets/RecentChapterListviewWidget.dart';
 import '../widgets/check_internet_method.dart';
 import '../widgets/toast_message.dart';
-import 'categoryDetailScreen.dart';
-import 'recent_chapter_view.dart';
 
 class chapterScreen extends StatefulWidget {
   final BuildContext context;
@@ -87,7 +85,7 @@ class chapterPage extends State<chapterScreen> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => RecentBookDetailScreen(
+              builder: (context) => BookDetailScreen(
                     bookid: getId,
                     chapterCOunt: chaptersCOunt,
                     chapterName: chapterName,
@@ -578,11 +576,11 @@ class chapterPage extends State<chapterScreen> {
                     ],
                   ),
                 ),
-                SizedBox(
-                  height: screenHeight *
-                      (AppConfig().bottomNavigationBarHeight /
-                          AppConfig().screenHeight),
-                ),
+                // SizedBox(
+                //   height: screenHeight *
+                //       (AppConfig().bottomNavigationBarHeight /
+                //           AppConfig().screenHeight),
+                // ),
               ],
             ),
     );
@@ -651,7 +649,7 @@ class chapterPage extends State<chapterScreen> {
             }
           }
         }
-        getSharedPreferenceData(getResult);
+       // getSharedPreferenceData(getResult);
       },
     );
   }

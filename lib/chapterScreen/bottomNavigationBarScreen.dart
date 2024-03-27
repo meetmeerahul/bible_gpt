@@ -25,6 +25,7 @@ import '../reuseable/button/BackArrowWidget.dart';
 import '../reuseable/button/PrimaryButton.dart';
 import '../signInScreen/profile_page.dart';
 import '../signInScreen/signinScreen.dart';
+import '../signInScreen/webViewScreen.dart';
 import '../widgets/MenuBarDrawer.dart';
 import '../widgets/app_logo_widget.dart';
 import '../widgets/check_internet_method.dart';
@@ -158,12 +159,12 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   }
 
   navigateToWebViewScreen(String getWebViewUrl, String getWebViewTitle) {
-    // Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //         builder: (context) => webViewScreen(
-    //             webViewUrl: getWebViewUrl,
-    //             webViewTitle: getWebViewTitle))).then((value) {});
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => webViewScreen(
+                webViewUrl: getWebViewUrl,
+                webViewTitle: getWebViewTitle))).then((value) {});
   }
 
   navigateToNoInternetScreen(bool initCall) {
@@ -193,18 +194,18 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   }
 
   callSocialMediaClick(int getSelectedSocialMedia) {
-    if (getSelectedSocialMedia == 1) {
-      print("Youtube Click");
-    } else if (getSelectedSocialMedia == 2) {
-      print("Facebook Click");
-      navigateToWebViewScreen(AppConfig().facebookLink, "");
-    } else if (getSelectedSocialMedia == 3) {
-      print("Twitter Click");
-      navigateToWebViewScreen(AppConfig().twitterLink, "");
-    } else {
-      navigateToWebViewScreen(AppConfig().instagramLink, "");
-      print("Instagram Click");
-    }
+    // if (getSelectedSocialMedia == 1) {
+    //   print("Youtube Click");
+    // } else if (getSelectedSocialMedia == 2) {
+    //   print("Facebook Click");
+    //   navigateToWebViewScreen(AppConfig().facebookLink, "");
+    // } else if (getSelectedSocialMedia == 3) {
+    //   print("Twitter Click");
+    //   navigateToWebViewScreen(AppConfig().twitterLink, "");
+    // } else {
+    //   navigateToWebViewScreen(AppConfig().instagramLink, "");
+    //   print("Instagram Click");
+    // }
   }
 
   addContextInScreen() {
@@ -257,7 +258,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
         navigateToWebViewScreen(AppConfig().contactUsUrl,
             LanguageTextFile().getLanguageSettingContactText(getLanguageCode));
       } else if (getSelectedSetting == 5) {
-        navigateToStore();
+        // navigateToStore();
       } else if (getSelectedSetting == 6) {
         callDeleteAccountAPI(getToken);
       }
@@ -1097,6 +1098,14 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                           .first
                                                                           .shortName!;
 
+                                                                      setState(
+                                                                          () {
+                                                                        oldTest =
+                                                                            false;
+                                                                        newTest =
+                                                                            false;
+                                                                      });
+
                                                                       getBookDetails(
                                                                           _defaultShortName!);
 
@@ -1295,6 +1304,13 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                 setState(() {
                                                                   userSelectedTrans =
                                                                       newValue;
+                                                                });
+
+                                                                setState(() {
+                                                                  oldTest =
+                                                                      false;
+                                                                  newTest =
+                                                                      false;
                                                                 });
                                                                 changableShortName =
                                                                     newValue!

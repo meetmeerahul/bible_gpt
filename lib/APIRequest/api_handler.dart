@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import '../chapterScreen/bookDetailScreen.dart';
 import '../class/book_chapter.dart';
+import '../config/app_config.dart';
 
 class ApiHandler {
   static Future<List<LanguagesAndTransilations>> getLanguages() async {
@@ -80,5 +81,49 @@ class ApiHandler {
     }
 
     return BookChapters.bookDataFromAPi(dataList);
+  }
+
+  static Future<Map<String, dynamic>> textToSpeechAPI(
+      {required String getText, required String getLanguageCode}) async {
+    Map<String, dynamic> getTextToSpeechResponse = {
+      "status": false,
+      "message": "",
+      "audio": ""
+    };
+    String textToSpeechAPIUrl =
+        "https://api.mybiblegpt.com/api/v1/user/text-to-speach/";
+    ;
+    print(textToSpeechAPIUrl);
+
+    try {
+      var getTextToSpeechAPIResponse = await http.post(
+          Uri.parse(textToSpeechAPIUrl),
+          body: {"text_input": getText, "language_code": getLanguageCode});
+      print(getTextToSpeechAPIResponse.body);
+      
+
+      if (getTextToSpeechAPIResponse.statusCode >= 200 &&
+          getTextToSpeechAPIResponse.statusCode < 300) {
+        getTextToSpeechResponse["status"] = true;
+
+        Map getResponseMap = jsonDecode(getTextToSpeechAPIResponse.body);
+
+        print(getResponseMap);
+
+        String getAudioText = getResponseMap["audio_content"] ?? "";
+
+        getTextToSpeechResponse["audio"] = getAudioText;
+      } else {
+        getTextToSpeechResponse["status"] = false;
+        Map getResponseMap = jsonDecode(getTextToSpeechAPIResponse.body);
+        String getErrorMessage = getResponseMap["message"] ?? "";
+        getTextToSpeechResponse["message"] = getErrorMessage;
+      }
+    } catch (e) {
+      getTextToSpeechResponse["status"] = false;
+      String getErrorMessage = "This voice is not available";
+      getTextToSpeechResponse["message"] = getErrorMessage;
+    }
+    return getTextToSpeechResponse;
   }
 }

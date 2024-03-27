@@ -625,7 +625,7 @@ class AppConfig {
   double categoryDetailScreenTopListviewPadding = 38;
 
   String profileCircleIcon = "assets/svg/profile_circle.svg";
-  String aboutUsUrl = "https://mygitagpt.com/privacy-policy";
+  String aboutUsUrl = "https://mybiblegpt.com/about";
   String contactUsUrl = "https://9xtechnology.com/contact.php";
   String googleSocialMediaText = "google";
   String appleSocialMediaText = "apple";

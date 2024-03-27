@@ -27,7 +27,9 @@ import 'package:http/http.dart' as http;
 
 import '../dashBoardScreen/noInternetScreen.dart';
 import '../loader/widget/TextLoaderWidget.dart';
+import '../loader/widget/player_loader.dart';
 import '../widgets/check_internet_method.dart';
+import '../widgets/toast_message.dart';
 
 class BookDetailScreen extends StatefulWidget {
   final String bookid;
@@ -84,12 +86,20 @@ class BookDetail extends State<BookDetailScreen> {
   bool isPlaying = false;
   bool isPause = false;
 
-  bool apiIsloading = true;
+  bool playIcon = false;
+
+  bool apiIsloading = false;
+
+  bool chapterListIsEmpty = true;
 
   // List<Translations>? _selectedTranslations;
   List<LanguagesAndTransilations>? languagesList;
 
   Translations? userSelectedTranslation;
+
+  List<BookChapters> chaptersList = [];
+
+  BookChapters? selectedChapterClass;
 
   late int checkedIndex;
 
@@ -101,17 +111,47 @@ class BookDetail extends State<BookDetailScreen> {
   late Future<List<BookChapters>> _booksFuture;
   late List<Translations> _translations;
 
-  // Uint8List audioData =
-  //     Uint8List.fromList(base64.decode(await fluttertts.speak(demoVerse)));
-  // activeSource = BytesSource(audioData);
-
-  // print(activeSource);
-  // // player.play(BytesSource(audioData));
+  bool musicApiIsLoading = false;
 
   getLanguage() {
     languageLocal = Provider.of<ChangeLanguageLocal>(context);
     getLanguageCode = languageMethod(context);
     print("Language in details :$getLanguageCode");
+  }
+
+  callTextToSpeechAPI(String getText, String getAPILanguageCode) async {
+    print(getText);
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+    if (internetConnectCheck) {
+      var getTextToSpeechAPIResponse = await ApiHandler.textToSpeechAPI(
+          getText: getText, getLanguageCode: getAPILanguageCode);
+      print(getTextToSpeechAPIResponse);
+      if (getTextToSpeechAPIResponse["status"]) {
+        String getAudio = getTextToSpeechAPIResponse["audio"];
+        playSoundFromUrl(false, getAudio);
+      } else {
+        ToastMessage(screenHeight, getTextToSpeechAPIResponse["message"],
+            getTextToSpeechAPIResponse["status"]);
+      }
+    } else {}
+  }
+
+  playSoundFromUrl(bool getAudioUrl, String getAudio) async {
+    if (getAudioUrl) {
+      String url =
+          "https://cdn.islamic.network/quran/audio/64/ar.abdurrahmaansudais/$getAudio.mp3";
+      activeSource = UrlSource(url);
+      _audioPlayer.play(UrlSource(url));
+    } else {
+      if (Platform.isIOS) {
+        Uint8List audioData = Uint8List.fromList(base64.decode(getAudio));
+        audioPlayerLocalRun(audioData);
+      } else {
+        Uint8List audioData = Uint8List.fromList(base64.decode(getAudio));
+        activeSource = BytesSource(audioData);
+        _audioPlayer.play(BytesSource(audioData));
+      }
+    }
   }
 
   @override
@@ -185,29 +225,106 @@ class BookDetail extends State<BookDetailScreen> {
       setState(() {
         apiIsloading = true;
       });
-
-      return await ApiHandler.getChaptersContents(
+      print(" Apiloading :   $apiIsloading");
+      var result = await ApiHandler.getChaptersContents(
           changableShortName, bookid, chapterNumber);
+      setState(() {
+        apiIsloading = false;
+      });
+      return result;
     } else {
       chapterNumber = chapter.toString();
 
       setState(() {
         apiIsloading = true;
       });
-
-      return await ApiHandler.getChaptersContents(
+      print(" Apiloading :   $apiIsloading");
+      var result = await ApiHandler.getChaptersContents(
           changableShortName, bookid, chapterNumber);
+      setState(() {
+        apiIsloading = false;
+      });
+      return result;
     }
   }
 
-  Future<void> playAudio() async {
-    final response = await http.get(Uri.parse(
-        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3'));
-    final bytes = response.bodyBytes;
+  Future<void> playAudio(
+      {required String text, required String languageCode}) async {
+    setState(() {
+      musicApiIsLoading = true;
+    });
+    Map<String, dynamic> getTextToSpeechResponse = {
+      "status": false,
+      "message": "",
+      "audio": ""
+    };
+    String textToSpeechAPIUrl =
+        "https://api.mybiblegpt.com/api/v1/user/text-to-speach/";
+    print(textToSpeechAPIUrl);
+
+    try {
+      var getTextToSpeechAPIResponse = await http.post(
+          Uri.parse(textToSpeechAPIUrl),
+          body: {"text_input": text, "language_code": getLanguageCode});
+      print(getTextToSpeechAPIResponse.body);
+
+      if (getTextToSpeechAPIResponse.statusCode >= 200 &&
+          getTextToSpeechAPIResponse.statusCode < 300) {
+        getTextToSpeechResponse["status"] = true;
+
+        Map getResponseMap = jsonDecode(getTextToSpeechAPIResponse.body);
+        print("=============================");
+        print(getResponseMap);
+
+        String getAudioText = getResponseMap["audio_content"] ?? "";
+
+        getTextToSpeechResponse["audio"] = getAudioText;
+      } else {
+        getTextToSpeechResponse["status"] = false;
+        Map getResponseMap = jsonDecode(getTextToSpeechAPIResponse.body);
+        String getErrorMessage = getResponseMap["message"] ?? "";
+        getTextToSpeechResponse["message"] = getErrorMessage;
+      }
+    } catch (e) {
+      getTextToSpeechResponse["status"] = false;
+      String getErrorMessage = "This voice is not available";
+      getTextToSpeechResponse["message"] = getErrorMessage;
+    }
+
+    final audioContent = getTextToSpeechResponse["audio"];
+
+    if (Platform.isIOS) {
+      Uint8List audioData = Uint8List.fromList(base64.decode(audioContent));
+      audioPlayerLocalRun(audioData);
+    } else {
+      Uint8List audioData = Uint8List.fromList(base64.decode(audioContent));
+      activeSource = BytesSource(audioData);
+      _audioPlayer.play(BytesSource(audioData));
+
+      _audioPlayer.onPlayerStateChanged.listen((event) {
+        if (event == PlayerState.completed) {
+          setState(() {
+            isPlaying = false;
+          });
+        }
+      });
+    }
+
+    setState(() {
+      musicApiIsLoading = false;
+    });
+  }
+
+  audioPlayerLocalRun(Uint8List getData) async {
+    print("get data $getData");
     final file = File('${(await getTemporaryDirectory()).path}/temp_audio.mp3');
-    await file.writeAsBytes(bytes);
+    await file.writeAsBytes(getData);
     activeSource = DeviceFileSource(file.path);
     _audioPlayer.play(DeviceFileSource(file.path));
+  }
+
+  Future<void> play(DeviceFileSource activeSource) async {
+    _audioPlayer.play(activeSource);
   }
 
   Future<void> stop() async {
@@ -324,42 +441,62 @@ class BookDetail extends State<BookDetailScreen> {
                             ),
                           ],
                         ),
-                        Container(
-                          height:
-                              (screenHeight * (36 / AppConfig().screenHeight)),
-                          width:
-                              (screenWidth * (113 / AppConfig().screenWidth)),
-                          decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(30)),
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Color(0xFFC47807),
-                                Color(0xFF643402),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              isPlaying = true;
+                            });
+                            for (int i = 0; i < chaptersList.length; i++) {
+                              print(chaptersList[i].text);
+                              // playAudio(
+                              //     languageCode: getLanguageCode,
+                              //     text: chaptersList[i].text!);
+
+                              Future.delayed(const Duration(seconds: 2));
+                            }
+
+                            setState(() {
+                              isPlaying = false;
+                            });
+                          },
+                          child: Container(
+                            height: (screenHeight *
+                                (36 / AppConfig().screenHeight)),
+                            width:
+                                (screenWidth * (113 / AppConfig().screenWidth)),
+                            decoration: const BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Color(0xFFC47807),
+                                  Color(0xFF643402),
+                                ],
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                SvgPicture.asset(
+                                    width: (screenWidth *
+                                        (10.87 / AppConfig().screenWidth)),
+                                    height: (screenHeight *
+                                        (12 / AppConfig().screenHeight)),
+                                    "assets/svg/play_icon.svg"),
+                                Text(
+                                  getLanguageCode == 'en'
+                                      ? "Play All"
+                                      : "सभी खेलना",
+                                  style: TextStyle(
+                                    color: const Color(0xFFFFFFFF),
+                                    fontSize: (screenHeight *
+                                        (16 / AppConfig().screenHeight)),
+                                  ),
+                                ),
                               ],
                             ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              SvgPicture.asset(
-                                  width: (screenWidth *
-                                      (10.87 / AppConfig().screenWidth)),
-                                  height: (screenHeight *
-                                      (12 / AppConfig().screenHeight)),
-                                  "assets/svg/play_icon.svg"),
-                              Text(
-                                getLanguageCode == 'en'
-                                    ? "Play All"
-                                    : "सभी खेलना",
-                                style: TextStyle(
-                                  color: const Color(0xFFFFFFFF),
-                                  fontSize: (screenHeight *
-                                      (16 / AppConfig().screenHeight)),
-                                ),
-                              ),
-                            ],
                           ),
                         ),
                         Row(
@@ -428,13 +565,10 @@ class BookDetail extends State<BookDetailScreen> {
                                     onChanged: (String? value) {
                                       setState(() {
                                         selectedChapter = value!;
-                                        apiIsloading = !apiIsloading;
+                                        print(
+                                            " Selected chapter : $selectedChapter");
                                         _booksFuture = getBookChapters(
                                             int.parse(selectedChapter));
-                                      });
-
-                                      setState(() {
-                                        apiIsloading = false;
                                       });
                                     },
                                     buttonStyleData: ButtonStyleData(
@@ -517,7 +651,8 @@ class BookDetail extends State<BookDetailScreen> {
                                       color: darkMode
                                           ? const Color(0xFFAF6A06)
                                           : const Color(0xFF623301),
-                                      fontSize: 12,
+                                      fontSize: (screenHeight *
+                                          (12 / AppConfig().screenHeight)),
                                     ),
                                   ),
                                   SizedBox(
@@ -600,7 +735,6 @@ class BookDetail extends State<BookDetailScreen> {
                                                 onChanged:
                                                     (Translations? value) {
                                                   setState(() {
-                                                    apiIsloading = true;
                                                     userSelectedTranslation =
                                                         value;
                                                     changableShortName =
@@ -608,7 +742,6 @@ class BookDetail extends State<BookDetailScreen> {
                                                     _booksFuture =
                                                         getBookChapters(int.parse(
                                                             selectedChapter));
-                                                    apiIsloading = false;
                                                   });
                                                 },
                                                 buttonStyleData:
@@ -697,159 +830,180 @@ class BookDetail extends State<BookDetailScreen> {
                           builder:
                               (BuildContext context, AsyncSnapshot snapshot) {
                             if (snapshot.hasError) {
-                              // return const NoInternetScreen();
-
                               return const SizedBox(
                                 height: 500,
                                 child: Center(
                                   child: Text(
-                                      'Some error Happended in Loaading the data '),
+                                      'Some error happened in loading the data'),
                                 ),
                               );
                             } else {
-                              return (!snapshot.hasData) ||
-                                      (snapshot.hasData && apiIsloading)
+                              return snapshot.data == null
                                   ? DetailLoaderScreen(
                                       screenWidth, screenHeight, darkMode)
-                                  : ListView.builder(
-                                      shrinkWrap: true,
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      itemCount: snapshot.data.length,
-                                      primary: false,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        BookChapters item =
-                                            snapshot.data[index];
-                                        return Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: (screenWidth *
-                                                  (8 /
-                                                      AppConfig().screenWidth)),
-                                              vertical: (screenHeight *
-                                                  (8 /
-                                                      AppConfig()
-                                                          .screenHeight))),
-                                          child: Container(
-                                            height: (screenHeight *
-                                                (220 /
-                                                    AppConfig().screenHeight)),
-                                            width: (screenWidth *
-                                                (396 /
-                                                    AppConfig().screenWidth)),
-                                            decoration: BoxDecoration(
-                                              color: darkMode
-                                                  ? const Color(0xFF2D281E)
-                                                  : Colors.transparent,
-                                              border: Border.all(
-                                                  color:
-                                                      const Color(0xFFAF6A06)),
-                                              borderRadius:
-                                                  const BorderRadius.all(
-                                                Radius.circular(6),
+                                  : apiIsloading
+                                      ? DetailLoaderScreen(
+                                          screenWidth, screenHeight, darkMode)
+                                      : ListView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemCount: snapshot.data.length,
+                                          primary: false,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            BookChapters item =
+                                                snapshot.data[index];
+
+                                            chaptersList.add(item);
+
+                                            return Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: (screenWidth *
+                                                    (8 /
+                                                        AppConfig()
+                                                            .screenWidth)),
+                                                vertical: (screenHeight *
+                                                    (8 /
+                                                        AppConfig()
+                                                            .screenHeight)),
                                               ),
-                                            ),
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                    right: (screenWidth *
-                                                        (12 /
-                                                            AppConfig()
-                                                                .screenWidth)),
+                                              child: Container(
+                                                height: (screenHeight *
+                                                    (220 /
+                                                        AppConfig()
+                                                            .screenHeight)),
+                                                width: (screenWidth *
+                                                    (396 /
+                                                        AppConfig()
+                                                            .screenWidth)),
+                                                decoration: BoxDecoration(
+                                                  color: darkMode
+                                                      ? const Color(0xFF2D281E)
+                                                      : Colors.transparent,
+                                                  border: Border.all(
+                                                      color: const Color(
+                                                          0xFFAF6A06)),
+                                                  borderRadius:
+                                                      const BorderRadius.all(
+                                                    Radius.circular(6),
                                                   ),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      const SizedBox(),
-                                                      Text(
-                                                        getLanguageCode == 'en'
-                                                            ? "Verse"
-                                                            : "कविता",
-                                                        style: const TextStyle(
-                                                          color:
-                                                              Color(0xFFAF6A06),
-                                                        ),
+                                                ),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: [
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                        right: (screenWidth *
+                                                            (12 /
+                                                                AppConfig()
+                                                                    .screenWidth)),
                                                       ),
-                                                      GestureDetector(
-                                                        onTap: () async {
-                                                          print(_audioPlayer
-                                                              .state);
-                                                          if (isPlaying) {
-                                                            await _audioPlayer
-                                                                .stop();
-                                                            setState(() {
-                                                              isPlaying = false;
-                                                            });
-                                                          } else if (_audioState ==
-                                                                  "Pause" ||
-                                                              !isPlaying) {
-                                                            setState(() {
-                                                              isPlaying = true;
-                                                            });
-                                                            playAudio();
-                                                          }
-                                                          checkedIndex = index;
-                                                        },
-                                                        child: SvgPicture.asset(
-                                                            isPlaying &&
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          const SizedBox(),
+                                                          Text(
+                                                            getLanguageCode ==
+                                                                    'en'
+                                                                ? "Verse"
+                                                                : "कविता",
+                                                            style:
+                                                                const TextStyle(
+                                                              color: Color(
+                                                                  0xFFAF6A06),
+                                                            ),
+                                                          ),
+                                                          GestureDetector(
+                                                            onTap: () async {
+                                                              print(_audioPlayer
+                                                                  .state);
+
+                                                              if (isPlaying) {
+                                                                await _audioPlayer
+                                                                    .stop();
+
+                                                                setState(() {
+                                                                  isPlaying =
+                                                                      false;
+                                                                });
+                                                              } else if (_audioState ==
+                                                                      "Pause" ||
+                                                                  !isPlaying) {
+                                                                setState(() {
+                                                                  isPlaying =
+                                                                      true;
+                                                                });
+
+                                                                playAudio(
+                                                                    languageCode:
+                                                                        getLanguageCode,
+                                                                    text: item
+                                                                        .text!);
+                                                              }
+
+                                                              checkedIndex =
+                                                                  index;
+                                                            },
+                                                            child: SvgPicture.asset(isPlaying &&
                                                                     checkedIndex ==
                                                                         index
                                                                 ? "assets/svg/speaker_on.svg"
                                                                 : "assets/svg/mic_icon.svg"),
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                SvgPicture.asset(
-                                                    "assets/svg/rect_bookdetail.svg"),
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                    bottom: (screenHeight *
-                                                        (25 /
-                                                            AppConfig()
-                                                                .screenHeight)),
-                                                    top: (screenHeight *
-                                                        (33 /
-                                                            AppConfig()
-                                                                .screenHeight)),
-                                                    left: (screenWidth *
-                                                        28 /
-                                                        AppConfig()
-                                                            .screenWidth),
-                                                    right: (screenWidth *
-                                                        28 /
-                                                        AppConfig()
-                                                            .screenWidth),
-                                                  ),
-                                                  child: Text(
-                                                    textAlign: TextAlign.center,
-                                                    item.text!,
-                                                    style: TextStyle(
-                                                      color: darkMode
-                                                          ? const Color(
-                                                              0xFFFFFFFF)
-                                                          : const Color(
-                                                              0xFF353535),
-                                                      fontSize: (screenHeight *
-                                                          (14 /
-                                                              AppConfig()
-                                                                  .screenHeight)),
                                                     ),
-                                                  ),
+                                                    SvgPicture.asset(
+                                                        "assets/svg/rect_bookdetail.svg"),
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                        bottom: (screenHeight *
+                                                            (25 /
+                                                                AppConfig()
+                                                                    .screenHeight)),
+                                                        top: (screenHeight *
+                                                            (33 /
+                                                                AppConfig()
+                                                                    .screenHeight)),
+                                                        left: (screenWidth *
+                                                            28 /
+                                                            AppConfig()
+                                                                .screenWidth),
+                                                        right: (screenWidth *
+                                                            28 /
+                                                            AppConfig()
+                                                                .screenWidth),
+                                                      ),
+                                                      child: Text(
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        item.text!,
+                                                        style: TextStyle(
+                                                          color: darkMode
+                                                              ? const Color(
+                                                                  0xFFFFFFFF)
+                                                              : const Color(
+                                                                  0xFF353535),
+                                                          fontSize: (screenHeight *
+                                                              (14 /
+                                                                  AppConfig()
+                                                                      .screenHeight)),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SvgPicture.asset(
+                                                        "assets/svg/narrow_line.svg"),
+                                                  ],
                                                 ),
-                                                SvgPicture.asset(
-                                                    "assets/svg/narrow_line.svg"),
-                                              ],
-                                            ),
-                                          ),
+                                              ),
+                                            );
+                                          },
                                         );
-                                      },
-                                    );
                             }
                           },
                         )
@@ -872,59 +1026,79 @@ class BookDetail extends State<BookDetailScreen> {
         ),
       ),
       bottomNavigationBar: isPlaying
-          ? Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: (screenWidth * (1 / AppConfig().screenWidth)),
-                  vertical: (screenHeight * (1 / AppConfig().screenHeight))),
-              child: Container(
-                height: 50,
-                width: 100,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(colors: [
-                    Color(0xFFC47807),
-                    Color(0xFF643402),
-                  ]),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      color: Colors.white,
-                      icon: Icon(_audioState == 'Playing'
-                          ? Icons.pause
-                          : Icons.play_arrow),
-                      onPressed: () async {
-                        if (_audioState == "Playing") {
-                          await _audioPlayer.pause();
-                        } else if (_audioState == "Paused" ||
-                            _audioState == "Stopped") {
-                          playAudio();
-                        }
-                      },
-                    ),
-                    Slider(
-                      value: _position,
-                      min: 0.0,
-                      max: _duration,
-                      onChanged: (value) {
-                        setState(() {
-                          _position = value;
-                          _audioPlayer.seek(Duration(seconds: value.toInt()));
-                        });
-                      },
-                    ),
-                    Text(
-                      "${_position.toStringAsFixed(0).toString()}  / ${_duration.toStringAsFixed(0).toString()} sec",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize:
-                            (screenHeight * (12 / AppConfig().screenHeight)),
+          ? musicApiIsLoading
+              ? TextLoaderWidget(
+                  AppConfig().screenWidth * .8,
+                  screenHeight * (50 / AppConfig().screenHeight),
+                  screenHeight * (0 / AppConfig().screenHeight),
+                  darkMode)
+              : !isPlaying
+                  ? const SizedBox()
+                  : Visibility(
+                      visible: isPlaying,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal:
+                                (screenWidth * (1 / AppConfig().screenWidth)),
+                            vertical: (screenHeight *
+                                (1 / AppConfig().screenHeight))),
+                        child: Container(
+                          height: 50,
+                          width: 100,
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(colors: [
+                              Color(0xFFC47807),
+                              Color(0xFF643402),
+                            ]),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                color: Colors.white,
+                                icon: Icon(_audioState == "Playing"
+                                    ? Icons.pause
+                                    : Icons.play_arrow),
+                                onPressed: () async {
+                                  if (_audioState == "Playing") {
+                                    setState(() {
+                                      _audioState = "Paused";
+                                    });
+                                    await _audioPlayer.pause();
+                                  } else if (_audioState == "Paused" ||
+                                      _audioState == "Stopped") {
+                                    setState(() {
+                                      _audioState = "Playing";
+                                    });
+                                    await _audioPlayer.resume();
+                                  }
+                                },
+                              ),
+                              Slider(
+                                value: _position,
+                                min: 0.0,
+                                max: _duration,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _position = value;
+                                    _audioPlayer
+                                        .seek(Duration(seconds: value.toInt()));
+                                  });
+                                },
+                              ),
+                              Text(
+                                "${_position.toStringAsFixed(0).toString()}  / ${_duration.toStringAsFixed(0).toString()} sec",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: (screenHeight *
+                                      (12 / AppConfig().screenHeight)),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
                     )
-                  ],
-                ),
-              ),
-            )
           : null,
     );
   }
