@@ -384,21 +384,27 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   }
 
   void getBookDetails(String shortName) async {
-    List<BookDetails> bookDetails =
-        await ApiHandler.getBookDetails(shortName: shortName);
-    int count = bookDetails.length; // Retrieve the count directly
-    print('Number of result maps: $count');
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
 
-    if (count == 66) {
-      setState(() {
-        newT = 27;
-        oldT = 39;
-      });
+    if (internetConnectCheck) {
+      List<BookDetails> bookDetails =
+          await ApiHandler.getBookDetails(shortName: shortName);
+      int count = bookDetails.length; // Retrieve the count directly
+      print('Number of result maps: $count');
+
+      if (count == 66) {
+        setState(() {
+          newT = 27;
+          oldT = 39;
+        });
+      } else {
+        setState(() {
+          oldT = 39;
+          newT = 0;
+        });
+      }
     } else {
-      setState(() {
-        oldT = 39;
-        newT = 0;
-      });
+      navigateToNoInternetScreen(true);
     }
   }
 

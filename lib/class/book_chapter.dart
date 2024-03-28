@@ -2,8 +2,9 @@ class BookChapters {
   int? pk;
   int? verse;
   String? text;
+  bool? versePlaying;
 
-  BookChapters({this.pk, this.verse, this.text});
+  BookChapters({this.pk, this.verse, this.text, this.versePlaying});
 
   BookChapters.fromJson(Map<String, dynamic> json) {
     pk = json['pk'];

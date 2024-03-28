@@ -143,6 +143,7 @@ flutter:
     - assets/svg/book_cover_dark.svg
     - assets/svg/speaker_on.svg
     - assets/png/book_cover.png
+    - assets/svg/pause.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
