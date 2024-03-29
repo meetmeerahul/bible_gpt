@@ -7,3 +7,5 @@ String changableLanguage = "";
 Translations? userSelectedTrans;
 
 String? audioText = "";
+
+

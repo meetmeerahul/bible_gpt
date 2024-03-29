@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:bible_gpt/APIRequest/api_handler.dart';
 import 'package:bible_gpt/class/book_chapter.dart';
@@ -77,8 +76,6 @@ class BookDetail extends State<BookDetailScreen> {
 
   late String getLanguageCode;
   late ChangeLanguageLocal languageLocal;
-
-  final Debouncer _debouncer = Debouncer(milliseconds: 300);
 
   int num = 20;
 
@@ -264,7 +261,7 @@ class BookDetail extends State<BookDetailScreen> {
         print(getResponseMap);
 
         String getAudioText = getResponseMap["audio_content"] ?? "";
-
+        audioText = getResponseMap["audio_content"];
         getTextToSpeechResponse["audio"] = getAudioText;
       } else {
         getTextToSpeechResponse["status"] = false;
@@ -287,13 +284,13 @@ class BookDetail extends State<BookDetailScreen> {
       Uint8List audioData = Uint8List.fromList(base64.decode(audioContent));
       activeSource = BytesSource(audioData);
       _audioPlayer.play(BytesSource(audioData));
-      _audioPlayer.onPlayerStateChanged.listen((event) {
-        if (event == PlayerState.completed) {
-          setState(() {
-            isPlaying = false;
-          });
-        }
-      });
+      // _audioPlayer.onPlayerStateChanged.listen((event) {
+      //   if (event == PlayerState.completed) {
+      //     setState(() {
+      //       isPlaying = false;
+      //     });
+      //   }
+      // });
     }
 
     setState(() {
@@ -489,11 +486,16 @@ class BookDetail extends State<BookDetailScreen> {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-                              if (playAllIsPlaying) {
+                              if ((playAllIsPlaying || isPlaying) ||
+                                  (playAllIsPlaying && isPlaying) ||
+                                  (playAllIsPlaying && !isPlaying) ||
+                                  (!playAllIsPlaying && isPlaying)) {
                                 playAllIsPlaying = false;
-
+                                isPlaying = false;
                                 playNumber = 0;
+
                                 _audioPlayer.stop();
+
                                 isPlaying = false;
                                 print("****************Audio PLayer Stopped");
                                 isAudioWidget = false;
@@ -533,12 +535,12 @@ class BookDetail extends State<BookDetailScreen> {
                                         (10.87 / AppConfig().screenWidth)),
                                     height: (screenHeight *
                                         (12 / AppConfig().screenHeight)),
-                                    !isPlaying
+                                    !playAllIsPlaying
                                         ? "assets/svg/play_icon.svg"
                                         : "assets/svg/pause.svg"),
                                 Text(
                                   getLanguageCode == 'en'
-                                      ? isPlaying
+                                      ? playAllIsPlaying
                                           ? "Stop"
                                           : "Play All"
                                       : isPlaying
@@ -895,173 +897,183 @@ class BookDetail extends State<BookDetailScreen> {
                                   : apiIsloading
                                       ? DetailLoaderScreen(
                                           screenWidth, screenHeight, darkMode)
-                                      : ListView.builder(
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemCount: snapshot.data.length ?? 0,
-                                          primary: false,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            verseCount = snapshot.data.length;
+                                      : SingleChildScrollView(
+                                          physics: !playAllIsPlaying
+                                              ? const AlwaysScrollableScrollPhysics()
+                                              : const NeverScrollableScrollPhysics(),
+                                          child: ListView.builder(
+                                            shrinkWrap: true,
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            itemCount:
+                                                snapshot.data.length ?? 0,
+                                            primary: false,
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              verseCount = snapshot.data.length;
 
-                                            BookChapters item =
-                                                snapshot.data[index];
+                                              BookChapters item =
+                                                  snapshot.data[index];
 
-                                            chaptersList.add(item);
+                                              chaptersList.add(item);
 
-                                            print(
-                                                "Chapterlist length ${chaptersList.length}");
+                                              print(
+                                                  "Chapterlist length ${chaptersList.length}");
 
-                                            return Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: (screenWidth *
-                                                    (8 /
-                                                        AppConfig()
-                                                            .screenWidth)),
-                                                vertical: (screenHeight *
-                                                    (8 /
-                                                        AppConfig()
-                                                            .screenHeight)),
-                                              ),
-                                              child: Container(
-                                                height: (screenHeight *
-                                                    (230 /
-                                                        AppConfig()
-                                                            .screenHeight)),
-                                                width: (screenWidth *
-                                                    (396 /
-                                                        AppConfig()
-                                                            .screenWidth)),
-                                                decoration: BoxDecoration(
-                                                  color: darkMode
-                                                      ? const Color(0xFF2D281E)
-                                                      : Colors.transparent,
-                                                  border: Border.all(
-                                                      color: const Color(
-                                                          0xFFAF6A06)),
-                                                  borderRadius:
-                                                      const BorderRadius.all(
-                                                    Radius.circular(6),
-                                                  ),
+                                              return Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: (screenWidth *
+                                                      (8 /
+                                                          AppConfig()
+                                                              .screenWidth)),
+                                                  vertical: (screenHeight *
+                                                      (8 /
+                                                          AppConfig()
+                                                              .screenHeight)),
                                                 ),
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceEvenly,
-                                                  children: [
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                        right: (screenWidth *
-                                                            (12 /
-                                                                AppConfig()
-                                                                    .screenWidth)),
-                                                      ),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          const SizedBox(),
-                                                          Text(
-                                                            getLanguageCode ==
-                                                                    'en'
-                                                                ? "Verse"
-                                                                : "कविता",
-                                                            style:
-                                                                const TextStyle(
-                                                              color: Color(
-                                                                  0xFFAF6A06),
-                                                            ),
-                                                          ),
-                                                          GestureDetector(
-                                                            onTap: () async {
-                                                              print(_audioPlayer
-                                                                  .state);
-
-                                                              if (isPlaying) {
-                                                                await _audioPlayer
-                                                                    .stop();
-
-                                                                setState(() {
-                                                                  isPlaying =
-                                                                      false;
-                                                                });
-                                                              } else if (_audioState ==
-                                                                      "Pause" ||
-                                                                  !isPlaying) {
-                                                                setState(() {
-                                                                  isPlaying =
-                                                                      true;
-                                                                });
-
-                                                                playAudio(
-                                                                    languageCode:
-                                                                        getLanguageCode,
-                                                                    text: item
-                                                                        .text!);
-
-                                                                // meaningClick(
-                                                                //     item);
-                                                              }
-
-                                                              checkedIndex =
-                                                                  index;
-                                                            },
-                                                            child: SvgPicture.asset(isPlaying &&
-                                                                    checkedIndex ==
-                                                                        index
-                                                                ? "assets/svg/speaker_on.svg"
-                                                                : "assets/svg/mic_icon.svg"),
-                                                          ),
-                                                        ],
-                                                      ),
+                                                child: Container(
+                                                  height: (screenHeight *
+                                                      (230 /
+                                                          AppConfig()
+                                                              .screenHeight)),
+                                                  width: (screenWidth *
+                                                      (396 /
+                                                          AppConfig()
+                                                              .screenWidth)),
+                                                  decoration: BoxDecoration(
+                                                    color: darkMode
+                                                        ? const Color(
+                                                            0xFF2D281E)
+                                                        : Colors.transparent,
+                                                    border: Border.all(
+                                                        color: const Color(
+                                                            0xFFAF6A06)),
+                                                    borderRadius:
+                                                        const BorderRadius.all(
+                                                      Radius.circular(6),
                                                     ),
-                                                    SvgPicture.asset(
-                                                        "assets/svg/rect_bookdetail.svg"),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                        bottom: (screenHeight *
-                                                            (25 /
-                                                                AppConfig()
-                                                                    .screenHeight)),
-                                                        top: (screenHeight *
-                                                            (33 /
-                                                                AppConfig()
-                                                                    .screenHeight)),
-                                                        left: (screenWidth *
-                                                            28 /
-                                                            AppConfig()
-                                                                .screenWidth),
-                                                        right: (screenWidth *
-                                                            28 /
-                                                            AppConfig()
-                                                                .screenWidth),
-                                                      ),
-                                                      child: Text(
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        item.text!,
-                                                        style: TextStyle(
-                                                          color: darkMode
-                                                              ? const Color(
-                                                                  0xFFFFFFFF)
-                                                              : const Color(
-                                                                  0xFF353535),
-                                                          fontSize: (screenHeight *
-                                                              (14 /
+                                                  ),
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceEvenly,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                          right: (screenWidth *
+                                                              (12 /
                                                                   AppConfig()
-                                                                      .screenHeight)),
+                                                                      .screenWidth)),
+                                                        ),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            const SizedBox(),
+                                                            Text(
+                                                              getLanguageCode ==
+                                                                      'en'
+                                                                  ? "Verse"
+                                                                  : "कविता",
+                                                              style:
+                                                                  const TextStyle(
+                                                                color: Color(
+                                                                    0xFFAF6A06),
+                                                              ),
+                                                            ),
+                                                            GestureDetector(
+                                                              onTap: () async {
+                                                                print(
+                                                                    _audioPlayer
+                                                                        .state);
+
+                                                                if (isPlaying) {
+                                                                  await _audioPlayer
+                                                                      .stop();
+
+                                                                  setState(() {
+                                                                    isPlaying =
+                                                                        false;
+                                                                  });
+                                                                } else if (_audioState ==
+                                                                        "Pause" ||
+                                                                    !isPlaying) {
+                                                                  setState(() {
+                                                                    isPlaying =
+                                                                        true;
+                                                                  });
+
+                                                                  playAudio(
+                                                                      languageCode:
+                                                                          getLanguageCode,
+                                                                      text: item
+                                                                          .text!);
+
+                                                                  // meaningClick(
+                                                                  //     item);
+                                                                }
+
+                                                                checkedIndex =
+                                                                    index;
+                                                              },
+                                                              child: SvgPicture.asset(isPlaying &&
+                                                                      checkedIndex ==
+                                                                          index
+                                                                  ? "assets/svg/speaker_on.svg"
+                                                                  : "assets/svg/mic_icon.svg"),
+                                                            ),
+                                                          ],
                                                         ),
                                                       ),
-                                                    ),
-                                                    SvgPicture.asset(
-                                                        "assets/svg/narrow_line.svg"),
-                                                  ],
+                                                      SvgPicture.asset(
+                                                          "assets/svg/rect_bookdetail.svg"),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                          bottom: (screenHeight *
+                                                              (25 /
+                                                                  AppConfig()
+                                                                      .screenHeight)),
+                                                          top: (screenHeight *
+                                                              (33 /
+                                                                  AppConfig()
+                                                                      .screenHeight)),
+                                                          left: (screenWidth *
+                                                              28 /
+                                                              AppConfig()
+                                                                  .screenWidth),
+                                                          right: (screenWidth *
+                                                              28 /
+                                                              AppConfig()
+                                                                  .screenWidth),
+                                                        ),
+                                                        child: Text(
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          item.text!,
+                                                          style: TextStyle(
+                                                            color: darkMode
+                                                                ? const Color(
+                                                                    0xFFFFFFFF)
+                                                                : const Color(
+                                                                    0xFF353535),
+                                                            fontSize: (screenHeight *
+                                                                (14 /
+                                                                    AppConfig()
+                                                                        .screenHeight)),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      SvgPicture.asset(
+                                                          "assets/svg/narrow_line.svg"),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                            );
-                                          },
+                                              );
+                                            },
+                                          ),
                                         );
                             }
                           },
@@ -1125,6 +1137,12 @@ class BookDetail extends State<BookDetailScreen> {
                                 _audioState = "Playing";
                               });
                               await _audioPlayer.resume();
+                            } else if (_audioState == "Compleated") {
+                              setState(() {
+                                _audioState = "Playing";
+                              });
+                              // await _audioPlayer.play(audioText);
+                              print("Play again");
                             }
                           },
                         ),
@@ -1142,7 +1160,7 @@ class BookDetail extends State<BookDetailScreen> {
                           },
                         ),
                         Text(
-                          "${position.inSeconds}  -  ${duration.inSeconds} ",
+                          "0.${position.inSeconds}  /  0.${duration.inSeconds} Sec ",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: (screenHeight *
@@ -1198,7 +1216,6 @@ class BookDetail extends State<BookDetailScreen> {
     });
 
     for (int i = 0; i < chaptersList.length; i++) {
-      print("Value of $i");
       //  getClass.verse = getClass.verse! + 1; // Incrementing getClass.verse by 1
 
       if (chaptersList[i].verse == getClass.verse) {
@@ -1224,20 +1241,5 @@ class BookDetail extends State<BookDetailScreen> {
         chaptersList[i].versePlaying = false;
       }
     }
-  }
-}
-
-class Debouncer {
-  final int milliseconds;
-  VoidCallback? action;
-  Timer? _timer;
-
-  Debouncer({required this.milliseconds});
-
-  run(VoidCallback action) {
-    if (_timer != null) {
-      _timer!.cancel();
-    }
-    _timer = Timer(Duration(milliseconds: milliseconds), action);
   }
 }
