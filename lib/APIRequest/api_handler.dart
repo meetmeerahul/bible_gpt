@@ -92,7 +92,6 @@ class ApiHandler {
     };
     String textToSpeechAPIUrl =
         "https://api.mybiblegpt.com/api/v1/user/text-to-speach/";
-    ;
     print(textToSpeechAPIUrl);
 
     try {
@@ -100,7 +99,6 @@ class ApiHandler {
           Uri.parse(textToSpeechAPIUrl),
           body: {"text_input": getText, "language_code": getLanguageCode});
       print(getTextToSpeechAPIResponse.body);
-      
 
       if (getTextToSpeechAPIResponse.statusCode >= 200 &&
           getTextToSpeechAPIResponse.statusCode < 300) {

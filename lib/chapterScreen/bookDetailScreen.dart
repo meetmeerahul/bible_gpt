@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -77,6 +78,8 @@ class BookDetail extends State<BookDetailScreen> {
   late String getLanguageCode;
   late ChangeLanguageLocal languageLocal;
 
+  final Debouncer _debouncer = Debouncer(milliseconds: 300);
+
   int num = 20;
 
   bool isPlaying = false;
@@ -101,6 +104,8 @@ class BookDetail extends State<BookDetailScreen> {
   BookChapters? selectedChapterClass;
 
   int checkedIndex = 0;
+
+  int verseCount = 0;
 
   String selectedChapter = "1";
   final FlutterTts fluttertts = FlutterTts();
@@ -334,7 +339,7 @@ class BookDetail extends State<BookDetailScreen> {
               print("Chapters list $chaptersList");
 
               print("@#%%#################################%%%%%%%");
-              //meaningClick(chaptersList[playNumber]);
+              meaningClick(chaptersList[playNumber]);
             } else {
               playAllIsPlaying = false;
             }
@@ -345,6 +350,9 @@ class BookDetail extends State<BookDetailScreen> {
         } else if (state == PlayerState.stopped) {
           //isAudioPlaying = false;
           print("stopped");
+        } else if (state == PlayerState.completed) {
+          playAllIsPlaying = true;
+          isPlaying = true;
         }
       });
     });
@@ -484,10 +492,8 @@ class BookDetail extends State<BookDetailScreen> {
                               if (playAllIsPlaying) {
                                 playAllIsPlaying = false;
 
-                                _audioPlayer.state = PlayerState.completed;
                                 playNumber = 0;
-                                stop();
-
+                                _audioPlayer.stop();
                                 isPlaying = false;
                                 print("****************Audio PLayer Stopped");
                                 isAudioWidget = false;
@@ -496,7 +502,7 @@ class BookDetail extends State<BookDetailScreen> {
                                 isPlaying = true;
                                 isAudioWidget = true;
                                 playNumber = 0;
-                                _audioPlayer.state = PlayerState.playing;
+
                                 print("******************Audio PLayer staterd");
                                 meaningClick(chaptersList[playNumber]);
                               }
@@ -527,15 +533,15 @@ class BookDetail extends State<BookDetailScreen> {
                                         (10.87 / AppConfig().screenWidth)),
                                     height: (screenHeight *
                                         (12 / AppConfig().screenHeight)),
-                                    !playAllIsPlaying
+                                    !isPlaying
                                         ? "assets/svg/play_icon.svg"
                                         : "assets/svg/pause.svg"),
                                 Text(
                                   getLanguageCode == 'en'
-                                      ? playAllIsPlaying
+                                      ? isPlaying
                                           ? "Stop"
                                           : "Play All"
-                                      : playAllIsPlaying
+                                      : isPlaying
                                           ? "रुकना"
                                           : "सभी खेलना",
                                   style: TextStyle(
@@ -879,14 +885,10 @@ class BookDetail extends State<BookDetailScreen> {
                           builder:
                               (BuildContext context, AsyncSnapshot snapshot) {
                             if (snapshot.hasError) {
-                              return const SizedBox(
-                                height: 500,
-                                child: Center(
-                                  child: Text(
-                                      'Some error happened in loading the data'),
-                                ),
-                              );
+                              return DetailLoaderScreen(
+                                  screenWidth, screenHeight, darkMode);
                             } else {
+                              chaptersList.clear();
                               return snapshot.data == null
                                   ? DetailLoaderScreen(
                                       screenWidth, screenHeight, darkMode)
@@ -897,14 +899,19 @@ class BookDetail extends State<BookDetailScreen> {
                                           shrinkWrap: true,
                                           physics:
                                               const NeverScrollableScrollPhysics(),
-                                          itemCount: snapshot.data.length,
+                                          itemCount: snapshot.data.length ?? 0,
                                           primary: false,
                                           itemBuilder: (BuildContext context,
                                               int index) {
+                                            verseCount = snapshot.data.length;
+
                                             BookChapters item =
                                                 snapshot.data[index];
 
                                             chaptersList.add(item);
+
+                                            print(
+                                                "Chapterlist length ${chaptersList.length}");
 
                                             return Padding(
                                               padding: EdgeInsets.symmetric(
@@ -1077,76 +1084,75 @@ class BookDetail extends State<BookDetailScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: isPlaying
+      bottomNavigationBar: (isPlaying || playAllIsPlaying)
           ? musicApiIsLoading
               ? TextLoaderWidget(
                   AppConfig().screenWidth * .8,
                   screenHeight * (50 / AppConfig().screenHeight),
                   screenHeight * (0 / AppConfig().screenHeight),
                   darkMode)
-              : !isPlaying
-                  ? const SizedBox()
-                  : Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal:
-                              (screenWidth * (1 / AppConfig().screenWidth)),
-                          vertical:
-                              (screenHeight * (1 / AppConfig().screenHeight))),
-                      child: Container(
-                        height: 50,
-                        width: 100,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(colors: [
-                            Color(0xFFC47807),
-                            Color(0xFF643402),
-                          ]),
+              : Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: (screenWidth * (1 / AppConfig().screenWidth)),
+                      vertical:
+                          (screenHeight * (1 / AppConfig().screenHeight))),
+                  child: Container(
+                    height: 50,
+                    width: 100,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(colors: [
+                        Color(0xFFC47807),
+                        Color(0xFF643402),
+                      ]),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          color: Colors.white,
+                          icon: Icon(_audioState == "Playing"
+                              ? Icons.pause
+                              : Icons.play_arrow),
+                          onPressed: () async {
+                            if (_audioState == "Playing") {
+                              setState(() {
+                                _audioState = "Paused";
+                              });
+                              await _audioPlayer.pause();
+                            } else if (_audioState == "Paused" ||
+                                _audioState == "Stopped") {
+                              setState(() {
+                                _audioState = "Playing";
+                              });
+                              await _audioPlayer.resume();
+                            }
+                          },
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              color: Colors.white,
-                              icon: Icon(_audioState == "Playing"
-                                  ? Icons.pause
-                                  : Icons.play_arrow),
-                              onPressed: () async {
-                                if (_audioState == "Playing") {
-                                  setState(() {
-                                    _audioState = "Paused";
-                                  });
-                                  await _audioPlayer.pause();
-                                } else if (_audioState == "Paused" ||
-                                    _audioState == "Stopped") {
-                                  setState(() {
-                                    _audioState = "Playing";
-                                  });
-                                  await _audioPlayer.resume();
-                                }
-                              },
-                            ),
-                            Slider(
-                              value: position.inSeconds.toDouble(),
-                              min: 0.0,
-                              max: duration.inSeconds.toDouble(),
-                              onChanged: (value) {
-                                setState(() {
-                                  position = Duration(seconds: value.toInt());
-                                  _audioPlayer.seek(position);
-                                });
-                              },
-                            ),
-                            Text(
-                              "${position.inSeconds}  -  ${duration.inSeconds} ",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: (screenHeight *
-                                    (12 / AppConfig().screenHeight)),
-                              ),
-                            )
-                          ],
+                        Slider(
+                          value: position.inSeconds
+                              .toDouble()
+                              .clamp(0.0, duration.inSeconds.toDouble()),
+                          min: 0,
+                          max: duration.inSeconds.toDouble(),
+                          onChanged: (value) {
+                            setState(() {
+                              position = Duration(seconds: value.toInt());
+                              _audioPlayer.seek(position);
+                            });
+                          },
                         ),
-                      ),
-                    )
+                        Text(
+                          "${position.inSeconds}  -  ${duration.inSeconds} ",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: (screenHeight *
+                                (12 / AppConfig().screenHeight)),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                )
           : null,
     );
   }
@@ -1186,34 +1192,52 @@ class BookDetail extends State<BookDetailScreen> {
   }
 
   meaningClick(BookChapters getClass) {
+    print("chapters length in meaning call ${chaptersList.length}");
     setState(() {
       isAudioWidget = true;
-
-      print("Selected Chapter: $selectedChapterClass");
-
-      print("Chapter Length: ${chaptersList.length}");
-
-      for (int i = 0; i < chaptersList.length; i++) {
-        if (chaptersList[i].verse == getClass.verse) {
-          selectedChapterClass = getClass;
-
-          print("Verse id: ${getClass.verse}");
-
-          selectedAudioId = chaptersList[i].verse.toString();
-
-          print("***********************");
-
-          print(chaptersList[i]);
-          print("Value of i: $i");
-
-          // Call playAudio for each item in chaptersList
-          playAudio(text: chaptersList[i].text!, languageCode: getLanguageCode);
-        } else {
-          print("Verse id: ${chaptersList[i].verse}");
-
-          chaptersList[i].versePlaying = false;
-        }
-      }
     });
+
+    for (int i = 0; i < chaptersList.length; i++) {
+      print("Value of $i");
+      //  getClass.verse = getClass.verse! + 1; // Incrementing getClass.verse by 1
+
+      if (chaptersList[i].verse == getClass.verse) {
+        selectedChapterClass = getClass;
+
+        setState(() {
+          musicApiIsLoading = true;
+        });
+
+        playAudio(
+          text: chaptersList[i].text!,
+          languageCode: getLanguageCode,
+        );
+
+        setState(() {
+          musicApiIsLoading = true;
+        });
+
+        // playAllIsPlaying = false;
+      } else {
+        print(
+            " getClass : ${getClass.verse}  chapterVerse:${chaptersList[i].verse}");
+        chaptersList[i].versePlaying = false;
+      }
+    }
+  }
+}
+
+class Debouncer {
+  final int milliseconds;
+  VoidCallback? action;
+  Timer? _timer;
+
+  Debouncer({required this.milliseconds});
+
+  run(VoidCallback action) {
+    if (_timer != null) {
+      _timer!.cancel();
+    }
+    _timer = Timer(Duration(milliseconds: milliseconds), action);
   }
 }
