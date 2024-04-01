@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:bible_gpt/class/book_details.dart';
 import 'package:bible_gpt/class/languages_and_transilations.dart';
@@ -64,7 +65,7 @@ class ApiHandler {
       String shortname, String bookid, String chapter) async {
     print(" book id======$bookid  shortname=$shortname chapter = $chapter");
     String url = "https://bolls.life/get-chapter/$shortname/$bookid/$chapter/";
-
+    print("Book detail api call");
     print(url);
     final response = await http.get(Uri.parse(url));
 
@@ -123,5 +124,35 @@ class ApiHandler {
       getTextToSpeechResponse["message"] = getErrorMessage;
     }
     return getTextToSpeechResponse;
+  }
+
+  Future<Map<String, dynamic>> searchGptAPI(
+      {required String getQuestion}) async {
+    Map<String, dynamic> getSearchGPTResponse = {
+      "status": false,
+      "message": "",
+      "data": {}
+    };
+    String searchGPTAPIUrl =
+        "http://api.mybiblegpt.com/api/v1/gpt/campaign?prompt={{$getQuestion}}";
+    print(searchGPTAPIUrl);
+    try {
+      HttpClientRequest request =
+          await HttpClient().getUrl(Uri.parse(searchGPTAPIUrl));
+      HttpClientResponse response = await request.close();
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        getSearchGPTResponse["status"] = true;
+        getSearchGPTResponse["data"] = response;
+      } else {
+        getSearchGPTResponse["status"] = false;
+        String getErrorMessage = "Network response was not ok";
+        getSearchGPTResponse["message"] = getErrorMessage;
+      }
+    } catch (e) {
+      getSearchGPTResponse["status"] = false;
+      String getErrorMessage = e.toString() ?? "";
+      getSearchGPTResponse["message"] = getErrorMessage;
+    }
+    return getSearchGPTResponse;
   }
 }

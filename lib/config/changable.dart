@@ -8,4 +8,4 @@ Translations? userSelectedTrans;
 
 String? audioText = "";
 
-
+int listViewMaxLength = 0;

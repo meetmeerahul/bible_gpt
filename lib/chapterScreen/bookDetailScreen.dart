@@ -86,6 +86,8 @@ class BookDetail extends State<BookDetailScreen> {
 
   bool apiIsloading = false;
 
+  bool songIsFetching = false;
+
   ItemScrollController itemScrollController = ItemScrollController();
 
   bool chapterListIsEmpty = true;
@@ -112,6 +114,9 @@ class BookDetail extends State<BookDetailScreen> {
 
   bool musicApiIsLoading = false;
 
+  GlobalKey topKey = GlobalKey();
+  double topKeyHeight = 0;
+
   Duration duration = Duration.zero;
   Duration position = Duration.zero;
   bool isAudioWidget = false;
@@ -122,6 +127,67 @@ class BookDetail extends State<BookDetailScreen> {
   bool isAudioPlayerLoading = false;
   bool playAllIsPlaying = false;
   int playNumber = 0;
+
+  int listviewLength = 0;
+  int numberOfTime = 0;
+
+  callRender() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final RenderBox renderBox =
+          topKey.currentContext!.findRenderObject() as RenderBox;
+      setState(() {
+        print("${renderBox.size}");
+        topKeyHeight = renderBox.size.height;
+      });
+    });
+  }
+
+  getPageIncreaseCount() {
+    numberOfTime += 1;
+    print("Incremented");
+    setState(() {
+      // listviewLength = numberOfTime * 10;
+    });
+    print(listviewLength);
+  }
+
+  callInitState() async {
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+    if (internetConnectCheck) {
+      audioPlayerInit();
+      pageScrollController.addListener(() {
+        if (pageScrollController.offset > 0) {
+          if (statusBarVisible) {
+          } else {
+            setState(() {
+              statusBarVisible = true;
+            });
+          }
+        } else {
+          setState(() {
+            statusBarVisible = false;
+          });
+        }
+        if (pageScrollController.position.maxScrollExtent ==
+            pageScrollController.position.pixels) {
+          print("call bottom");
+          // getPageIncreaseCount();
+        }
+      });
+    } else {
+      navigateToNoInternetScreen(true);
+    }
+  }
+
+  navigateToNoInternetScreen(bool callInit) {
+    Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetScreen()))
+        .then((value) {
+      if (callInit) {
+        callInitState();
+      }
+    });
+  }
 
   getLanguage() {
     languageLocal = Provider.of<ChangeLanguageLocal>(context);
@@ -169,9 +235,10 @@ class BookDetail extends State<BookDetailScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    scrollinit();
+    //scrollinit();
+    callInitState();
     _booksFuture = getBookChapters(0);
-    audioPlayerInit();
+    // audioPlayerInit();
     getTransilations();
 
     setState(() {
@@ -179,24 +246,24 @@ class BookDetail extends State<BookDetailScreen> {
     });
   }
 
-  scrollinit() async {
-    bool internetConnectCheck = await CheckInternetConnectionMethod();
-    if (internetConnectCheck) {
-      pageScrollController.addListener(() {
-        if (pageScrollController.offset > 0) {
-          if (statusBarVisible) {
-            setState(() {
-              statusBarVisible = !statusBarVisible;
-            });
-          }
-        } else {
-          setState(() {
-            statusBarVisible = !statusBarVisible;
-          });
-        }
-      });
-    }
-  }
+  // scrollinit() async {
+  //   bool internetConnectCheck = await CheckInternetConnectionMethod();
+  //   if (internetConnectCheck) {
+  //     pageScrollController.addListener(() {
+  //       if (pageScrollController.offset > 0) {
+  //         if (statusBarVisible) {
+  //           setState(() {
+  //             statusBarVisible = !statusBarVisible;
+  //           });
+  //         }
+  //       } else {
+  //         setState(() {
+  //           statusBarVisible = !statusBarVisible;
+  //         });
+  //       }
+  //     });
+  //   }
+  // }
 
   Future<List<BookChapters>> getBookChapters(int chapter) async {
     late String chapterNumber;
@@ -213,6 +280,11 @@ class BookDetail extends State<BookDetailScreen> {
       setState(() {
         apiIsloading = false;
       });
+
+      numberOfTime = 0;
+      getPageIncreaseCount();
+      callRender();
+
       return result;
     } else {
       chapterNumber = chapter.toString();
@@ -226,6 +298,10 @@ class BookDetail extends State<BookDetailScreen> {
       setState(() {
         apiIsloading = false;
       });
+
+      numberOfTime = 0;
+      getPageIncreaseCount();
+      callRender();
       return result;
     }
   }
@@ -331,6 +407,7 @@ class BookDetail extends State<BookDetailScreen> {
           print("play all : $playAllIsPlaying");
           if (playAllIsPlaying) {
             playNumber += 1;
+
             if (playNumber < chaptersList.length) {
               scrollToIndex(playNumber);
               print("Chapters list $chaptersList");
@@ -375,10 +452,15 @@ class BookDetail extends State<BookDetailScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    stop();
-    pageScrollController.dispose();
     super.dispose();
+    // TODO: implement dispose
+    pageScrollController.dispose();
+
+    if (isPlaying) {
+      _audioPlayer.dispose();
+    }
+
+    // _audioPlayer.dispose();
   }
 
   @override
@@ -393,17 +475,20 @@ class BookDetail extends State<BookDetailScreen> {
     print(("ook id : ${widget.bookid}"));
     print(" BookId-------${widget.chapterCOunt}");
     print("book name $chapterName");
+
+    print("TopKey Height : $topKeyHeight");
     // print(" Chapters-------${widget.chapterCount}");
     return Scaffold(
       body: Container(
         child: Stack(
           children: [
             SingleChildScrollView(
-              controller: pageScrollController,
               physics: const AlwaysScrollableScrollPhysics(),
+              controller: pageScrollController,
               child: Column(
                 children: [
                   Container(
+                    key: topKey,
                     height: (screenHeight * (400 / AppConfig().screenHeight)),
                     width: (screenWidth * (440 / AppConfig().screenWidth)),
                     decoration: BoxDecoration(
@@ -486,27 +571,30 @@ class BookDetail extends State<BookDetailScreen> {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-                              if ((playAllIsPlaying || isPlaying) ||
-                                  (playAllIsPlaying && isPlaying) ||
-                                  (playAllIsPlaying && !isPlaying) ||
-                                  (!playAllIsPlaying && isPlaying)) {
-                                playAllIsPlaying = false;
-                                isPlaying = false;
-                                playNumber = 0;
-
-                                _audioPlayer.stop();
-
-                                isPlaying = false;
-                                print("****************Audio PLayer Stopped");
-                                isAudioWidget = false;
-                              } else {
-                                playAllIsPlaying = true;
-                                isPlaying = true;
-                                isAudioWidget = true;
-                                playNumber = 0;
-
-                                print("******************Audio PLayer staterd");
-                                meaningClick(chaptersList[playNumber]);
+                              if (!musicApiIsLoading) {
+                                if ((playAllIsPlaying || isPlaying) ||
+                                    (playAllIsPlaying && isPlaying) ||
+                                    (playAllIsPlaying && !isPlaying) ||
+                                    (!playAllIsPlaying && isPlaying) ||
+                                    playAllIsPlaying ||
+                                    songIsFetching) {
+                                  _audioPlayer.stop();
+                                  songIsFetching = false;
+                                  playAllIsPlaying = false;
+                                  isPlaying = false;
+                                  playNumber = 0;
+                                  isPlaying = false;
+                                  print("****************Audio PLayer Stopped");
+                                  isAudioWidget = false;
+                                } else {
+                                  playAllIsPlaying = true;
+                                  isPlaying = true;
+                                  isAudioWidget = true;
+                                  playNumber = 0;
+                                  print(
+                                      "******************Audio PLayer started");
+                                  meaningClick(chaptersList[playNumber]);
+                                }
                               }
                             });
                           },
@@ -543,7 +631,7 @@ class BookDetail extends State<BookDetailScreen> {
                                       ? playAllIsPlaying
                                           ? "Stop"
                                           : "Play All"
-                                      : isPlaying
+                                      : playAllIsPlaying
                                           ? "रुकना"
                                           : "सभी खेलना",
                                   style: TextStyle(
@@ -891,25 +979,41 @@ class BookDetail extends State<BookDetailScreen> {
                                   screenWidth, screenHeight, darkMode);
                             } else {
                               chaptersList.clear();
+
                               return snapshot.data == null
                                   ? DetailLoaderScreen(
                                       screenWidth, screenHeight, darkMode)
                                   : apiIsloading
                                       ? DetailLoaderScreen(
                                           screenWidth, screenHeight, darkMode)
-                                      : SingleChildScrollView(
-                                          physics: !playAllIsPlaying
-                                              ? const AlwaysScrollableScrollPhysics()
-                                              : const NeverScrollableScrollPhysics(),
-                                          child: ListView.builder(
+                                      : SizedBox(
+                                          height: playAllIsPlaying
+                                              ? (screenHeight - topKeyHeight)
+                                              : null,
+                                          width: screenWidth,
+                                          child:
+                                              ScrollablePositionedList.builder(
+                                            itemScrollController:
+                                                itemScrollController,
+                                            scrollDirection: Axis.vertical,
                                             shrinkWrap: true,
-                                            physics:
-                                                const NeverScrollableScrollPhysics(),
-                                            itemCount:
-                                                snapshot.data.length ?? 0,
-                                            primary: false,
+                                            physics: playAllIsPlaying
+                                                ? const AlwaysScrollableScrollPhysics()
+                                                : const NeverScrollableScrollPhysics(),
+                                            itemCount: snapshot.data.length,
+
+                                            /*
+                                           listviewLength >
+                                                    snapshot.data.length
+                                                ? snapshot.data.length
+                                                : listviewLength,
+                                                
+                                              
+                                            */
                                             itemBuilder: (BuildContext context,
                                                 int index) {
+                                              listViewMaxLength =
+                                                  snapshot.data.length;
                                               verseCount = snapshot.data.length;
 
                                               BookChapters item =
@@ -918,7 +1022,7 @@ class BookDetail extends State<BookDetailScreen> {
                                               chaptersList.add(item);
 
                                               print(
-                                                  "Chapterlist length ${chaptersList.length}");
+                                                  "ListView Length  : $listviewLength");
 
                                               return Padding(
                                                 padding: EdgeInsets.symmetric(
@@ -1020,7 +1124,8 @@ class BookDetail extends State<BookDetailScreen> {
                                                               },
                                                               child: SvgPicture.asset(isPlaying &&
                                                                       checkedIndex ==
-                                                                          index
+                                                                          index &&
+                                                                      !playAllIsPlaying
                                                                   ? "assets/svg/speaker_on.svg"
                                                                   : "assets/svg/mic_icon.svg"),
                                                             ),
@@ -1205,8 +1310,8 @@ class BookDetail extends State<BookDetailScreen> {
     //await autoScrollController.scrollToIndex(getIndex, preferPosition: AutoScrollPosition.begin);
     //await Scrollable.ensureVisible(Key(getIndex.toString().bu));
     //itemScrollController.jumpTo(index: getIndex);
-    itemScrollController.scrollTo(
-        index: getIndex, duration: const Duration(milliseconds: 500));
+    // itemScrollController.scrollTo(
+    //     index: getIndex, duration: const Duration(milliseconds: 500));
   }
 
   meaningClick(BookChapters getClass) {
@@ -1223,6 +1328,7 @@ class BookDetail extends State<BookDetailScreen> {
 
         setState(() {
           musicApiIsLoading = true;
+          songIsFetching = true;
         });
 
         playAudio(
@@ -1232,6 +1338,7 @@ class BookDetail extends State<BookDetailScreen> {
 
         setState(() {
           musicApiIsLoading = true;
+          songIsFetching = false;
         });
 
         // playAllIsPlaying = false;

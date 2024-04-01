@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:bible_gpt/APIRequest/api_handler.dart';
 import 'package:bible_gpt/signInScreen/signinScreen.dart';
+import 'package:bible_gpt/widgets/check_internet_method.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +23,7 @@ import '../widgets/background_color_widget.dart';
 import '../widgets/search_gpt_text_field.dart';
 import '../widgets/textWidget.dart';
 import '../widgets/toast_message.dart';
+import 'noInternetScreen.dart';
 
 class GptScreen extends StatefulWidget {
   const GptScreen({super.key});
@@ -83,6 +87,63 @@ class _GptScreenState extends State<GptScreen> {
     ].join(":");
   }
 
+  navigateToNoInternetScreen(bool callInit) {
+    Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetScreen()))
+        .then((value) {
+      if (callInit) {
+        callInitState();
+      }
+    });
+  }
+
+  callSearchGPTAPI(String getQuestion) async {
+    setState(() {
+      isLoading = true;
+      searchResult = "";
+      //bottomBar= false;
+      isAudioWidget = false;
+      player.stop();
+      activeSource = null;
+      textEditingController.text = "";
+      //_stop();
+    });
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+    if (internetConnectCheck) {
+      var getSearchAPIResponse = await ApiHandler().searchGptAPI(
+        getQuestion: getQuestion,
+      );
+      print(getSearchAPIResponse);
+      if (getSearchAPIResponse["status"]) {
+        HttpClientResponse getResponse = getSearchAPIResponse["data"];
+        var content = await utf8.decodeStream(getResponse);
+        print(content);
+        setState(() {
+          searchResult += content;
+        });
+        /*setState(() {
+          searchResult = getSearchAPIResponse["result"];
+        });*/
+      } else {
+        ToastMessage(screenHeight, getSearchAPIResponse["message"],
+            getSearchAPIResponse["status"]);
+      }
+    } else {
+      navigateToNoInternetScreen(false);
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  callInitState() async {
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+    if (internetConnectCheck) {
+    } else {
+      navigateToNoInternetScreen(true);
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -106,760 +167,293 @@ class _GptScreenState extends State<GptScreen> {
     // getLanguageCode = languageMethod(context);
     AppConfig().getStatusBar(darkMode);
     return WillPopScope(
-      onWillPop: Platform.isIOS
-          ? null
-          : () async {
-              return true;
-            },
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          resizeToAvoidBottomInset: false,
-          body:
-              // (copyRightContentTextFuture == null)
-              //     ? const SizedBox()
-              //     :
-              SizedBox(
-            width: screenWidth,
-            height: screenHeight,
-            child: Stack(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                      color: darkMode ? Colors.black : Colors.white),
-                ),
-                Image(
-                    fit: BoxFit.cover,
-                    height: (screenHeight * (350 / AppConfig().screenHeight)),
-                    width: double.infinity,
-                    image: AssetImage(darkMode
-                        ? "assets/png/book_image_dark.png"
-                        : "assets/png/book_image.png")),
-                SizedBox(
-                  width: screenWidth,
-                  height: screenHeight,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          height: screenHeight *
-                              (AppConfig().gptScreenTopPadding /
-                                  AppConfig().screenHeight),
-                        ),
-                        Container(
-                          width: screenWidth,
-                          padding: EdgeInsets.symmetric(
-                              horizontal:
-                                  screenWidth * (24 / AppConfig().screenWidth)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                child: BackArrowWidget(
-                                    screenWidth: screenWidth,
-                                    screenHeight: screenHeight,
-                                    darkMode: darkMode,
-                                    getCallBackFunction: (getCallBackFunction) {
-                                      if (getCallBackFunction) {
-                                        Navigator.pop(context);
-                                      }
-                                    }),
-                              ),
-                              AppLogoWidget(
-                                  screenWidth,
-                                  screenHeight,
-                                  AppConfig().gptScreenAppLogoWidth,
-                                  AppConfig().gptScreenAppLogoHeight,
-                                  darkMode),
-                              Container(
-                                child: TextButton(
-                                  onPressed: () {
-                                    //navigateToSignInScreen();
-                                    //checkUserLogIn();
-                                  },
-                                  style: TextButton.styleFrom(
-                                    minimumSize: Size.zero,
-                                    padding: EdgeInsets.zero,
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
+        onWillPop: Platform.isIOS
+            ? null
+            : () async {
+                return true;
+              },
+        child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+              resizeToAvoidBottomInset: false,
+              body:
+                  // (copyRightContentTextFuture == null)
+                  //     ? const SizedBox()
+                  //     :
+                  SizedBox(
+                width: screenWidth,
+                height: screenHeight,
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                          color: darkMode ? Colors.black : Colors.white),
+                    ),
+                    Image(
+                        fit: BoxFit.cover,
+                        height:
+                            (screenHeight * (350 / AppConfig().screenHeight)),
+                        width: double.infinity,
+                        image: AssetImage(darkMode
+                            ? "assets/png/book_image_dark.png"
+                            : "assets/png/book_image.png")),
+                    SizedBox(
+                      width: screenWidth,
+                      height: screenHeight,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              height: screenHeight *
+                                  (AppConfig().gptScreenTopPadding /
+                                      AppConfig().screenHeight),
+                            ),
+                            Container(
+                              width: screenWidth,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth *
+                                      (24 / AppConfig().screenWidth)),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    child: BackArrowWidget(
+                                        screenWidth: screenWidth,
+                                        screenHeight: screenHeight,
+                                        darkMode: darkMode,
+                                        getCallBackFunction:
+                                            (getCallBackFunction) {
+                                          if (getCallBackFunction) {
+                                            Navigator.pop(context);
+                                          }
+                                        }),
                                   ),
-                                  child: Container(
-                                    width: screenWidth *
-                                        (AppConfig()
-                                                .chapterScreenProfileIconWidth *
-                                            2 /
-                                            AppConfig().screenWidth),
-                                    height: screenHeight *
-                                        (AppConfig()
-                                                .chapterScreenAppLogoHeight /
-                                            AppConfig().screenHeight),
-                                    alignment: Alignment.centerRight,
-                                    child: SizedBox(
-                                      width: screenWidth *
-                                          (AppConfig()
-                                                  .chapterScreenProfileIconWidth /
-                                              AppConfig().screenWidth),
-                                      height: screenWidth *
-                                          (AppConfig()
-                                                  .chapterScreenProfileIconWidth /
-                                              AppConfig().screenWidth),
-                                      child: InkWell(
-                                        onTap: () => Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const SigninScreen())),
-                                        child: SvgPicture.asset(
-                                          color: const Color(0xFFAF6A06),
-                                          darkMode
-                                              ? AppConfig()
-                                                  .chapterScreenProfileDarkIcon
-                                              : AppConfig()
-                                                  .chapterScreenProfileLightIcon,
-                                          fit: BoxFit.scaleDown,
+                                  AppLogoWidget(
+                                      screenWidth,
+                                      screenHeight,
+                                      AppConfig().gptScreenAppLogoWidth,
+                                      AppConfig().gptScreenAppLogoHeight,
+                                      darkMode),
+                                  Container(
+                                    child: TextButton(
+                                      onPressed: () {
+                                        //navigateToSignInScreen();
+                                        //checkUserLogIn();
+                                      },
+                                      style: TextButton.styleFrom(
+                                        minimumSize: Size.zero,
+                                        padding: EdgeInsets.zero,
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      child: Container(
+                                        width: screenWidth *
+                                            (AppConfig()
+                                                    .chapterScreenProfileIconWidth *
+                                                2 /
+                                                AppConfig().screenWidth),
+                                        height: screenHeight *
+                                            (AppConfig()
+                                                    .chapterScreenAppLogoHeight /
+                                                AppConfig().screenHeight),
+                                        alignment: Alignment.centerRight,
+                                        child: SizedBox(
+                                          width: screenWidth *
+                                              (AppConfig()
+                                                      .chapterScreenProfileIconWidth /
+                                                  AppConfig().screenWidth),
+                                          height: screenWidth *
+                                              (AppConfig()
+                                                      .chapterScreenProfileIconWidth /
+                                                  AppConfig().screenWidth),
+                                          child: InkWell(
+                                            onTap: () => Navigator.of(context)
+                                                .push(MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const SigninScreen())),
+                                            child: SvgPicture.asset(
+                                              color: const Color(0xFFAF6A06),
+                                              darkMode
+                                                  ? AppConfig()
+                                                      .chapterScreenProfileDarkIcon
+                                                  : AppConfig()
+                                                      .chapterScreenProfileLightIcon,
+                                              fit: BoxFit.scaleDown,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: screenHeight *
-                              (AppConfig().gptScreenTopSearchPadding /
-                                  AppConfig().screenHeight),
-                        ),
-                        Container(
-                          child: SearchGptTextFieldWidget(
-                              screenWidth: screenWidth,
-                              screenHeight: screenHeight,
-                              scaleFactor: scaleFactor,
-                              getHintText: LanguageTextFile()
-                                  .getSearchGPTWidgetHintText(getLanguageCode),
-                              readOnly: false,
-                              textEditingController: textEditingController,
-                              isListening: isListening,
-                              darkMode: darkMode,
-                              backgroundOpacity:
-                                  darkMode ? 0.4 : (Platform.isIOS ? 1 : 1),
-                              getLanguageCode: getLanguageCode,
-                              textScrollController: textFieldScrollController,
-                              getEdittextFunction: (getText) {
-                                setState(() {
-                                  textEditingController.text = getText;
-                                });
-                              },
-                              submitTextFunction: (getSubmitText) {
-                                FocusManager.instance.primaryFocus?.unfocus();
-                                setState(() {
-                                  // if (textEditingController.text.isNotEmpty) {
-                                  //   callSearchGPTAPI(
-                                  //       textEditingController.text.toString());
-                                  // } else {
-                                  ToastMessage(
-                                      screenHeight,
-                                      getLanguageCode == 'en'
-                                          ? "Please enter in search field"
-                                          : "कृपया खोज फ़ील्ड में दर्ज करें",
-                                      false);
-                                  //}
-                                });
-                              },
-                              getListeningFunction: (getListening) {
-                                setState(() {
-                                  if (textEditingController.text.isNotEmpty) {
-                                    textEditingController.clear();
-                                  } else {
-                                    if (isListening) {
-                                      isListening = false;
-                                      _speech.stop();
-                                    } else {
-                                      isListening = true;
+                            ),
+                            SizedBox(
+                              height: screenHeight *
+                                  (AppConfig().gptScreenTopSearchPadding /
+                                      AppConfig().screenHeight),
+                            ),
+                            Container(
+                              child: SearchGptTextFieldWidget(
+                                  screenWidth: screenWidth,
+                                  screenHeight: screenHeight,
+                                  scaleFactor: scaleFactor,
+                                  getHintText: LanguageTextFile()
+                                      .getSearchGPTWidgetHintText(
+                                          getLanguageCode),
+                                  readOnly: false,
+                                  textEditingController: textEditingController,
+                                  isListening: isListening,
+                                  darkMode: darkMode,
+                                  backgroundOpacity:
+                                      darkMode ? 0.4 : (Platform.isIOS ? 1 : 1),
+                                  getLanguageCode: getLanguageCode,
+                                  textScrollController:
+                                      textFieldScrollController,
+                                  getEdittextFunction: (getText) {
+                                    setState(() {
+                                      textEditingController.text = getText;
+                                    });
+                                  },
+                                  submitTextFunction: (getSubmitText) {
+                                    FocusManager.instance.primaryFocus
+                                        ?.unfocus();
+                                    setState(() {
+                                      if (textEditingController
+                                          .text.isNotEmpty) {
+                                        isListening = false;
+                                        _speech.stop();
+                                        callSearchGPTAPI(textEditingController
+                                            .text
+                                            .toString());
+                                      } else {
+                                        ToastMessage(
+                                            screenHeight,
+                                            getLanguageCode == 'en'
+                                                ? "Please enter in search field"
+                                                : "कृपया खोज फ़ील्ड में दर्ज करें",
+                                            false);
+                                      }
+                                    });
+                                  },
+                                  getListeningFunction: (getListening) {
+                                    setState(() {
+                                      if (textEditingController
+                                          .text.isNotEmpty) {
+                                        textEditingController.clear();
+                                      } else {
+                                        if (isListening) {
+                                          isListening = false;
+                                          _speech.stop();
+                                        } else {
+                                          isListening = true;
 
-                                      Listen();
-                                    }
-                                  }
-                                });
-                              }),
-                        ),
-                        SizedBox(
-                          height:
-                              (screenHeight * (10 / AppConfig().screenHeight)),
-                        ),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth *
-                                  (AppConfig()
-                                          .dashboardScreenBottomContentPadding /
-                                      AppConfig().screenWidth)),
-                          /*    child: languageFutureWidget(
-                            screenWidth: screenWidth,
-                            screenHeight: screenHeight,
-                            selectedLanguage: getSelectedLanguageCode,
-                            getLanguageTranslatorMethod: bottomContentFutureMethod,
-                            getFontSize:
-                                AppConfig().dashboardScreenBottomContentTextSize,
-                            getDarkMode: darkMode,
-                            getTextAlign: TextAlign.center,
-                            getTextColor: darkMode
-                                ? AppConfig()
-                                    .dashboardScreenBottomContentTextDarkColor
-                                : AppConfig()
-                                    .dashboardScreenBottomContentTextLightColor,
-                            getFontFamily: AppConfig().outfitFontRegular,
-                            getTextDirection: LanguageTextFile()
-                                .getTextDirection(getSelectedLanguageCode),
-                            getSoftWrap: true),*/
-
-                          //child:languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getSelectedLanguageCode, getText: LanguageTextFile().getDashboardScreenBottomContentText(0), getTextStyle: TextStyle(fontSize: screenHeight*(AppConfig().dashboardScreenBottomContentTextSize/AppConfig().screenHeight),color: darkMode?AppConfig().dashboardScreenBottomContentTextDarkColor:AppConfig().dashboardScreenBottomContentTextLightColor,fontFamily: AppConfig().outfitFontRegular)),
-                          child: Text(
-                            LanguageTextFile()
-                                .getDashboardScreenBottomContentText(
-                                    getLanguageCode),
-                            textScaler: const TextScaler.linear(1.0),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: screenHeight *
-                                    (AppConfig()
-                                            .dashboardScreenBottomContentTextSize /
-                                        AppConfig().screenHeight),
-                                color: darkMode
-                                    ? AppConfig()
-                                        .dashboardScreenBottomContentTextDarkColor
-                                    : AppConfig()
-                                        .dashboardScreenBottomContentTextLightColor,
-                                fontFamily: AppConfig().outfitFontRegular),
-                            // textDirection: getLanguageType ==
-                            //         AppConfig().languageSettingArabicLanguageCode
-                            //     ? TextDirection.rtl
-                            //     : TextDirection.ltr
-                          ),
-                        ),
-                        isLoading
-                            ? SizedBox(
-                                height: screenHeight *
-                                    (AppConfig()
-                                            .gptScreenTopSearchResultPadding /
-                                        AppConfig().screenHeight),
-                              )
-                            : const SizedBox(),
-                        isLoading
-                            ? Container(
-                                width: screenWidth,
-                                margin: EdgeInsets.symmetric(
-                                    horizontal: screenWidth *
-                                        (AppConfig()
-                                                .gptScreenSearchResultLeftPadding /
-                                            AppConfig().screenWidth)),
-                                decoration: BoxDecoration(
-                                  color: darkMode
-                                      ? AppConfig()
-                                          .gptScreenSearchResultBackgroundDarkColor
-                                      : AppConfig()
-                                          .gptScreenSearchResultBackgroundLightColor,
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(screenWidth *
-                                          (AppConfig()
-                                              .gptScreenSearchResultCornerRadius) /
+                                          Listen();
+                                        }
+                                      }
+                                    });
+                                  }),
+                            ),
+                            SizedBox(
+                              height: (screenHeight *
+                                  (10 / AppConfig().screenHeight)),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth *
+                                      (AppConfig()
+                                              .dashboardScreenBottomContentPadding /
                                           AppConfig().screenWidth)),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: screenHeight *
-                                          (AppConfig()
-                                                  .gptScreenSearchResultInnerTopPadding /
-                                              AppConfig().screenHeight),
-                                      horizontal: screenWidth *
-                                          (AppConfig()
-                                                  .gptScreenSearchResultInnerLeftPadding /
-                                              AppConfig().screenWidth)),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      TextLoaderWidget(
-                                          screenWidth,
-                                          screenHeight *
-                                              (AppConfig()
-                                                      .gptScreenSearchResultTextSize /
-                                                  AppConfig().screenHeight),
-                                          screenHeight *
-                                              (AppConfig()
-                                                      .gptScreenSearchResultTextSize /
-                                                  AppConfig().screenHeight),
-                                          darkMode),
-                                      SizedBox(
-                                        height: screenHeight *
-                                            (7 / AppConfig().screenHeight),
-                                      ),
-                                      TextLoaderWidget(
-                                          screenWidth,
-                                          screenHeight *
-                                              (AppConfig()
-                                                      .gptScreenSearchResultTextSize /
-                                                  AppConfig().screenHeight),
-                                          screenHeight *
-                                              (AppConfig()
-                                                      .gptScreenSearchResultTextSize /
-                                                  AppConfig().screenHeight),
-                                          darkMode),
-                                      SizedBox(
-                                        height: screenHeight *
-                                            (7 / AppConfig().screenHeight),
-                                      ),
-                                      TextLoaderWidget(
-                                          screenWidth,
-                                          screenHeight *
-                                              (AppConfig()
-                                                      .gptScreenSearchResultTextSize /
-                                                  AppConfig().screenHeight),
-                                          screenHeight *
-                                              (AppConfig()
-                                                      .gptScreenSearchResultTextSize /
-                                                  AppConfig().screenHeight),
-                                          darkMode),
-                                      SizedBox(
-                                        height: screenHeight *
-                                            (7 / AppConfig().screenHeight),
-                                      ),
-                                      TextLoaderWidget(
-                                          screenWidth,
-                                          screenHeight *
-                                              (AppConfig()
-                                                      .gptScreenSearchResultTextSize /
-                                                  AppConfig().screenHeight),
-                                          screenHeight *
-                                              (AppConfig()
-                                                      .gptScreenSearchResultTextSize /
-                                                  AppConfig().screenHeight),
-                                          darkMode),
-                                      SizedBox(
-                                        height: screenHeight *
-                                            (7 / AppConfig().screenHeight),
-                                      ),
-                                      TextLoaderWidget(
-                                          screenWidth * 0.5,
-                                          screenHeight *
-                                              (AppConfig()
-                                                      .gptScreenSearchResultTextSize /
-                                                  AppConfig().screenHeight),
-                                          screenHeight *
-                                              (AppConfig()
-                                                      .gptScreenSearchResultTextSize /
-                                                  AppConfig().screenHeight),
-                                          darkMode),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            : searchResult == ""
-                                ? const SizedBox()
-                                : Stack(
-                                    alignment: Alignment.topCenter,
-                                    children: [
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(
-                                            height: screenHeight *
+                              child: Text(
+                                LanguageTextFile()
+                                    .getDashboardScreenBottomContentText(
+                                        getLanguageCode),
+                                textScaler: const TextScaler.linear(1.0),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: screenHeight *
+                                        (AppConfig()
+                                                .dashboardScreenBottomContentTextSize /
+                                            AppConfig().screenHeight),
+                                    color: darkMode
+                                        ? AppConfig()
+                                            .dashboardScreenBottomContentTextDarkColor
+                                        : AppConfig()
+                                            .dashboardScreenBottomContentTextLightColor,
+                                    fontFamily: AppConfig().outfitFontRegular),
+                                // textDirection: getLanguageType ==
+                                //         AppConfig().languageSettingArabicLanguageCode
+                                //     ? TextDirection.rtl
+                                //     : TextDirection.ltr
+                              ),
+                            ),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    top: (screenHeight *
+                                        (60 / AppConfig().screenHeight))),
+                                child: isLoading
+                                    ? Padding(
+                                        padding: EdgeInsets.only(
+                                          top: (screenHeight *
+                                              (30 / AppConfig().screenHeight)),
+                                          right: (screenWidth *
+                                              (30 / AppConfig().screenWidth)),
+                                          left: (screenWidth *
+                                              (30 / AppConfig().screenWidth)),
+                                        ),
+                                        child: TextLoaderWidget(
+                                            screenWidth,
+                                            60,
+                                            screenHeight *
                                                 (AppConfig()
-                                                        .gptScreenTopSearchResultPadding /
+                                                        .gptScreenSearchResultTextSize /
                                                     AppConfig().screenHeight),
-                                          ),
-                                          Container(
-                                            width: screenWidth,
-                                            margin: EdgeInsets.symmetric(
-                                                horizontal: screenWidth *
-                                                    (AppConfig()
-                                                            .gptScreenSearchResultLeftPadding /
+                                            darkMode),
+                                      )
+                                    : Padding(
+                                        padding: EdgeInsets.only(
+                                          top: (screenHeight *
+                                              (30 / AppConfig().screenHeight)),
+                                          right: (screenWidth *
+                                              (30 / AppConfig().screenWidth)),
+                                          left: (screenWidth *
+                                              (30 / AppConfig().screenWidth)),
+                                        ),
+                                        child: AnimatedTextKit(
+                                          animatedTexts: [
+                                            TypewriterAnimatedText(
+                                              textAlign: TextAlign.start,
+                                              searchResult,
+                                              textStyle: TextStyle(
+                                                color: darkMode
+                                                    ? const Color(0xffffffff)
+                                                    : const Color(0xff0000000),
+                                                fontSize: (screenHeight *
+                                                    (12 /
                                                         AppConfig()
-                                                            .screenWidth)),
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(screenWidth *
-                                                      (AppConfig()
-                                                          .gptScreenSearchResultCornerRadius) /
-                                                      AppConfig().screenWidth)),
-                                              color: darkMode
-                                                  ? AppConfig()
-                                                      .gptScreenSearchResultBackgroundDarkColor
-                                                  : AppConfig()
-                                                      .gptScreenSearchResultBackgroundLightColor,
-                                              boxShadow: <BoxShadow>[
-                                                BoxShadow(
-                                                  blurStyle: BlurStyle.outer,
-                                                  color: Colors.grey
-                                                      .withOpacity(0.25),
-                                                  blurRadius: 1,
-                                                ),
-                                              ],
-                                            ),
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: screenHeight *
-                                                      (AppConfig()
-                                                              .gptScreenSearchResultInnerTopPadding /
-                                                          AppConfig()
-                                                              .screenHeight),
-                                                  horizontal: screenWidth *
-                                                      (AppConfig()
-                                                              .gptScreenSearchResultInnerLeftPadding /
-                                                          AppConfig()
-                                                              .screenWidth)),
-                                              child: Column(
-                                                children: [
-                                                  Container(
-                                                    // child: TextWidget(
-                                                    //   screenWidth:
-                                                    //       screenWidth,
-                                                    //   screenHeight:
-                                                    //       screenHeight,
-                                                    //   getText: searchResult,
-                                                    //   fontSize: AppConfig()
-                                                    //       .gptScreenSearchResultTextSize,
-                                                    //   getTextAlign:
-                                                    //       TextAlign.start,
-                                                    //   getTextColor: darkMode
-                                                    //       ? AppConfig()
-                                                    //           .gptScreenSearchResultTextDarkColor
-                                                    //       : AppConfig()
-                                                    //           .gptScreenSearchResultTextLightColor,
-                                                    //   getFontFamily: AppConfig()
-                                                    //       .outfitFontRegular,
-                                                    //   getTextDirection:
-                                                    //       LanguageTextFile()
-                                                    //           .getTextDirection(
-                                                    //               getLanguageCode),
-                                                    //   getSoftWrap: true
-                                                    // ),
-
-                                                    //child: languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getLanguageCode, getLanguageTranslatorMethod: searchResultFutureMethod, getFontSize: AppConfig().gptScreenSearchResultTextSize, getDarkMode: darkMode, getTextAlign: TextAlign.start, getTextColor: darkMode?AppConfig().gptScreenSearchResultTextDarkColor:AppConfig().gptScreenSearchResultTextLightColor, getFontFamily: AppConfig().outfitFontRegular, getTextDirection: LanguageTextFile().getTextDirection(getLanguageCode), getSoftWrap: true),
-                                                    child: Text(
-                                                      searchResult,
-                                                      textScaler:
-                                                          const TextScaler
-                                                              .linear(1.0),
-                                                      textAlign:
-                                                          TextAlign.start,
-                                                      style: TextStyle(
-                                                          fontSize: screenHeight *
-                                                              (AppConfig()
-                                                                      .gptScreenSearchResultTextSize /
-                                                                  AppConfig()
-                                                                      .screenHeight),
-                                                          color: darkMode
-                                                              ? AppConfig()
-                                                                  .gptScreenSearchResultTextDarkColor
-                                                              : AppConfig()
-                                                                  .gptScreenSearchResultTextLightColor,
-                                                          fontFamily: AppConfig()
-                                                              .outfitFontRegular),
-                                                    ),
-                                                  ),
-                                                ],
+                                                            .screenHeight)),
+                                                fontWeight: FontWeight.w400,
                                               ),
                                             ),
-                                          ),
-                                          SizedBox(
-                                            height: screenHeight *
-                                                (AppConfig()
-                                                        .gptScreenTopSearchResultPadding /
-                                                    AppConfig().screenHeight),
-                                          ),
-                                        ],
-                                      ),
-                                      Container(
-                                        margin: EdgeInsets.only(
-                                            top: screenHeight *
-                                                (5 / AppConfig().screenHeight)),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Container(),
-                                            SpeakerWidget(
-                                                screenWidth: screenWidth,
-                                                screenHeight: screenHeight,
-                                                getDarkMode: darkMode,
-                                                isPlayed: (audioPlayerState ==
-                                                        PlayerState.playing)
-                                                    ? true
-                                                    : false,
-                                                callBackFunction:
-                                                    (getCallBackResult) async {
-                                                  if (getCallBackResult) {
-                                                    if (activeSource == null) {
-                                                      // getLanguageTypeMethod(
-                                                      //     searchResult);
-                                                    } else {
-                                                      if (audioPlayerState ==
-                                                          PlayerState.playing) {
-                                                        await player.pause();
-                                                      } else if (audioPlayerState ==
-                                                          PlayerState.paused) {
-                                                        await player.resume();
-                                                      } else if ((audioPlayerState ==
-                                                              PlayerState
-                                                                  .completed) ||
-                                                          (audioPlayerState ==
-                                                              PlayerState
-                                                                  .stopped)) {
-                                                        await player
-                                                            .play(activeSource);
-                                                      }
-                                                    }
-                                                    setState(() {
-                                                      isAudioWidget = true;
-
-                                                      //bottomBar= true;
-                                                      /*if(ttsState==TtsState.playing || ttsState == TtsState.continued){
-                                    _pause();
-                                  }
-                                  else if (ttsState == TtsState.paused){
-                                    _resume();
-                                  }
-                                  else{
-                                    _speak();
-                                  }*/
-                                                    });
-                                                  }
-                                                }),
                                           ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                        SizedBox(
-                          height:
-                              (screenHeight * (20 / AppConfig().screenHeight)),
-                        ),
-                        Padding(
-                            padding: EdgeInsets.only(
-                                top: (screenHeight *
-                                    (60 / AppConfig().screenHeight))),
-                            child: textEditingController.text.isNotEmpty
-                                ? AnimatedTextKit(
-                                    animatedTexts: [
-                                      TypewriterAnimatedText(
-                                        textAlign: TextAlign.start,
-                                        "The Bible is a sacred scripture in the Christian religion,\nbelieved to be inspired by God. It is a collection of books\nwritten by various authors over a span of centuries. It is\ndivided into two main parts: the Old Testament (which is\nalso a sacred text in Judaism) and the New Testament.\nThe Old Testament contains books such as Genesis,\nExodus, Psalms, among others, and tells stories of\nancient prophets, kings, and the teachings they shared.\nThe New Testament contains the four Gospels (Matthew,\nMark, Luke, and John), which tell the story of Jesus\nChrist's life, teachings, death, and resurrection, as well as\nother books like Acts, which describes the early Christian\nchurch, and Revelation, which shares prophetic visions.\nThe Bible is considered the holy guideline by\nChristians by which they should live.",
-                                        textStyle: TextStyle(
-                                          color: darkMode
-                                              ? const Color(0xffffffff)
-                                              : const Color(0xff0000000),
-                                          fontSize: (screenHeight *
-                                              (12 / AppConfig().screenHeight)),
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ],
-                                    totalRepeatCount: 1,
-                                  )
-                                : const Text(""))
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          bottomNavigationBar: Wrap(
-            children: [
-              isAudioWidget
-                  ? Container(
-                      decoration: BoxDecoration(
-                        color: darkMode
-                            ? AppConfig()
-                                .categoryDetailScreenBackgroundEndDarkColor
-                            : AppConfig()
-                                .categoryDetailScreenBackgroundEndLightColor,
-                        boxShadow: <BoxShadow>[
-                          BoxShadow(
-                            blurStyle: BlurStyle.outer,
-                            color: darkMode
-                                ? Colors.transparent.withOpacity(0.7)
-                                : Colors.grey.withOpacity(0.5),
-                            blurRadius: 7,
-                          ),
-                        ],
-                      ),
-                      padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).padding.bottom),
-                      child: Padding(
-                        padding: EdgeInsets.all(
-                            screenWidth * (16 / AppConfig().screenWidth)),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                ((audioPlayerState == PlayerState.playing) ||
-                                        (audioPlayerState ==
-                                            PlayerState.paused) ||
-                                        (audioPlayerState ==
-                                            PlayerState.completed))
-                                    ? SizedBox(
-                                        width: screenWidth *
-                                            (35 / AppConfig().screenWidth),
-                                        height: screenWidth *
-                                            (35 / AppConfig().screenWidth),
-                                        child: IconButton(
-                                          onPressed: () async {
-                                            print(audioPlayerState);
-                                            if (audioPlayerState ==
-                                                PlayerState.playing) {
-                                              await player.pause();
-                                            } else if (audioPlayerState ==
-                                                PlayerState.paused) {
-                                              await player.resume();
-                                            } else if ((audioPlayerState ==
-                                                    PlayerState.completed) ||
-                                                (audioPlayerState ==
-                                                    PlayerState.stopped)) {
-                                              await player.play(activeSource);
-                                            }
-                                          },
-                                          padding: const EdgeInsets.all(0),
-                                          icon: Icon(
-                                            (audioPlayerState ==
-                                                    PlayerState.playing)
-                                                ? Icons.pause
-                                                : Icons.play_arrow,
-                                            size: screenWidth *
-                                                (35 / AppConfig().screenWidth),
-                                            color: const Color(0xFFE67647),
-                                          ),
+                                          totalRepeatCount: 1,
                                         ),
                                       )
-                                    : TextLoaderWidget(
-                                        screenWidth *
-                                            (35 / AppConfig().screenWidth),
-                                        screenWidth *
-                                            (35 / AppConfig().screenWidth),
-                                        screenWidth *
-                                            (5 / AppConfig().screenWidth),
-                                        darkMode),
-                                SizedBox(
-                                  width: screenWidth *
-                                      (16 / AppConfig().screenWidth),
+                                // If not loading and text is empty, show nothing
                                 ),
-                                ((audioPlayerState == PlayerState.playing) ||
-                                        (audioPlayerState ==
-                                            PlayerState.paused) ||
-                                        (audioPlayerState ==
-                                            PlayerState.completed))
-                                    ? SizedBox(
-                                        width: screenWidth -
-                                            screenWidth *
-                                                ((16 + 16 + 16 + 35) /
-                                                    AppConfig().screenWidth),
-                                        child: _audioProgressBar(),
-                                      )
-                                    : TextLoaderWidget(
-                                        screenWidth -
-                                            screenWidth *
-                                                ((16 + 16 + 16 + 35) /
-                                                    AppConfig().screenWidth),
-                                        screenHeight *
-                                            (15 / AppConfig().screenHeight),
-                                        screenHeight *
-                                            (15 / AppConfig().screenHeight),
-                                        darkMode),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const SizedBox(),
-                                ((audioPlayerState == PlayerState.playing) ||
-                                        (audioPlayerState ==
-                                            PlayerState.paused) ||
-                                        (audioPlayerState ==
-                                            PlayerState.completed))
-                                    ? Container(
-                                        child: TextWidget(
-                                            screenWidth: screenWidth,
-                                            screenHeight: screenHeight,
-                                            getText:
-                                                "${formatTime(position)}/${formatTime(duration)}",
-                                            fontSize: AppConfig()
-                                                .categoryDetailScreenTitleChapterTextSize,
-                                            getTextAlign: TextAlign.end,
-                                            getTextColor:
-                                                const Color(0xFF9D3524),
-                                            getFontFamily:
-                                                AppConfig().outfitFontRegular,
-                                            getTextDirection: LanguageTextFile()
-                                                .getTextDirection(
-                                                    getLanguageCode),
-                                            getSoftWrap: true),
-                                        //child: languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getLanguageCode,getLanguageTranslatorMethod: timerPositionFutureMethod, getFontSize: AppConfig().categoryDetailScreenTitleChapterTextSize, getDarkMode: darkMode, getTextAlign: TextAlign.center, getTextColor: Color(0xFF9D3524), getFontFamily: AppConfig().outfitFontRegular, getTextDirection: LanguageTextFile().getTextDirection(getLanguageCode), getSoftWrap: true),
-                                        //child: Text("${formatTime(position)}/${formatTime(duration)}",textScaler: TextScaler.linear(1.0),textAlign: TextAlign.center,style: TextStyle(fontSize: screenHeight*(AppConfig().categoryDetailScreenTitleChapterTextSize/AppConfig().screenHeight),color: darkMode?AppConfig().categoryDetailScreenTitleChapterText1DarkColor:AppConfig().categoryDetailScreenTitleChapterText1LightColor,fontFamily: AppConfig().outfitFontRegular),textDirection: LanguageTextFile().getTextDirection(getLanguageCode),),
-                                      )
-                                    : TextLoaderWidget(
-                                        screenWidth *
-                                            ((16 + 16 + 16 + 35) /
-                                                AppConfig().screenWidth),
-                                        screenHeight *
-                                            (AppConfig()
-                                                    .categoryDetailScreenTitleChapterTextSize /
-                                                AppConfig().screenHeight),
-                                        screenHeight *
-                                            (AppConfig()
-                                                    .categoryDetailScreenTitleChapterTextSize /
-                                                AppConfig().screenHeight),
-                                        darkMode),
-                              ],
-                            ),
                           ],
                         ),
                       ),
-                    )
-                  : const SizedBox(),
-            ],
-          ),
-        ),
-      ),
-    );
+                    ),
+                  ],
+                ),
+              ),
+            )));
   }
-
-  Widget _audioProgressBar() {
-    return Container(
-      alignment: Alignment.center,
-      child: LinearProgressIndicator(
-        backgroundColor: const Color(0xFFE67647),
-        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF9D3524)),
-        value: durationDouble != 0 ? (positionDouble / durationDouble) : 0,
-        borderRadius: BorderRadius.all(
-            Radius.circular(screenHeight * (15 / AppConfig().screenHeight))),
-      ),
-    );
-  }
-
-  /*Widget _progressBar(int end){
-    print(end);
-    return Container(
-        alignment: Alignment.center,
-        child: LinearProgressIndicator(
-          backgroundColor: Color(0xFFF5D784),
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF805002)),
-          value: (previousRunningLength+end) / (searchResult!.length),
-        ));
-  }*/
 
   Listen() async {
     if (isListening) {
