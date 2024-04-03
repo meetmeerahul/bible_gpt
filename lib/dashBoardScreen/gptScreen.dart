@@ -173,286 +173,283 @@ class _GptScreenState extends State<GptScreen> {
                 return true;
               },
         child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: Scaffold(
-              resizeToAvoidBottomInset: false,
-              body:
-                  // (copyRightContentTextFuture == null)
-                  //     ? const SizedBox()
-                  //     :
-                  SizedBox(
-                width: screenWidth,
-                height: screenHeight,
-                child: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                          color: darkMode ? Colors.black : Colors.white),
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body:
+                // (copyRightContentTextFuture == null)
+                //     ? const SizedBox()
+                //     :
+                Container(
+              width: screenWidth,
+              height: screenHeight,
+              decoration:
+                  BoxDecoration(color: darkMode ? Colors.black : Colors.white),
+              child: Column(
+                children: [
+                  Container(
+                    height: (screenHeight * (300 / AppConfig().screenHeight)),
+                    width: screenWidth,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(darkMode
+                              ? "assets/png/book_image_dark.png"
+                              : "assets/png/book_image.png"),
+                          fit: BoxFit.cover),
                     ),
-                    Image(
-                        fit: BoxFit.cover,
-                        height:
-                            (screenHeight * (350 / AppConfig().screenHeight)),
-                        width: double.infinity,
-                        image: AssetImage(darkMode
-                            ? "assets/png/book_image_dark.png"
-                            : "assets/png/book_image.png")),
-                    SizedBox(
-                      width: screenWidth,
-                      height: screenHeight,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              height: screenHeight *
-                                  (AppConfig().gptScreenTopPadding /
-                                      AppConfig().screenHeight),
-                            ),
-                            Container(
-                              width: screenWidth,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: screenWidth *
-                                      (24 / AppConfig().screenWidth)),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    child: BackArrowWidget(
-                                        screenWidth: screenWidth,
-                                        screenHeight: screenHeight,
-                                        darkMode: darkMode,
-                                        getCallBackFunction:
-                                            (getCallBackFunction) {
-                                          if (getCallBackFunction) {
-                                            Navigator.pop(context);
-                                          }
-                                        }),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: screenHeight *
+                              (AppConfig().gptScreenTopPadding /
+                                  AppConfig().screenHeight),
+                        ),
+                        Container(
+                          width: screenWidth,
+                          padding: EdgeInsets.symmetric(
+                              horizontal:
+                                  screenWidth * (24 / AppConfig().screenWidth)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                child: BackArrowWidget(
+                                    screenWidth: screenWidth,
+                                    screenHeight: screenHeight,
+                                    darkMode: darkMode,
+                                    getCallBackFunction: (getCallBackFunction) {
+                                      if (getCallBackFunction) {
+                                        Navigator.pop(context);
+                                      }
+                                    }),
+                              ),
+                              AppLogoWidget(
+                                  screenWidth,
+                                  screenHeight,
+                                  AppConfig().gptScreenAppLogoWidth,
+                                  AppConfig().gptScreenAppLogoHeight,
+                                  darkMode),
+                              Container(
+                                child: TextButton(
+                                  onPressed: () {
+                                    //navigateToSignInScreen();
+                                    //checkUserLogIn();
+                                  },
+                                  style: TextButton.styleFrom(
+                                    minimumSize: Size.zero,
+                                    padding: EdgeInsets.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
-                                  AppLogoWidget(
-                                      screenWidth,
-                                      screenHeight,
-                                      AppConfig().gptScreenAppLogoWidth,
-                                      AppConfig().gptScreenAppLogoHeight,
-                                      darkMode),
-                                  Container(
-                                    child: TextButton(
-                                      onPressed: () {
-                                        //navigateToSignInScreen();
-                                        //checkUserLogIn();
-                                      },
-                                      style: TextButton.styleFrom(
-                                        minimumSize: Size.zero,
-                                        padding: EdgeInsets.zero,
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                      ),
-                                      child: Container(
-                                        width: screenWidth *
-                                            (AppConfig()
-                                                    .chapterScreenProfileIconWidth *
-                                                2 /
-                                                AppConfig().screenWidth),
-                                        height: screenHeight *
-                                            (AppConfig()
-                                                    .chapterScreenAppLogoHeight /
-                                                AppConfig().screenHeight),
-                                        alignment: Alignment.centerRight,
-                                        child: SizedBox(
-                                          width: screenWidth *
-                                              (AppConfig()
-                                                      .chapterScreenProfileIconWidth /
-                                                  AppConfig().screenWidth),
-                                          height: screenWidth *
-                                              (AppConfig()
-                                                      .chapterScreenProfileIconWidth /
-                                                  AppConfig().screenWidth),
-                                          child: InkWell(
-                                            onTap: () => Navigator.of(context)
-                                                .push(MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        const SigninScreen())),
-                                            child: SvgPicture.asset(
-                                              color: const Color(0xFFAF6A06),
-                                              darkMode
-                                                  ? AppConfig()
-                                                      .chapterScreenProfileDarkIcon
-                                                  : AppConfig()
-                                                      .chapterScreenProfileLightIcon,
-                                              fit: BoxFit.scaleDown,
-                                            ),
-                                          ),
+                                  child: Container(
+                                    width: screenWidth *
+                                        (AppConfig()
+                                                .chapterScreenProfileIconWidth *
+                                            2 /
+                                            AppConfig().screenWidth),
+                                    height: screenHeight *
+                                        (AppConfig()
+                                                .chapterScreenAppLogoHeight /
+                                            AppConfig().screenHeight),
+                                    alignment: Alignment.centerRight,
+                                    child: SizedBox(
+                                      width: screenWidth *
+                                          (AppConfig()
+                                                  .chapterScreenProfileIconWidth /
+                                              AppConfig().screenWidth),
+                                      height: screenWidth *
+                                          (AppConfig()
+                                                  .chapterScreenProfileIconWidth /
+                                              AppConfig().screenWidth),
+                                      child: InkWell(
+                                        onTap: () => Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const SigninScreen())),
+                                        child: SvgPicture.asset(
+                                          color: const Color(0xFFAF6A06),
+                                          darkMode
+                                              ? AppConfig()
+                                                  .chapterScreenProfileDarkIcon
+                                              : AppConfig()
+                                                  .chapterScreenProfileLightIcon,
+                                          fit: BoxFit.scaleDown,
                                         ),
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                              height: screenHeight *
-                                  (AppConfig().gptScreenTopSearchPadding /
-                                      AppConfig().screenHeight),
-                            ),
-                            Container(
-                              child: SearchGptTextFieldWidget(
-                                  screenWidth: screenWidth,
-                                  screenHeight: screenHeight,
-                                  scaleFactor: scaleFactor,
-                                  getHintText: LanguageTextFile()
-                                      .getSearchGPTWidgetHintText(
-                                          getLanguageCode),
-                                  readOnly: false,
-                                  textEditingController: textEditingController,
-                                  isListening: isListening,
-                                  darkMode: darkMode,
-                                  backgroundOpacity:
-                                      darkMode ? 0.4 : (Platform.isIOS ? 1 : 1),
-                                  getLanguageCode: getLanguageCode,
-                                  textScrollController:
-                                      textFieldScrollController,
-                                  getEdittextFunction: (getText) {
-                                    setState(() {
-                                      textEditingController.text = getText;
-                                    });
-                                  },
-                                  submitTextFunction: (getSubmitText) {
-                                    FocusManager.instance.primaryFocus
-                                        ?.unfocus();
-                                    setState(() {
-                                      if (textEditingController
-                                          .text.isNotEmpty) {
-                                        isListening = false;
-                                        _speech.stop();
-                                        callSearchGPTAPI(textEditingController
-                                            .text
-                                            .toString());
-                                      } else {
-                                        ToastMessage(
-                                            screenHeight,
-                                            getLanguageCode == 'en'
-                                                ? "Please enter in search field"
-                                                : "कृपया खोज फ़ील्ड में दर्ज करें",
-                                            false);
-                                      }
-                                    });
-                                  },
-                                  getListeningFunction: (getListening) {
-                                    setState(() {
-                                      if (textEditingController
-                                          .text.isNotEmpty) {
-                                        textEditingController.clear();
-                                      } else {
-                                        if (isListening) {
-                                          isListening = false;
-                                          _speech.stop();
-                                        } else {
-                                          isListening = true;
-
-                                          Listen();
-                                        }
-                                      }
-                                    });
-                                  }),
-                            ),
-                            SizedBox(
-                              height: (screenHeight *
-                                  (10 / AppConfig().screenHeight)),
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: screenWidth *
-                                      (AppConfig()
-                                              .dashboardScreenBottomContentPadding /
-                                          AppConfig().screenWidth)),
-                              child: Text(
-                                LanguageTextFile()
-                                    .getDashboardScreenBottomContentText(
-                                        getLanguageCode),
-                                textScaler: const TextScaler.linear(1.0),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: screenHeight *
-                                        (AppConfig()
-                                                .dashboardScreenBottomContentTextSize /
-                                            AppConfig().screenHeight),
-                                    color: darkMode
-                                        ? AppConfig()
-                                            .dashboardScreenBottomContentTextDarkColor
-                                        : AppConfig()
-                                            .dashboardScreenBottomContentTextLightColor,
-                                    fontFamily: AppConfig().outfitFontRegular),
-                                // textDirection: getLanguageType ==
-                                //         AppConfig().languageSettingArabicLanguageCode
-                                //     ? TextDirection.rtl
-                                //     : TextDirection.ltr
-                              ),
-                            ),
-                            Padding(
-                                padding: EdgeInsets.only(
-                                    top: (screenHeight *
-                                        (60 / AppConfig().screenHeight))),
-                                child: isLoading
-                                    ? Padding(
-                                        padding: EdgeInsets.only(
-                                          top: (screenHeight *
-                                              (30 / AppConfig().screenHeight)),
-                                          right: (screenWidth *
-                                              (30 / AppConfig().screenWidth)),
-                                          left: (screenWidth *
-                                              (30 / AppConfig().screenWidth)),
-                                        ),
-                                        child: TextLoaderWidget(
-                                            screenWidth,
-                                            60,
-                                            screenHeight *
-                                                (AppConfig()
-                                                        .gptScreenSearchResultTextSize /
-                                                    AppConfig().screenHeight),
-                                            darkMode),
-                                      )
-                                    : Padding(
-                                        padding: EdgeInsets.only(
-                                          top: (screenHeight *
-                                              (30 / AppConfig().screenHeight)),
-                                          right: (screenWidth *
-                                              (30 / AppConfig().screenWidth)),
-                                          left: (screenWidth *
-                                              (30 / AppConfig().screenWidth)),
-                                        ),
-                                        child: AnimatedTextKit(
-                                          animatedTexts: [
-                                            TypewriterAnimatedText(
-                                              textAlign: TextAlign.start,
-                                              searchResult,
-                                              textStyle: TextStyle(
-                                                color: darkMode
-                                                    ? const Color(0xffffffff)
-                                                    : const Color(0xff0000000),
-                                                fontSize: (screenHeight *
-                                                    (12 /
-                                                        AppConfig()
-                                                            .screenHeight)),
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
-                                          ],
-                                          totalRepeatCount: 1,
-                                        ),
-                                      )
-                                // If not loading and text is empty, show nothing
                                 ),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
+                        SizedBox(
+                          height: screenHeight *
+                              (AppConfig().gptScreenTopSearchPadding /
+                                  AppConfig().screenHeight),
+                        ),
+                        Container(
+                          child: SearchGptTextFieldWidget(
+                              screenWidth: screenWidth,
+                              screenHeight: screenHeight,
+                              scaleFactor: scaleFactor,
+                              getHintText: LanguageTextFile()
+                                  .getSearchGPTWidgetHintText(getLanguageCode),
+                              readOnly: false,
+                              textEditingController: textEditingController,
+                              isListening: isListening,
+                              darkMode: darkMode,
+                              backgroundOpacity:
+                                  darkMode ? 0.4 : (Platform.isIOS ? 1 : 1),
+                              getLanguageCode: getLanguageCode,
+                              textScrollController: textFieldScrollController,
+                              getEdittextFunction: (getText) {
+                                setState(() {
+                                  textEditingController.text = getText;
+                                });
+                              },
+                              submitTextFunction: (getSubmitText) {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                setState(() {
+                                  if (textEditingController.text.isNotEmpty) {
+                                    isListening = false;
+                                    _speech.stop();
+                                    callSearchGPTAPI(
+                                        textEditingController.text.toString());
+                                  } else {
+                                    ToastMessage(
+                                        screenHeight,
+                                        getLanguageCode == 'en'
+                                            ? "Please enter in search field"
+                                            : "कृपया खोज फ़ील्ड में दर्ज करें",
+                                        false);
+                                  }
+                                });
+                              },
+                              getListeningFunction: (getListening) {
+                                setState(() {
+                                  if (textEditingController.text.isNotEmpty) {
+                                    textEditingController.clear();
+                                  } else {
+                                    if (isListening) {
+                                      isListening = false;
+                                      _speech.stop();
+                                    } else {
+                                      isListening = true;
+
+                                      Listen();
+                                    }
+                                  }
+                                });
+                              }),
+                        ),
+                        SizedBox(
+                          height:
+                              (screenHeight * (10 / AppConfig().screenHeight)),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth *
+                                  (AppConfig()
+                                          .dashboardScreenBottomContentPadding /
+                                      AppConfig().screenWidth)),
+                          child: Text(
+                            LanguageTextFile()
+                                .getDashboardScreenBottomContentText(
+                                    getLanguageCode),
+                            textScaler: const TextScaler.linear(1.0),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: screenHeight *
+                                    (AppConfig()
+                                            .dashboardScreenBottomContentTextSize /
+                                        AppConfig().screenHeight),
+                                color: darkMode
+                                    ? AppConfig()
+                                        .dashboardScreenBottomContentTextDarkColor
+                                    : AppConfig()
+                                        .dashboardScreenBottomContentTextLightColor,
+                                fontFamily: AppConfig().outfitFontRegular),
+                            // textDirection: getLanguageType ==
+                            //         AppConfig().languageSettingArabicLanguageCode
+                            //     ? TextDirection.rtl
+                            //     : TextDirection.ltr
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: SizedBox(
+                        width: screenWidth,
+                        // height: screenHeight -
+                        //     (screenHeight * (300 / AppConfig().screenHeight)),
+
+                        child: Padding(
+                            padding: EdgeInsets.only(
+                                top: (screenHeight *
+                                    (20 / AppConfig().screenHeight))),
+                            child: isLoading
+                                ? Padding(
+                                    padding: EdgeInsets.only(
+                                      top: (screenHeight *
+                                          (30 / AppConfig().screenHeight)),
+                                      right: (screenWidth *
+                                          (30 / AppConfig().screenWidth)),
+                                      left: (screenWidth *
+                                          (30 / AppConfig().screenWidth)),
+                                    ),
+                                    child: TextLoaderWidget(
+                                        screenWidth,
+                                        60,
+                                        screenHeight *
+                                            (AppConfig()
+                                                    .gptScreenSearchResultTextSize /
+                                                AppConfig().screenHeight),
+                                        darkMode),
+                                  )
+                                : Padding(
+                                    padding: EdgeInsets.only(
+                                      top: (screenHeight *
+                                          (30 / AppConfig().screenHeight)),
+                                      right: (screenWidth *
+                                          (30 / AppConfig().screenWidth)),
+                                      left: (screenWidth *
+                                          (30 / AppConfig().screenWidth)),
+                                    ),
+                                    child: AnimatedTextKit(
+                                      animatedTexts: [
+                                        TypewriterAnimatedText(
+                                          textAlign: TextAlign.start,
+                                          searchResult,
+                                          textStyle: TextStyle(
+                                            color: darkMode
+                                                ? const Color(0xffffffff)
+                                                : const Color(0xff0000000),
+                                            fontSize: (screenHeight *
+                                                (12 /
+                                                    AppConfig().screenHeight)),
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
+                                      totalRepeatCount: 1,
+                                    ),
+                                  )
+                            // If not loading and text is empty, show nothing
+                            ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            )));
+            ),
+          ),
+        ));
   }
 
   Listen() async {

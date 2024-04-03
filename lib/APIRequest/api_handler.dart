@@ -14,7 +14,10 @@ class ApiHandler {
   static Future<List<LanguagesAndTransilations>> getLanguages() async {
     const url = "https://bolls.life/static/bolls/app/views/languages.json";
 
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {'Accept-Charset': 'utf-8'},
+    );
     List tempList = [];
     if (response.statusCode == 200) {
       for (var v in jsonDecode(response.body)) {
@@ -31,7 +34,10 @@ class ApiHandler {
 
     print(url);
 
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {'Accept-Charset': 'utf-8'},
+    );
     List tempList = [];
     if (response.statusCode == 200) {
       for (var v in jsonDecode(response.body)) {

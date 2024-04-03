@@ -60,6 +60,11 @@ dependencies:
   webview_flutter: ^4.4.2
   url_launcher: ^6.2.5
   scrollable_positioned_list: ^0.3.8
+  flutter_localizations:
+    sdk: flutter
+  google_fonts: ^4.0.4
+  intl: any
+
 flutter_native_splash:
   background_image: "assets/png/splash_screen.png"
   android_gravity: fill
@@ -168,9 +173,9 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   fonts:
-    - family: OutfitBold
+    - family: Arial Unicode MS
       fonts:
-        - asset: assets/font/Outfit-Bold.ttf
+        - asset: assets/font/arial-unicode-ms.ttf
 
     - family: OutfitSemiBold
       fonts:
@@ -183,6 +188,7 @@ flutter:
     - family: OutfitRegular
       fonts:
         - asset: assets/font/Outfit-Regular.ttf
+
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

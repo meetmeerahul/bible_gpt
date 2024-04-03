@@ -28,6 +28,7 @@ import 'package:http/http.dart' as http;
 
 import '../dashBoardScreen/noInternetScreen.dart';
 import '../loader/widget/TextLoaderWidget.dart';
+
 import '../loader/widget/player_loader.dart';
 import '../widgets/check_internet_method.dart';
 import '../widgets/toast_message.dart';
@@ -105,6 +106,10 @@ class BookDetail extends State<BookDetailScreen> {
   int checkedIndex = 0;
 
   int verseCount = 0;
+
+  int verseIdForReplay = 0;
+
+  int playingIndex = -100;
 
   String selectedChapter = "1";
   final FlutterTts fluttertts = FlutterTts();
@@ -472,20 +477,20 @@ class BookDetail extends State<BookDetailScreen> {
 
     getLanguage();
     print(darkMode);
-    print(("ook id : ${widget.bookid}"));
-    print(" BookId-------${widget.chapterCOunt}");
+    print(("ook id : $bookid"));
+    print(" BookId-------$chapterCOunt");
     print("book name $chapterName");
 
     print("TopKey Height : $topKeyHeight");
-    // print(" Chapters-------${widget.chapterCount}");
+    // print(" Chapters-------${chapterCount}");
     return Scaffold(
       body: Container(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              controller: pageScrollController,
-              child: Column(
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          controller: pageScrollController,
+          child: Column(
+            children: [
+              Column(
                 children: [
                   Container(
                     key: topKey,
@@ -578,7 +583,9 @@ class BookDetail extends State<BookDetailScreen> {
                                     (!playAllIsPlaying && isPlaying) ||
                                     playAllIsPlaying ||
                                     songIsFetching) {
+                                  playingIndex = -1;
                                   _audioPlayer.stop();
+
                                   songIsFetching = false;
                                   playAllIsPlaying = false;
                                   isPlaying = false;
@@ -976,16 +983,25 @@ class BookDetail extends State<BookDetailScreen> {
                               (BuildContext context, AsyncSnapshot snapshot) {
                             if (snapshot.hasError) {
                               return DetailLoaderScreen(
-                                  screenWidth, screenHeight, darkMode);
+                                screenWidth,
+                                screenHeight,
+                                darkMode,
+                              );
                             } else {
                               chaptersList.clear();
 
                               return snapshot.data == null
                                   ? DetailLoaderScreen(
-                                      screenWidth, screenHeight, darkMode)
+                                      screenWidth,
+                                      screenHeight,
+                                      darkMode,
+                                    )
                                   : apiIsloading
                                       ? DetailLoaderScreen(
-                                          screenWidth, screenHeight, darkMode)
+                                          screenWidth,
+                                          screenHeight,
+                                          darkMode,
+                                        )
                                       : SizedBox(
                                           height: playAllIsPlaying
                                               ? (screenHeight - topKeyHeight)
@@ -1001,15 +1017,6 @@ class BookDetail extends State<BookDetailScreen> {
                                                 ? const AlwaysScrollableScrollPhysics()
                                                 : const NeverScrollableScrollPhysics(),
                                             itemCount: snapshot.data.length,
-
-                                            /*
-                                           listviewLength >
-                                                    snapshot.data.length
-                                                ? snapshot.data.length
-                                                : listviewLength,
-                                                
-                                              
-                                            */
                                             itemBuilder: (BuildContext context,
                                                 int index) {
                                               listViewMaxLength =
@@ -1036,14 +1043,14 @@ class BookDetail extends State<BookDetailScreen> {
                                                               .screenHeight)),
                                                 ),
                                                 child: Container(
-                                                  height: (screenHeight *
-                                                      (230 /
-                                                          AppConfig()
-                                                              .screenHeight)),
-                                                  width: (screenWidth *
-                                                      (396 /
-                                                          AppConfig()
-                                                              .screenWidth)),
+                                                  // height: (screenHeight *
+                                                  //     (230 /
+                                                  //         AppConfig()
+                                                  //             .screenHeight)),
+                                                  // width: (screenWidth *
+                                                  //     (396 /
+                                                  //         AppConfig()
+                                                  //             .screenWidth)),
                                                   decoration: BoxDecoration(
                                                     color: darkMode
                                                         ? const Color(
@@ -1062,6 +1069,12 @@ class BookDetail extends State<BookDetailScreen> {
                                                         MainAxisAlignment
                                                             .spaceEvenly,
                                                     children: [
+                                                      SizedBox(
+                                                        height: (screenHeight *
+                                                            (5 /
+                                                                AppConfig()
+                                                                    .screenHeight)),
+                                                      ),
                                                       Padding(
                                                         padding:
                                                             EdgeInsets.only(
@@ -1100,6 +1113,8 @@ class BookDetail extends State<BookDetailScreen> {
                                                                   setState(() {
                                                                     isPlaying =
                                                                         false;
+                                                                    playingIndex =
+                                                                        -1;
                                                                   });
                                                                 } else if (_audioState ==
                                                                         "Pause" ||
@@ -1107,30 +1122,49 @@ class BookDetail extends State<BookDetailScreen> {
                                                                   setState(() {
                                                                     isPlaying =
                                                                         true;
+                                                                    playingIndex =
+                                                                        index;
                                                                   });
 
                                                                   playAudio(
-                                                                      languageCode:
-                                                                          getLanguageCode,
-                                                                      text: item
-                                                                          .text!);
+                                                                    languageCode:
+                                                                        getLanguageCode,
+                                                                    text: item
+                                                                        .text!,
+                                                                  );
 
-                                                                  // meaningClick(
-                                                                  //     item);
+                                                                  // meaningClick(item);
                                                                 }
 
                                                                 checkedIndex =
                                                                     index;
                                                               },
-                                                              child: SvgPicture.asset(isPlaying &&
-                                                                      checkedIndex ==
-                                                                          index &&
-                                                                      !playAllIsPlaying
-                                                                  ? "assets/svg/speaker_on.svg"
-                                                                  : "assets/svg/mic_icon.svg"),
+                                                              child: SvgPicture
+                                                                  .asset(
+                                                                isPlaying &&
+                                                                        checkedIndex ==
+                                                                            index &&
+                                                                        !playAllIsPlaying
+                                                                    ? "assets/svg/speaker_on.svg"
+                                                                    : "assets/svg/mic_icon.svg",
+                                                                height: (screenHeight *
+                                                                    (25 /
+                                                                        AppConfig()
+                                                                            .screenHeight)),
+                                                                width: (screenWidth *
+                                                                    (25 *
+                                                                        AppConfig()
+                                                                            .screenWidth)),
+                                                              ),
                                                             ),
                                                           ],
                                                         ),
+                                                      ),
+                                                      SizedBox(
+                                                        height: (screenHeight *
+                                                            (5 /
+                                                                AppConfig()
+                                                                    .screenHeight)),
                                                       ),
                                                       SvgPicture.asset(
                                                           "assets/svg/rect_bookdetail.svg"),
@@ -1154,25 +1188,79 @@ class BookDetail extends State<BookDetailScreen> {
                                                               AppConfig()
                                                                   .screenWidth),
                                                         ),
-                                                        child: Text(
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          item.text!,
-                                                          style: TextStyle(
-                                                            color: darkMode
-                                                                ? const Color(
-                                                                    0xFFFFFFFF)
-                                                                : const Color(
-                                                                    0xFF353535),
-                                                            fontSize: (screenHeight *
-                                                                (14 /
-                                                                    AppConfig()
-                                                                        .screenHeight)),
-                                                          ),
-                                                        ),
+                                                        child:
+                                                            index ==
+                                                                    playingIndex
+                                                                ? Container(
+                                                                    decoration:
+                                                                        const BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius.all(
+                                                                              Radius.circular(10)),
+                                                                      gradient:
+                                                                          LinearGradient(
+                                                                        begin: Alignment
+                                                                            .topCenter,
+                                                                        end: Alignment
+                                                                            .bottomCenter,
+                                                                        colors: [
+                                                                          Color(
+                                                                              0xFFC47807),
+                                                                          Color(
+                                                                              0xFF643402),
+                                                                        ],
+                                                                      ), // Set the background color to green
+                                                                    ),
+                                                                    child:
+                                                                        Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .all(
+                                                                          8.0),
+                                                                      child:
+                                                                          Text(
+                                                                        textAlign:
+                                                                            TextAlign.center,
+                                                                        item.text!,
+                                                                        style:
+                                                                            TextStyle(
+                                                                          color: darkMode
+                                                                              ? const Color(0xFFFFFFFF)
+                                                                              : const Color(0xFF353535),
+                                                                          fontSize:
+                                                                              (screenHeight * (14 / AppConfig().screenHeight)),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                : Text(
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
+                                                                    item.text!,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: darkMode
+                                                                          ? const Color(
+                                                                              0xFFFFFFFF)
+                                                                          : const Color(
+                                                                              0xFF353535),
+                                                                      fontSize:
+                                                                          (screenHeight *
+                                                                              (14 / AppConfig().screenHeight)),
+                                                                    ),
+                                                                  ),
                                                       ),
-                                                      SvgPicture.asset(
-                                                          "assets/svg/narrow_line.svg"),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                          bottom: (screenHeight *
+                                                              (15 /
+                                                                  AppConfig()
+                                                                      .screenHeight)),
+                                                        ),
+                                                        child: SvgPicture.asset(
+                                                            "assets/svg/narrow_line.svg"),
+                                                      ),
                                                     ],
                                                   ),
                                                 ),
@@ -1188,17 +1276,17 @@ class BookDetail extends State<BookDetailScreen> {
                   ),
                 ],
               ),
-            ),
-            !statusBarVisible
-                ? Container(
-                    width: screenWidth,
-                    height: statusBarHeight,
-                    color: darkMode
-                        ? AppConfig().chapterScreenBackgroundStartDarkColor
-                        : AppConfig().chapterScreenBackgroundStartLightColor,
-                  )
-                : const SizedBox(),
-          ],
+              !statusBarVisible
+                  ? Container(
+                      width: screenWidth,
+                      height: statusBarHeight,
+                      color: darkMode
+                          ? AppConfig().chapterScreenBackgroundStartDarkColor
+                          : AppConfig().chapterScreenBackgroundStartLightColor,
+                    )
+                  : const SizedBox(),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: (isPlaying || playAllIsPlaying)
@@ -1247,7 +1335,10 @@ class BookDetail extends State<BookDetailScreen> {
                                 _audioState = "Playing";
                               });
                               // await _audioPlayer.play(audioText);
-                              print("Play again");
+                              // playAudio(
+                              //   languageCode: getLanguageCode,
+                              //   text: chaptersList[verseIdForReplay].text!,
+                              // );
                             }
                           },
                         ),
@@ -1310,14 +1401,15 @@ class BookDetail extends State<BookDetailScreen> {
     //await autoScrollController.scrollToIndex(getIndex, preferPosition: AutoScrollPosition.begin);
     //await Scrollable.ensureVisible(Key(getIndex.toString().bu));
     //itemScrollController.jumpTo(index: getIndex);
-    // itemScrollController.scrollTo(
-    //     index: getIndex, duration: const Duration(milliseconds: 500));
+    itemScrollController.scrollTo(
+        index: getIndex, duration: const Duration(milliseconds: 500));
   }
 
   meaningClick(BookChapters getClass) {
     print("chapters length in meaning call ${chaptersList.length}");
     setState(() {
       isAudioWidget = true;
+      //  playingIndex = 0;
     });
 
     for (int i = 0; i < chaptersList.length; i++) {
@@ -1329,12 +1421,21 @@ class BookDetail extends State<BookDetailScreen> {
         setState(() {
           musicApiIsLoading = true;
           songIsFetching = true;
+
+          playingIndex = i;
         });
 
-        playAudio(
-          text: chaptersList[i].text!,
-          languageCode: getLanguageCode,
-        );
+        if (i >= 10) {
+          playAudio(
+            text: chaptersList[i - 2].text!,
+            languageCode: getLanguageCode,
+          );
+        } else {
+          playAudio(
+            text: chaptersList[i].text!,
+            languageCode: getLanguageCode,
+          );
+        }
 
         setState(() {
           musicApiIsLoading = true;

@@ -5,5 +5,6 @@ import 'change_theme_local.dart';
 
 bool themeMethod(BuildContext context) {
   var theme = Provider.of<ChangeThemeLocal>(context);
+  
   return theme.getTheme();
 }
