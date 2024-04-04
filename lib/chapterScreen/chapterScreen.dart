@@ -590,6 +590,7 @@ class chapterPage extends State<chapterScreen> {
   Widget RecentChapterListview(
       ChapterHomeListClass getChapterHomeClass, int getIndex) {
     return RecentChapterListviewWidget(
+        context: context,
         screenWidth: screenWidth,
         screenHeight: screenHeight,
         getChapterClass: getChapterHomeClass,
@@ -617,6 +618,7 @@ class chapterPage extends State<chapterScreen> {
 
   Widget AllChapterListview(List<ChapterHomeListClass> getAllChapterList) {
     return AllChapterListviewWidget(
+      context: context,
       screenWidth: screenWidth,
       screenHeight: screenHeight,
       getChapterList: getAllChapterList,

@@ -6,6 +6,7 @@ import '../config/app_config.dart';
 import '../config/language_text_file.dart';
 
 Widget SearchGptTextFieldWidget({
+  required BuildContext context,
   required double screenWidth,
   required double screenHeight,
   required double scaleFactor,
@@ -114,18 +115,23 @@ Widget SearchGptTextFieldWidget({
                     // filled: true,
                     hintText: getHintText,
                     hintStyle: TextStyle(
-                        fontSize: screenHeight *
-                            (AppConfig().searchGptWidgetEdittextHintTextSize /
-                                (AppConfig().screenHeight * scaleFactor)),
+                        fontSize: MediaQuery.of(context).textScaler.scale(
+                              screenHeight *
+                                  (AppConfig()
+                                          .searchGptWidgetEdittextHintTextSize /
+                                      (AppConfig().screenHeight * scaleFactor)),
+                            ),
                         color: darkMode
                             ? AppConfig().searchGptWidgetEdittextTextDarkColor
                             : AppConfig().searchGptWidgetEdittextTextLightColor,
                         fontFamily: AppConfig().outfitFontRegular),
                   ),
                   style: TextStyle(
-                      fontSize: screenHeight *
-                          (AppConfig().searchGptWidgetEdittextTextSize /
-                              (AppConfig().screenHeight * scaleFactor)),
+                      fontSize: MediaQuery.of(context).textScaler.scale(
+                            screenHeight *
+                                (AppConfig().searchGptWidgetEdittextTextSize /
+                                    (AppConfig().screenHeight * scaleFactor)),
+                          ),
                       color: darkMode
                           ? AppConfig().searchGptWidgetEdittextTextDarkColor
                           : AppConfig().searchGptWidgetEdittextTextLightColor,

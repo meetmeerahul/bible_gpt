@@ -379,6 +379,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               alignment: Alignment.topCenter,
               children: [
                 BackgroundColorWidget(
+                    context: context,
                     screenWidth: screenWidth,
                     screenHeight: screenHeight,
                     getDarkMode: darkMode,
@@ -498,6 +499,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         height: screenHeight * (30 / AppConfig().screenHeight),
                       ),
                       SearchGptTextFieldWidget(
+                          context: context,
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
                           scaleFactor: scaleFactor,
@@ -525,29 +527,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Container(
                         padding: EdgeInsets.symmetric(
                             horizontal: screenWidth *
-                                (AppConfig()
-                                        .dashboardScreenBottomContentPadding /
+                                (AppConfig().chapterScreenLeftPadding *
+                                    2 /
                                     AppConfig().screenWidth)),
-                        /*    child: languageFutureWidget(
-                            screenWidth: screenWidth,
-                            screenHeight: screenHeight,
-                            selectedLanguage: getSelectedLanguageCode,
-                            getLanguageTranslatorMethod: bottomContentFutureMethod,
-                            getFontSize:
-                                AppConfig().dashboardScreenBottomContentTextSize,
-                            getDarkMode: darkMode,
-                            getTextAlign: TextAlign.center,
-                            getTextColor: darkMode
-                                ? AppConfig()
-                                    .dashboardScreenBottomContentTextDarkColor
-                                : AppConfig()
-                                    .dashboardScreenBottomContentTextLightColor,
-                            getFontFamily: AppConfig().outfitFontRegular,
-                            getTextDirection: LanguageTextFile()
-                                .getTextDirection(getSelectedLanguageCode),
-                            getSoftWrap: true),*/
-
-                        //child:languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getSelectedLanguageCode, getText: LanguageTextFile().getDashboardScreenBottomContentText(0), getTextStyle: TextStyle(fontSize: screenHeight*(AppConfig().dashboardScreenBottomContentTextSize/AppConfig().screenHeight),color: darkMode?AppConfig().dashboardScreenBottomContentTextDarkColor:AppConfig().dashboardScreenBottomContentTextLightColor,fontFamily: AppConfig().outfitFontRegular)),
                         child: Text(
                           LanguageTextFile()
                               .getDashboardScreenBottomContentText(
@@ -555,20 +537,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              fontSize: screenHeight *
-                                  (AppConfig()
-                                          .dashboardScreenBottomContentTextSize /
-                                      AppConfig().screenHeight),
+                              fontSize: MediaQuery.of(context).textScaler.scale(
+                                    screenHeight *
+                                        (AppConfig()
+                                                .chapterScreenContentTextSize /
+                                            AppConfig().screenHeight),
+                                  ),
                               color: darkMode
                                   ? AppConfig()
-                                      .dashboardScreenBottomContentTextDarkColor
+                                      .chapterScreenContentTextDarkColor
                                   : AppConfig()
-                                      .dashboardScreenBottomContentTextLightColor,
+                                      .chapterScreenContentTextLightColor,
                               fontFamily: AppConfig().outfitFontRegular),
-                          // textDirection: getLanguageType ==
-                          //         AppConfig().languageSettingArabicLanguageCode
-                          //     ? TextDirection.rtl
-                          //     : TextDirection.ltr
+                          textDirection: LanguageTextFile()
+                              .getTextDirection(getSelectedLanguageCode),
                         ),
                       ),
                       SizedBox(
@@ -577,6 +559,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 AppConfig().screenHeight),
                       ),
                       PrimaryButton(
+                          context: context,
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
                           buttonWidth:

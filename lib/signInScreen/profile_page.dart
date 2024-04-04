@@ -90,6 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Stack(
                 children: [
                   BackgroundColorWidget(
+                      context: context,
                       screenWidth: screenWidth,
                       screenHeight: screenHeight,
                       getDarkMode: darkMode,
@@ -288,6 +289,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 screenHeight * (65 / AppConfig().screenHeight),
                           ),
                           PrimaryButton(
+                              context: context,
                               screenWidth: screenWidth,
                               screenHeight: screenHeight,
                               buttonWidth: 130,

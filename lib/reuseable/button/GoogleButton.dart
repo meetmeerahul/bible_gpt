@@ -5,7 +5,8 @@ import '../../config/app_config.dart';
 import '../../config/language_text_file.dart';
 
 ElevatedButton GoogleButton(
-    {required double screenWidth,
+    {required BuildContext context,
+    required double screenWidth,
     required double screenHeight,
     required double buttonWidth,
     required double buttonHeight,

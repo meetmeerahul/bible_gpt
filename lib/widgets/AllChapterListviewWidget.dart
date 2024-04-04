@@ -6,7 +6,8 @@ import '../config/language_text_file.dart';
 import 'ChapterHomeCardWidget.dart';
 
 Widget AllChapterListviewWidget(
-    {required double screenWidth,
+    {required BuildContext context,
+    required double screenWidth,
     required double screenHeight,
     required List<ChapterHomeListClass> getChapterList,
     required bool darkMode,
@@ -32,6 +33,7 @@ Widget AllChapterListviewWidget(
               children: [
                 getChapterList.isNotEmpty
                     ? ChapterHomeCardWidget(
+                        context: context,
                         screenWidth: screenWidth,
                         screenHeight: screenHeight,
                         getChapterHomeClass: getChapterList[0],
@@ -47,6 +49,7 @@ Widget AllChapterListviewWidget(
                 ),
                 getChapterList.length > 1
                     ? ChapterHomeCardWidget(
+                        context: context,
                         screenWidth: screenWidth,
                         screenHeight: screenHeight,
                         getChapterHomeClass: getChapterList[1],
@@ -62,6 +65,7 @@ Widget AllChapterListviewWidget(
                 ),
                 getChapterList.length > 2
                     ? ChapterHomeCardWidget(
+                        context: context,
                         screenWidth: screenWidth,
                         screenHeight: screenHeight,
                         getChapterHomeClass: getChapterList[2],

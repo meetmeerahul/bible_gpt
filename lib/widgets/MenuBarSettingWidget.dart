@@ -37,7 +37,9 @@ Widget MenuBarSettingWidget({
             textScaler: const TextScaler.linear(1.0),
             textAlign: TextAlign.start,
             style: TextStyle(
-              fontSize: screenHeight * (18 / AppConfig().screenHeight),
+              fontSize: MediaQuery.of(context)
+                  .textScaler
+                  .scale((screenHeight * (18 / AppConfig().screenHeight))),
               color: getDarkMode
                   ? const Color(0xFFFBE4AB)
                   : const Color(0xFFA36501),
@@ -110,8 +112,9 @@ Widget MenuBarSettingWidget({
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.start,
                           style: TextStyle(
-                              fontSize: screenHeight *
-                                  (14 / AppConfig().screenHeight),
+                              fontSize: MediaQuery.of(context).textScaler.scale(
+                                  (screenHeight *
+                                      (14 / AppConfig().screenHeight))),
                               color: getDarkMode
                                   ? const Color(0xFFFFFFFF)
                                   : const Color(0xFF8A8A8A),
@@ -129,6 +132,7 @@ Widget MenuBarSettingWidget({
                           children: [
                             Container(
                               child: TextWidget(
+                                  context: context,
                                   screenWidth: screenWidth,
                                   screenHeight: screenHeight,
                                   getText: LanguageTextFile()
@@ -234,8 +238,9 @@ Widget MenuBarSettingWidget({
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.start,
                           style: TextStyle(
-                              fontSize: screenHeight *
-                                  (14 / AppConfig().screenHeight),
+                              fontSize: MediaQuery.of(context).textScaler.scale(
+                                  (screenHeight *
+                                      (14 / AppConfig().screenHeight))),
                               color: getDarkMode
                                   ? const Color(0xFFFFFFFF)
                                   : const Color(0xFF8A8A8A),
@@ -365,8 +370,9 @@ Widget MenuBarSettingWidget({
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.start,
                           style: TextStyle(
-                              fontSize: screenHeight *
-                                  (14 / AppConfig().screenHeight),
+                              fontSize: MediaQuery.of(context).textScaler.scale(
+                                  (screenHeight *
+                                      (14 / AppConfig().screenHeight))),
                               color: getDarkMode
                                   ? const Color(0xFFFFFFFF)
                                   : const Color(0xFF8A8A8A),
@@ -435,8 +441,9 @@ Widget MenuBarSettingWidget({
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.start,
                           style: TextStyle(
-                              fontSize: screenHeight *
-                                  (14 / AppConfig().screenHeight),
+                              fontSize: MediaQuery.of(context).textScaler.scale(
+                                  (screenHeight *
+                                      (14 / AppConfig().screenHeight))),
                               color: getDarkMode
                                   ? const Color(0xFFFFFFFF)
                                   : const Color(0xFF8A8A8A),
@@ -505,8 +512,9 @@ Widget MenuBarSettingWidget({
                           textScaler: const TextScaler.linear(1.0),
                           textAlign: TextAlign.start,
                           style: TextStyle(
-                              fontSize: screenHeight *
-                                  (14 / AppConfig().screenHeight),
+                              fontSize: MediaQuery.of(context).textScaler.scale(
+                                  (screenHeight *
+                                      (14 / AppConfig().screenHeight))),
                               color: getDarkMode
                                   ? const Color(0xFFFFFFFF)
                                   : const Color(0xFF8A8A8A),
@@ -743,6 +751,7 @@ LanguageDialogBox(
                                 ),
                                 Container(
                                   child: TextWidget(
+                                      context: context,
                                       screenWidth: screenWidth,
                                       screenHeight: screenHeight,
                                       getText: LanguageTextFile()
@@ -828,6 +837,7 @@ LanguageDialogBox(
                                 ),
                                 Container(
                                   child: TextWidget(
+                                      context: context,
                                       screenWidth: screenWidth,
                                       screenHeight: screenHeight,
                                       getText: LanguageTextFile()

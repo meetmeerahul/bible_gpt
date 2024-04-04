@@ -158,6 +158,7 @@ class NoInternetPage extends State<NoInternetScreen> {
                     height: screenHeight * (40 / AppConfig().screenHeight),
                   ),
                   PrimaryButton(
+                    context: context,
                       screenWidth: screenWidth,
                       screenHeight: screenHeight,
                       buttonWidth: 130,

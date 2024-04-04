@@ -8,7 +8,8 @@ import '../config/app_config.dart';
 import '../config/language_text_file.dart';
 
 Widget ChapterHomeCardWidget(
-    {required double screenWidth,
+    {required BuildContext context,
+    required double screenWidth,
     required double screenHeight,
     required ChapterHomeListClass getChapterHomeClass,
     required bool darkMode,
@@ -63,7 +64,16 @@ Widget ChapterHomeCardWidget(
               // ),
               child: Padding(
                 padding: EdgeInsets.only(
-                    left: (screenWidth * (10 / AppConfig().screenWidth))),
+                  left: MediaQuery.of(context)
+                      .textScaler
+                      .scale(screenWidth * (10 / AppConfig().screenWidth)),
+                  top: MediaQuery.of(context)
+                      .textScaler
+                      .scale((screenHeight * (20 / AppConfig().screenHeight))),
+                  bottom: MediaQuery.of(context)
+                      .textScaler
+                      .scale((screenHeight * (20 / AppConfig().screenHeight))),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -102,7 +112,7 @@ Widget ChapterHomeCardWidget(
                               '', // Provide a default value if getChapterHomeClass.name is null
                           style: TextStyle(
                               fontSize: (screenHeight *
-                                  (16 / AppConfig().screenHeight))),
+                                  (12 / AppConfig().screenHeight))),
                         ),
                       ),
                     ),

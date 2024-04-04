@@ -188,7 +188,7 @@ class _GptScreenState extends State<GptScreen> {
               child: Column(
                 children: [
                   Container(
-                    height: (screenHeight * (300 / AppConfig().screenHeight)),
+                    height: (screenHeight * (290 / AppConfig().screenHeight)),
                     width: screenWidth,
                     decoration: BoxDecoration(
                       image: DecorationImage(
@@ -202,9 +202,8 @@ class _GptScreenState extends State<GptScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
-                          height: screenHeight *
-                              (AppConfig().gptScreenTopPadding /
-                                  AppConfig().screenHeight),
+                          height:
+                              screenHeight * (60 / AppConfig().screenHeight),
                         ),
                         Container(
                           width: screenWidth,
@@ -293,6 +292,7 @@ class _GptScreenState extends State<GptScreen> {
                         ),
                         Container(
                           child: SearchGptTextFieldWidget(
+                              context: context,
                               screenWidth: screenWidth,
                               screenHeight: screenHeight,
                               scaleFactor: scaleFactor,
@@ -353,8 +353,8 @@ class _GptScreenState extends State<GptScreen> {
                         Container(
                           padding: EdgeInsets.symmetric(
                               horizontal: screenWidth *
-                                  (AppConfig()
-                                          .dashboardScreenBottomContentPadding /
+                                  (AppConfig().chapterScreenLeftPadding *
+                                      2 /
                                       AppConfig().screenWidth)),
                           child: Text(
                             LanguageTextFile()
@@ -363,20 +363,21 @@ class _GptScreenState extends State<GptScreen> {
                             textScaler: const TextScaler.linear(1.0),
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                fontSize: screenHeight *
-                                    (AppConfig()
-                                            .dashboardScreenBottomContentTextSize /
-                                        AppConfig().screenHeight),
+                                fontSize:
+                                    MediaQuery.of(context).textScaler.scale(
+                                          screenHeight *
+                                              (AppConfig()
+                                                      .chapterScreenContentTextSize /
+                                                  AppConfig().screenHeight),
+                                        ),
                                 color: darkMode
                                     ? AppConfig()
-                                        .dashboardScreenBottomContentTextDarkColor
+                                        .chapterScreenContentTextDarkColor
                                     : AppConfig()
-                                        .dashboardScreenBottomContentTextLightColor,
+                                        .chapterScreenContentTextLightColor,
                                 fontFamily: AppConfig().outfitFontRegular),
-                            // textDirection: getLanguageType ==
-                            //         AppConfig().languageSettingArabicLanguageCode
-                            //     ? TextDirection.rtl
-                            //     : TextDirection.ltr
+                            textDirection: LanguageTextFile()
+                                .getTextDirection(getLanguageCode),
                           ),
                         ),
                       ],
@@ -424,16 +425,22 @@ class _GptScreenState extends State<GptScreen> {
                                     child: AnimatedTextKit(
                                       animatedTexts: [
                                         TypewriterAnimatedText(
+                                          speed: const Duration(
+                                              microseconds: 2000),
                                           textAlign: TextAlign.start,
                                           searchResult,
                                           textStyle: TextStyle(
                                             color: darkMode
                                                 ? const Color(0xffffffff)
                                                 : const Color(0xff0000000),
-                                            fontSize: (screenHeight *
-                                                (12 /
-                                                    AppConfig().screenHeight)),
-                                            fontWeight: FontWeight.w400,
+
+                                            fontSize: MediaQuery.of(context)
+                                                .textScaler
+                                                .scale((screenHeight *
+                                                    (12 /
+                                                        AppConfig()
+                                                            .screenHeight))),
+                                            //fontWeight: FontWeight.w400,
                                           ),
                                         ),
                                       ],

@@ -197,6 +197,7 @@ class _SigninScreenState extends State<SigninScreen> {
           alignment: Alignment.topCenter,
           children: [
             BackgroundColorWidget(
+              context: context,
               screenWidth: screenWidth,
               screenHeight: screenHeight,
               getDarkMode: darkMode,
@@ -305,9 +306,7 @@ class _SigninScreenState extends State<SigninScreen> {
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(
                                         horizontal: screenWidth *
-                                            (AppConfig()
-                                                    .signInScreenActiveInnerButtonHorizontalPadding /
-                                                AppConfig().screenWidth),
+                                            (45 / AppConfig().screenWidth),
                                         vertical: screenHeight *
                                             (AppConfig()
                                                     .signInScreenActiveInnerButtonVerticalPadding /
@@ -336,10 +335,13 @@ class _SigninScreenState extends State<SigninScreen> {
                                       textScaler: const TextScaler.linear(1.0),
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                          fontSize: screenHeight *
-                                              (AppConfig()
-                                                      .signInScreenActiveButtonTextSize /
-                                                  AppConfig().screenHeight),
+                                          fontSize: MediaQuery.of(context)
+                                              .textScaler
+                                              .scale(screenHeight *
+                                                  (AppConfig()
+                                                          .signInScreenActiveButtonTextSize /
+                                                      AppConfig()
+                                                          .screenHeight)),
                                           color: AppConfig()
                                               .signInScreenActiveButtonTextColor,
                                           fontFamily:
@@ -388,10 +390,13 @@ class _SigninScreenState extends State<SigninScreen> {
                                       textScaler: const TextScaler.linear(1.0),
                                       textAlign: TextAlign.end,
                                       style: TextStyle(
-                                          fontSize: screenHeight *
-                                              (AppConfig()
-                                                      .signInScreenInActiveButtonTextSize /
-                                                  AppConfig().screenHeight),
+                                          fontSize: MediaQuery.of(context)
+                                              .textScaler
+                                              .scale(screenHeight *
+                                                  (AppConfig()
+                                                          .signInScreenActiveButtonTextSize /
+                                                      AppConfig()
+                                                          .screenHeight)),
                                           color: darkMode
                                               ? AppConfig()
                                                   .signInScreenInActiveTextDarkColor
@@ -446,12 +451,15 @@ class _SigninScreenState extends State<SigninScreen> {
                                           .getSignInScreenNumberButtonText(
                                               getLanguageCode),
                                       textScaler: const TextScaler.linear(1.0),
-                                      textAlign: TextAlign.end,
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
-                                          fontSize: screenHeight *
-                                              (AppConfig()
-                                                      .signInScreenInActiveButtonTextSize /
-                                                  AppConfig().screenHeight),
+                                          fontSize: MediaQuery.of(context)
+                                              .textScaler
+                                              .scale(screenHeight *
+                                                  (AppConfig()
+                                                          .signInScreenActiveButtonTextSize /
+                                                      AppConfig()
+                                                          .screenHeight)),
                                           color: darkMode
                                               ? AppConfig()
                                                   .signInScreenInActiveTextDarkColor
@@ -486,9 +494,7 @@ class _SigninScreenState extends State<SigninScreen> {
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(
                                         horizontal: screenWidth *
-                                            (AppConfig()
-                                                    .signInScreenActiveInnerButtonHorizontalPadding /
-                                                AppConfig().screenWidth),
+                                            (40 / AppConfig().screenWidth),
                                         vertical: screenHeight *
                                             (AppConfig()
                                                     .signInScreenActiveInnerButtonVerticalPadding /
@@ -517,10 +523,13 @@ class _SigninScreenState extends State<SigninScreen> {
                                       textScaler: const TextScaler.linear(1.0),
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                          fontSize: screenHeight *
-                                              (AppConfig()
-                                                      .signInScreenActiveButtonTextSize /
-                                                  AppConfig().screenHeight),
+                                          fontSize: MediaQuery.of(context)
+                                              .textScaler
+                                              .scale(screenHeight *
+                                                  (AppConfig()
+                                                          .signInScreenActiveButtonTextSize /
+                                                      AppConfig()
+                                                          .screenHeight)),
                                           color: AppConfig()
                                               .signInScreenActiveButtonTextColor,
                                           fontFamily:
@@ -975,6 +984,7 @@ class _SigninScreenState extends State<SigninScreen> {
                               AppConfig().screenHeight),
                     ),
                     PrimaryButton(
+                        context: context,
                         screenWidth: screenWidth,
                         screenHeight: screenHeight,
                         buttonWidth: AppConfig().signInScreenButtonWidth,
@@ -1236,14 +1246,19 @@ class _SigninScreenState extends State<SigninScreen> {
                               textScaler: const TextScaler.linear(1.0),
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                  fontSize: screenHeight *
-                                      (AppConfig().signInScreenLogInTextSize /
-                                          AppConfig().screenHeight),
-                                  color: darkMode
-                                      ? AppConfig()
-                                          .signInScreenLogInTextDarkColor
-                                      : AppConfig()
-                                          .signInScreenLogInTextLightColor,
+                                  fontSize: MediaQuery.of(
+                                          context)
+                                      .textScaler
+                                      .scale(screenHeight *
+                                          (AppConfig()
+                                                  .signInScreenLogInTextSize /
+                                              AppConfig().screenHeight)),
+                                  color:
+                                      darkMode
+                                          ? AppConfig()
+                                              .signInScreenLogInTextDarkColor
+                                          : AppConfig()
+                                              .signInScreenLogInTextLightColor,
                                   fontFamily: AppConfig().outfitFontRegular),
                             ),
                           ),
@@ -1301,6 +1316,7 @@ class _SigninScreenState extends State<SigninScreen> {
                         : const SizedBox(),
                         */
                     GoogleButton(
+                        context: context,
                         screenWidth: screenWidth,
                         screenHeight: screenHeight,
                         buttonWidth: AppConfig().signInScreenGoogleButtonWidth,
@@ -1372,10 +1388,10 @@ class _SigninScreenState extends State<SigninScreen> {
                                 textScaler: const TextScaler.linear(1.0),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    fontSize: screenHeight *
-                                        (AppConfig()
-                                                .signInScreenSwitchTextSize /
-                                            AppConfig().screenHeight),
+                                    fontSize: MediaQuery.of(context)
+                                        .textScaler
+                                        .scale((screenHeight *
+                                            (12 / AppConfig().screenHeight))),
                                     color: darkMode
                                         ? AppConfig()
                                             .signInScreenSwitchTextDarkColor1
@@ -1434,10 +1450,10 @@ class _SigninScreenState extends State<SigninScreen> {
                                 textScaler: const TextScaler.linear(1.0),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    fontSize: screenHeight *
-                                        (AppConfig()
-                                                .signInScreenSwitchTextSize /
-                                            AppConfig().screenHeight),
+                                    fontSize: MediaQuery.of(context)
+                                        .textScaler
+                                        .scale((screenHeight *
+                                            (12 / AppConfig().screenHeight))),
                                     color: darkMode
                                         ? AppConfig()
                                             .signInScreenSwitchTextDarkColor2
@@ -1478,10 +1494,10 @@ class _SigninScreenState extends State<SigninScreen> {
                             textScaler: const TextScaler.linear(1.0),
                             // textAlign: TextAlign.center,
                             style: TextStyle(
-                                fontSize: screenHeight *
-                                    (AppConfig()
-                                            .dashboardScreenCopyRightTextSize /
-                                        AppConfig().screenHeight),
+                                fontSize: MediaQuery.of(context)
+                                    .textScaler
+                                    .scale((screenHeight *
+                                        (12 / AppConfig().screenHeight))),
                                 color: darkMode
                                     ? AppConfig()
                                         .dashboardScreenBottomCopyRightTextDarkColor
@@ -1516,9 +1532,7 @@ class _SigninScreenState extends State<SigninScreen> {
     final user = await GoogleAuth.login();
 
     if (user == null) {
-
       ToastMessage(screenHeight, "No user found", false);
-      
     } else {
       String userDetails = "${user.displayName!} ${user.email}";
 

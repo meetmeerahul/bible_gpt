@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import '../config/app_config.dart';
 
 Widget TextWidget({
+  required BuildContext context,
   required double screenWidth,
   required double screenHeight,
   required String getText,
@@ -19,7 +20,9 @@ Widget TextWidget({
     textAlign: getTextAlign,
     style: TextStyle(
         height: 0,
-        fontSize: screenHeight * (fontSize / AppConfig().screenHeight),
+        fontSize: MediaQuery.of(context)
+            .textScaler
+            .scale((screenHeight * (14 / AppConfig().screenHeight))),
         color: getTextColor,
         fontFamily: getFontFamily),
     textDirection: getTextDirection,

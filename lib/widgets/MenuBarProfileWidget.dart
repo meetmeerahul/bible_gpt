@@ -101,9 +101,8 @@ Widget MenuBarProfileWidget(
                 textScaler: const TextScaler.linear(1.0),
                 textAlign: TextAlign.start,
                 style: TextStyle(
-                    fontSize: screenHeight *
-                        (AppConfig().chapterScreenMenuProfileTextSize /
-                            AppConfig().screenHeight),
+                    fontSize: MediaQuery.of(context).textScaler.scale(
+                        (screenHeight * (16 / AppConfig().screenHeight))),
                     color: darkMode
                         ? AppConfig().chapterScreenMenuProfileTextColorDark
                         : AppConfig().chapterScreenMenuProfileTextColorLight,

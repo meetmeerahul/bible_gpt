@@ -1,13 +1,9 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../config/app_config.dart';
 import '../config/language_text_file.dart';
-
-
 
 Widget LogInTextFieldWidget(
     BuildContext context,
@@ -27,7 +23,7 @@ Widget LogInTextFieldWidget(
     bool readMode,
     Function(String) getTextFunction,
     Function(bool) passwordVisibleFunction) {
-  return Container(
+  return SizedBox(
     width: screenWidth * (widgetWidth / AppConfig().screenWidth),
     height: screenHeight * (widgetHeight / AppConfig().screenHeight),
     child: TextFormField(
@@ -80,15 +76,14 @@ Widget LogInTextFieldWidget(
         isDense: true,
         hintText: hintText,
         hintStyle: TextStyle(
-            fontSize: screenHeight *
+            fontSize: MediaQuery.of(context).textScaler.scale(screenHeight *
                 (AppConfig().logInEdittextHintTextSize /
-                    (AppConfig().screenHeight * scaleFactor)),
+                    (AppConfig().screenHeight * scaleFactor))),
             color: darkMode
                 ? AppConfig().logInEdittextTextDarkColor
                 : AppConfig().logInEdittextTextLightColor,
             fontFamily: AppConfig().outfitFontRegular),
         suffixIconConstraints: BoxConstraints.expand(
-          
             width: screenHeight *
                 ((AppConfig().logInWidgetIconHeight +
                         AppConfig().logInEdittextLeftPadding +
@@ -117,7 +112,7 @@ Widget LogInTextFieldWidget(
                       horizontal: screenWidth *
                           (AppConfig().logInEdittextLeftPadding /
                               AppConfig().screenWidth)),
-                  child: Container(
+                  child: SizedBox(
                     //width: screenHeight*(AppConfig().logInWidgetIconHeight/AppConfig().screenHeight),
                     height: screenHeight *
                         (AppConfig().logInWidgetIconHeight /
@@ -137,9 +132,9 @@ Widget LogInTextFieldWidget(
             : null,
       ),
       style: TextStyle(
-          fontSize: screenHeight *
+          fontSize: MediaQuery.of(context).textScaler.scale(screenHeight *
               (AppConfig().logInEdittextTextSize /
-                  (AppConfig().screenHeight * scaleFactor)),
+                  (AppConfig().screenHeight * scaleFactor))),
           color: darkMode
               ? AppConfig().logInEdittextTextDarkColor
               : AppConfig().logInEdittextTextLightColor,

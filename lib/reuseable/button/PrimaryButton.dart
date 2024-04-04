@@ -5,7 +5,8 @@ import '../../config/app_config.dart';
 import '../../config/language_text_file.dart';
 
 ElevatedButton PrimaryButton(
-    {required double screenWidth,
+    {required BuildContext context,
+    required double screenWidth,
     required double screenHeight,
     required double buttonWidth,
     required double buttonHeight,
@@ -108,9 +109,10 @@ ElevatedButton PrimaryButton(
                     textScaler: const TextScaler.linear(1.0),
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                        fontSize: screenHeight *
-                            (AppConfig().primaryButtonTextSize /
-                                AppConfig().screenHeight),
+                        fontSize: MediaQuery.of(context).textScaler.scale(
+                            screenHeight *
+                                (AppConfig().primaryButtonTextSize /
+                                    AppConfig().screenHeight)),
                         color: AppConfig().primaryButtonTextColor,
                         fontFamily: AppConfig().outfitFontRegular),
                     textDirection:

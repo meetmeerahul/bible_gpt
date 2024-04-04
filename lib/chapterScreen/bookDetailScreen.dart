@@ -89,6 +89,8 @@ class BookDetail extends State<BookDetailScreen> {
 
   bool songIsFetching = false;
 
+  late double scaleFactor;
+
   ItemScrollController itemScrollController = ItemScrollController();
 
   bool chapterListIsEmpty = true;
@@ -515,63 +517,98 @@ class BookDetail extends State<BookDetailScreen> {
                             horizontal: (screenHeight *
                                 (27 / AppConfig().screenHeight)),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              GestureDetector(
-                                onTap: () => Navigator.of(context).pop(),
-                                child: SvgPicture.asset(
+                          child: SizedBox(
+                            height:
+                                kToolbarHeight, // Assuming you want the widget to have the same height as the app bar
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                GestureDetector(
+                                  onTap: () => Navigator.of(context).pop(),
+                                  child: SvgPicture.asset(
+                                    "assets/svg/back_arrow.svg",
                                     color: darkMode
-                                        ? const Color(0xffffffff)
-                                        : const Color(0xff000000),
-                                    "assets/svg/back_arrow.svg"),
-                              ),
-                              Text(
-                                textAlign: TextAlign.center,
-                                chapterName,
-                                style: TextStyle(
-                                    color: darkMode
-                                        ? const Color(0xffffffff)
-                                        : const Color(0xFF353535),
-                                    fontSize: 18),
-                              ),
-                              GestureDetector(
-                                onTap: () => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => const GptScreen(),
+                                        ? Colors.white
+                                        : Colors
+                                            .black, // Change icon color according to dark mode
                                   ),
                                 ),
-                                child: SvgPicture.asset(
+                                Expanded(
+                                  child: Text(
+                                    chapterName,
+                                    textAlign: TextAlign.center,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: darkMode
+                                          ? Colors.white
+                                          : const Color(0xFF353535),
+                                      fontSize: MediaQuery.of(context)
+                                              .textScaleFactor *
+                                          (screenHeight *
+                                              (18 / AppConfig().screenHeight)),
+                                    ),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const GptScreen(),
+                                    ),
+                                  ),
+                                  child: SvgPicture.asset(
+                                    "assets/svg/search_icon.svg",
                                     color: darkMode
-                                        ? const Color(0xffffffff)
-                                        : const Color(0xff000000),
-                                    "assets/svg/search_icon.svg"),
+                                        ? Colors.white
+                                        : Colors
+                                            .black, // Change icon color according to dark mode
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                getLanguageCode == 'en'
+                                    ? "Bible / "
+                                    : " बाइबिल /",
+                                style: TextStyle(
+                                  fontSize: MediaQuery.of(context)
+                                      .textScaler
+                                      .scale((screenHeight *
+                                          (12 / AppConfig().screenHeight))),
+                                  color: darkMode
+                                      ? const Color(0xffffffff)
+                                      : const Color(0xFF353535),
+                                ),
+                              ),
+                              Text(
+                                getLanguageCode == 'en'
+                                    ? " Book / "
+                                    : " किताब /",
+                                style: TextStyle(
+                                    fontSize: MediaQuery.of(context)
+                                        .textScaler
+                                        .scale((screenHeight *
+                                            (12 / AppConfig().screenHeight))),
+                                    color: const Color(0XFFAF6A06)),
+                              ),
+                              Text(
+                                chapterName,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontSize: MediaQuery.of(context)
+                                        .textScaler
+                                        .scale((screenHeight *
+                                            (12 / AppConfig().screenHeight))),
+                                    color: const Color(0XFFAF6A06)),
                               ),
                             ],
                           ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              getLanguageCode == 'en'
-                                  ? "Bible / "
-                                  : " बाइबिल /",
-                              style: TextStyle(
-                                color: darkMode
-                                    ? const Color(0xffffffff)
-                                    : const Color(0xFF353535),
-                              ),
-                            ),
-                            Text(
-                              getLanguageCode == 'en' ? " Book / " : " किताब /",
-                              style: const TextStyle(color: Color(0XFFAF6A06)),
-                            ),
-                            Text(
-                              chapterName,
-                              style: const TextStyle(color: Color(0XFFAF6A06)),
-                            ),
-                          ],
                         ),
                         GestureDetector(
                           onTap: () {
@@ -606,10 +643,11 @@ class BookDetail extends State<BookDetailScreen> {
                             });
                           },
                           child: Container(
-                            height: (screenHeight *
-                                (36 / AppConfig().screenHeight)),
-                            width:
-                                (screenWidth * (113 / AppConfig().screenWidth)),
+                            height: MediaQuery.of(context).textScaler.scale(
+                                (screenHeight *
+                                    (36 / AppConfig().screenHeight))),
+                            width: MediaQuery.of(context).textScaler.scale(
+                                screenWidth * (113 / AppConfig().screenWidth)),
                             decoration: const BoxDecoration(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(30)),
@@ -626,10 +664,15 @@ class BookDetail extends State<BookDetailScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 SvgPicture.asset(
-                                    width: (screenWidth *
-                                        (10.87 / AppConfig().screenWidth)),
-                                    height: (screenHeight *
-                                        (12 / AppConfig().screenHeight)),
+                                    width: MediaQuery.of(context)
+                                        .textScaler
+                                        .scale(((screenWidth *
+                                            (10.87 /
+                                                AppConfig().screenWidth)))),
+                                    height: MediaQuery.of(context)
+                                        .textScaler
+                                        .scale(((screenHeight *
+                                            (12 / AppConfig().screenHeight)))),
                                     !playAllIsPlaying
                                         ? "assets/svg/play_icon.svg"
                                         : "assets/svg/pause.svg"),
@@ -643,8 +686,10 @@ class BookDetail extends State<BookDetailScreen> {
                                           : "सभी खेलना",
                                   style: TextStyle(
                                     color: const Color(0xFFFFFFFF),
-                                    fontSize: (screenHeight *
-                                        (16 / AppConfig().screenHeight)),
+                                    fontSize: MediaQuery.of(context)
+                                        .textScaler
+                                        .scale((screenHeight *
+                                            (16 / AppConfig().screenHeight))),
                                   ),
                                 ),
                               ],
@@ -665,27 +710,41 @@ class BookDetail extends State<BookDetailScreen> {
                                     color: darkMode
                                         ? const Color(0xFFAF6A06)
                                         : const Color(0xFF623301),
-                                    fontSize: 12,
+                                    fontSize: MediaQuery.of(context)
+                                        .textScaler
+                                        .scale((screenHeight *
+                                            (12 / AppConfig().screenHeight))),
                                   ),
                                 ),
                                 SizedBox(
-                                  height: (screenHeight *
-                                      (5 / AppConfig().screenHeight)),
+                                  height: MediaQuery.of(context)
+                                      .textScaler
+                                      .scale((screenHeight *
+                                          (5 / AppConfig().screenHeight))),
                                 ),
                                 DropdownButtonHideUnderline(
                                   child: DropdownButton2<String>(
                                     isExpanded: true,
                                     hint: Row(
                                       children: [
-                                        const SizedBox(
-                                          width: 4,
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                              .textScaler
+                                              .scale(screenWidth *
+                                                  (4 /
+                                                      AppConfig().screenWidth)),
                                         ),
                                         Expanded(
                                           child: Text(
                                             LanguageTextFile()
                                                 .bottomNavAll(getLanguageCode),
                                             style: TextStyle(
-                                              fontSize: 12,
+                                              fontSize: MediaQuery.of(context)
+                                                  .textScaler
+                                                  .scale((screenHeight *
+                                                      (12 /
+                                                          AppConfig()
+                                                              .screenHeight))),
                                               color: darkMode
                                                   ? Colors.white
                                                   : Colors.black,
@@ -704,7 +763,12 @@ class BookDetail extends State<BookDetailScreen> {
                                           (index + 1)
                                               .toString(), // Assuming chapter numbering starts from 1
                                           style: TextStyle(
-                                            fontSize: 12,
+                                            fontSize: MediaQuery.of(context)
+                                                .textScaler
+                                                .scale((screenHeight *
+                                                    (12 /
+                                                        AppConfig()
+                                                            .screenHeight))),
                                             color: darkMode
                                                 ? Colors.white
                                                 : Colors.black,
@@ -759,7 +823,10 @@ class BookDetail extends State<BookDetailScreen> {
                                             ? Colors.white
                                             : Colors.black,
                                       ),
-                                      iconSize: 12,
+                                      iconSize: MediaQuery.of(context)
+                                          .textScaler
+                                          .scale((screenHeight *
+                                              (12 / AppConfig().screenHeight))),
                                       iconEnabledColor: Colors.black,
                                       iconDisabledColor: Colors.black,
                                     ),
@@ -814,8 +881,10 @@ class BookDetail extends State<BookDetailScreen> {
                                       color: darkMode
                                           ? const Color(0xFFAF6A06)
                                           : const Color(0xFF623301),
-                                      fontSize: (screenHeight *
-                                          (12 / AppConfig().screenHeight)),
+                                      fontSize: MediaQuery.of(context)
+                                          .textScaler
+                                          .scale((screenHeight *
+                                              (12 / AppConfig().screenHeight))),
                                     ),
                                   ),
                                   SizedBox(
@@ -838,7 +907,12 @@ class BookDetail extends State<BookDetailScreen> {
                                           color: darkMode
                                               ? const Color(0xFFAF6A06)
                                               : const Color(0xFF623301),
-                                          fontSize: 12,
+                                          fontSize: MediaQuery.of(context)
+                                              .textScaler
+                                              .scale((screenHeight *
+                                                  (12 /
+                                                      AppConfig()
+                                                          .screenHeight))),
                                         ),
                                       ),
                                       SizedBox(
@@ -861,7 +935,13 @@ class BookDetail extends State<BookDetailScreen> {
                                                             .bottomNavAll(
                                                                 getLanguageCode),
                                                         style: TextStyle(
-                                                          fontSize: 12,
+                                                          fontSize: MediaQuery
+                                                                  .of(context)
+                                                              .textScaler
+                                                              .scale((screenHeight *
+                                                                  (12 /
+                                                                      AppConfig()
+                                                                          .screenHeight))),
                                                           color: darkMode
                                                               ? Colors.white
                                                               : Colors.black,
@@ -873,24 +953,32 @@ class BookDetail extends State<BookDetailScreen> {
                                                   ],
                                                 ),
                                                 items: _translations
-                                                    .map((Translations item) =>
-                                                        DropdownMenuItem<
-                                                            Translations>(
-                                                          value: item,
-                                                          child: Text(
-                                                            item.fullName!,
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color: darkMode
-                                                                  ? Colors.white
-                                                                  : Colors
-                                                                      .black,
-                                                            ),
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                        ))
+                                                    .map(
+                                                        (Translations item) =>
+                                                            DropdownMenuItem<
+                                                                Translations>(
+                                                              value: item,
+                                                              child: Text(
+                                                                item.fullName!,
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: MediaQuery.of(
+                                                                          context)
+                                                                      .textScaler
+                                                                      .scale((screenHeight *
+                                                                          (12 /
+                                                                              AppConfig().screenHeight))),
+                                                                  color: darkMode
+                                                                      ? Colors
+                                                                          .white
+                                                                      : Colors
+                                                                          .black,
+                                                                ),
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ))
                                                     .toList(),
                                                 value: userSelectedTranslation ??
                                                     _translations
@@ -1112,9 +1200,14 @@ class BookDetail extends State<BookDetailScreen> {
                                                                       'en'
                                                                   ? "Verse"
                                                                   : "कविता",
-                                                              style:
-                                                                  const TextStyle(
-                                                                color: Color(
+                                                              style: TextStyle(
+                                                                fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .textScaler
+                                                                    .scale((screenHeight *
+                                                                        (12 /
+                                                                            AppConfig().screenHeight))),
+                                                                color: const Color(
                                                                     0xFFAF6A06),
                                                               ),
                                                             ),
@@ -1185,6 +1278,7 @@ class BookDetail extends State<BookDetailScreen> {
                                                                     .screenHeight)),
                                                       ),
                                                       SvgPicture.asset(
+                                                          width: screenWidth,
                                                           "assets/svg/rect_bookdetail.svg"),
                                                       Padding(
                                                         padding:
@@ -1269,10 +1363,12 @@ class BookDetail extends State<BookDetailScreen> {
                                                                           0xFFFFFFFF)
                                                                       : const Color(
                                                                           0xFF353535),
-                                                                  fontSize:
-                                                                      (screenHeight *
+                                                                  fontSize: MediaQuery.of(
+                                                                          context)
+                                                                      .textScaler
+                                                                      .scale((screenHeight *
                                                                           (14 /
-                                                                              AppConfig().screenHeight)),
+                                                                              AppConfig().screenHeight))),
                                                                 ),
                                                               ),
                                                       ),
@@ -1285,6 +1381,7 @@ class BookDetail extends State<BookDetailScreen> {
                                                                       .screenHeight)),
                                                         ),
                                                         child: SvgPicture.asset(
+                                                            width: screenWidth,
                                                             "assets/svg/narrow_line.svg"),
                                                       ),
                                                     ],

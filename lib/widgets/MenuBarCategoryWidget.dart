@@ -59,7 +59,8 @@ Widget MenuBarCategoryWidget(
                     textScaler: const TextScaler.linear(1.0),
                     textAlign: TextAlign.start,
                     style: TextStyle(
-                      fontSize: screenHeight * (14 / AppConfig().screenHeight),
+                      fontSize: MediaQuery.of(context).textScaler.scale(
+                          (screenHeight * (14 / AppConfig().screenHeight))),
                       color: currentCategory == 0
                           ? (getDarkMode
                               ? const Color(0xFFFBE4AB)

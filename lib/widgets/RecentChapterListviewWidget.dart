@@ -7,7 +7,8 @@ import '../config/language_text_file.dart';
 import 'ChapterHomeCardWidget.dart';
 
 Widget RecentChapterListviewWidget(
-    {required double screenWidth,
+    {required BuildContext context,
+    required double screenWidth,
     required double screenHeight,
     required ChapterHomeListClass getChapterClass,
     required int currentIndex,
@@ -34,6 +35,7 @@ Widget RecentChapterListviewWidget(
                               AppConfig().screenWidth),
                     ),
               ChapterHomeCardWidget(
+                  context: context,
                   screenWidth: screenWidth,
                   screenHeight: screenHeight,
                   getChapterHomeClass: getChapterClass,

@@ -6,7 +6,8 @@ import '../config/language_text_file.dart';
 import 'app_background_widget.dart';
 
 Widget BackgroundColorWidget(
-    {required double screenWidth,
+    {required BuildContext context,
+    required double screenWidth,
     required double screenHeight,
     required bool getDarkMode,
     required String getLanguageCode,
@@ -58,9 +59,8 @@ Widget BackgroundColorWidget(
                       textScaler: const TextScaler.linear(1.0),
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: screenHeight *
-                              (AppConfig().dashboardScreenCopyRightTextSize /
-                                  AppConfig().screenHeight),
+                          fontSize: MediaQuery.of(context).textScaler.scale(
+                              (screenHeight * (12 / AppConfig().screenHeight))),
                           color: getDarkMode
                               ? AppConfig()
                                   .dashboardScreenBottomCopyRightTextDarkColor
@@ -68,25 +68,6 @@ Widget BackgroundColorWidget(
                                   .dashboardScreenBottomCopyRightTextLightColor,
                           fontFamily: AppConfig().outfitFontRegular),
                     ),
-                    // child: languageFutureWidget(
-                    //     screenWidth: screenWidth,
-                    //     screenHeight: screenHeight,
-                    //     selectedLanguage: getLanguageCode,
-                    //     getLanguageTranslatorMethod: imageContentFuture,
-                    //     getFontSize:
-                    //         AppConfig().dashboardScreenCopyRightTextSize,
-                    //     getDarkMode: getDarkMode,
-                    //     getTextAlign: TextAlign.center,
-                    //     getTextColor: getDarkMode
-                    //         ? AppConfig()
-                    //             .dashboardScreenBottomCopyRightTextDarkColor
-                    //         : AppConfig()
-                    //             .dashboardScreenBottomCopyRightTextLightColor,
-                    //     getFontFamily: AppConfig().outfitFontRegular,
-                    //     getTextDirection: LanguageTextFile()
-                    //         .getTextDirection(getLanguageCode),
-                    //     getSoftWrap: true),
-                    //child:languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getSelectedLanguageCode, getText: LanguageTextFile().getDashboardScreenCopyRightText(0), ,getTextStyle: TextStyle(fontSize: screenHeight*(AppConfig().dashboardScreenCopyRightTextSize/AppConfig().screenHeight),color: getDarkMode?AppConfig().dashboardScreenBottomCopyRightTextDarkColor:AppConfig().dashboardScreenBottomCopyRightTextLightColor,fontFamily: AppConfig().outfitFontRegular)),
                   ),
                   SizedBox(
                     height: screenHeight *

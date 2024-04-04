@@ -548,7 +548,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                     children: [
                       Container(
                         height: swippedDown
-                            ? (screenHeight * (390 / AppConfig().screenHeight))
+                            ? (screenHeight * (400 / AppConfig().screenHeight))
                             : (screenHeight * (520 / AppConfig().screenHeight)),
 
                         decoration: const BoxDecoration(),
@@ -686,6 +686,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                             AppConfig().screenHeight),
                                   ),
                                   SearchGptTextFieldWidget(
+                                      context: context,
                                       screenWidth: screenWidth,
                                       screenHeight: screenHeight,
                                       scaleFactor: scaleFactor,
@@ -721,26 +722,6 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                     .chapterScreenLeftPadding *
                                                 2 /
                                                 AppConfig().screenWidth)),
-                                    // child: languageFutureWidget(
-                                    //     screenWidth: screenWidth,
-                                    //     screenHeight: screenHeight,
-                                    //     selectedLanguage: getLanguageCode,
-                                    //     getLanguageTranslatorMethod:
-                                    //         bottomNavigationContentFuture,
-                                    //     getFontSize: AppConfig()
-                                    //         .chapterScreenContentTextSize,
-                                    //     getDarkMode: darkMode,
-                                    //     getTextAlign: TextAlign.center,
-                                    //     getTextColor: darkMode
-                                    //         ? AppConfig()
-                                    //             .chapterScreenContentTextDarkColor
-                                    //         : AppConfig()
-                                    //             .chapterScreenContentTextLightColor,
-                                    //     getFontFamily:
-                                    //         AppConfig().outfitFontRegular,
-                                    //     getTextDirection: LanguageTextFile()
-                                    //         .getTextDirection(getLanguageCode),
-                                    //     getSoftWrap: true),
                                     child: Text(
                                       LanguageTextFile()
                                           .getDashboardScreenBottomContentText(
@@ -748,10 +729,15 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                       textScaler: const TextScaler.linear(1.0),
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                          fontSize: screenHeight *
-                                              (AppConfig()
-                                                      .chapterScreenContentTextSize /
-                                                  AppConfig().screenHeight),
+                                          fontSize: MediaQuery.of(context)
+                                              .textScaler
+                                              .scale(
+                                                screenHeight *
+                                                    (AppConfig()
+                                                            .chapterScreenContentTextSize /
+                                                        AppConfig()
+                                                            .screenHeight),
+                                              ),
                                           color: darkMode
                                               ? AppConfig()
                                                   .chapterScreenContentTextDarkColor
@@ -814,13 +800,18 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                               });
                                             },
                                             child: Container(
-                                              width: (screenWidth *
-                                                  (143 /
-                                                      AppConfig().screenWidth)),
-                                              height: (screenHeight *
-                                                  (40 /
-                                                      AppConfig()
-                                                          .screenHeight)),
+                                              width: MediaQuery.of(context)
+                                                  .textScaler
+                                                  .scale(screenWidth *
+                                                      (143 /
+                                                          AppConfig()
+                                                              .screenWidth)),
+                                              height: MediaQuery.of(context)
+                                                  .textScaler
+                                                  .scale((screenHeight *
+                                                      (40 /
+                                                          AppConfig()
+                                                              .screenHeight))),
                                               decoration: BoxDecoration(
                                                 border: Border.all(
                                                     color: darkMode
@@ -851,29 +842,40 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                   0xFFFFCA8C)
                                                               : const Color(
                                                                   0xFF754003),
-                                                          fontSize: (screenHeight *
-                                                              (12 /
-                                                                  AppConfig()
-                                                                      .screenHeight))),
+                                                          fontSize: MediaQuery
+                                                                  .of(context)
+                                                              .textScaler
+                                                              .scale((screenHeight *
+                                                                  (12 /
+                                                                      AppConfig()
+                                                                          .screenHeight)))),
                                                     ),
                                                     CircleAvatar(
-                                                      radius: (screenHeight *
-                                                          (14.5 /
-                                                              AppConfig()
-                                                                  .screenHeight)),
+                                                      radius: MediaQuery.of(
+                                                              context)
+                                                          .textScaler
+                                                          .scale((screenHeight *
+                                                              (14.5 /
+                                                                  AppConfig()
+                                                                      .screenHeight))),
                                                       backgroundColor: darkMode
                                                           ? const Color(
                                                               0xFF673602)
                                                           : const Color(
                                                               0xFFD69E0B),
-                                                      child: Text(oldT.toString(),
+                                                      child: Text(
+                                                          oldT.toString(),
                                                           style: TextStyle(
                                                               color: const Color(
                                                                   0xFFFFFFFF),
-                                                              fontSize: (screenHeight *
-                                                                  (14 /
-                                                                      AppConfig()
-                                                                          .screenHeight)))),
+                                                              fontSize: MediaQuery
+                                                                      .of(
+                                                                          context)
+                                                                  .textScaler
+                                                                  .scale((screenHeight *
+                                                                      (14.5 /
+                                                                          AppConfig()
+                                                                              .screenHeight))))),
                                                     )
                                                   ]),
                                             ),
@@ -895,13 +897,18 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                               });
                                             },
                                             child: Container(
-                                              width: (screenWidth *
-                                                  (143 /
-                                                      AppConfig().screenWidth)),
-                                              height: (screenHeight *
-                                                  (40 /
-                                                      AppConfig()
-                                                          .screenHeight)),
+                                              width: MediaQuery.of(context)
+                                                  .textScaler
+                                                  .scale(screenWidth *
+                                                      (143 /
+                                                          AppConfig()
+                                                              .screenWidth)),
+                                              height: MediaQuery.of(context)
+                                                  .textScaler
+                                                  .scale((screenHeight *
+                                                      (40 /
+                                                          AppConfig()
+                                                              .screenHeight))),
                                               decoration: BoxDecoration(
                                                 border: Border.all(
                                                     color: darkMode
@@ -932,16 +939,22 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                 0xFFFFCA8C)
                                                             : const Color(
                                                                 0xFF754003),
-                                                        fontSize: (screenHeight *
-                                                            (12 /
-                                                                AppConfig()
-                                                                    .screenHeight))),
+                                                        fontSize: MediaQuery.of(
+                                                                context)
+                                                            .textScaler
+                                                            .scale((screenHeight *
+                                                                (12 /
+                                                                    AppConfig()
+                                                                        .screenHeight)))),
                                                   ),
                                                   CircleAvatar(
-                                                    radius: (screenHeight *
-                                                        (14.5 /
-                                                            AppConfig()
-                                                                .screenHeight)),
+                                                    radius: MediaQuery.of(
+                                                            context)
+                                                        .textScaler
+                                                        .scale((screenHeight *
+                                                            (14.5 /
+                                                                AppConfig()
+                                                                    .screenHeight))),
                                                     backgroundColor: darkMode
                                                         ? const Color(
                                                             0xFF673602)
@@ -951,10 +964,13 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                         style: TextStyle(
                                                             color: const Color(
                                                                 0xFFFFFFFF),
-                                                            fontSize: (screenHeight *
-                                                                (14 /
-                                                                    AppConfig()
-                                                                        .screenHeight)))),
+                                                            fontSize: MediaQuery
+                                                                    .of(context)
+                                                                .textScaler
+                                                                .scale((screenHeight *
+                                                                    (14 /
+                                                                        AppConfig()
+                                                                            .screenHeight))))),
                                                   )
                                                 ],
                                               ),
@@ -1569,14 +1585,16 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                         : "नीचे ढकेलें",
                                     style: TextStyle(
                                       color: const Color(0xFF999999),
-                                      fontSize: (screenHeight *
-                                          (10 / AppConfig().screenHeight)),
+                                      fontSize: MediaQuery.of(context)
+                                          .textScaler
+                                          .scale((screenHeight *
+                                              (10 / AppConfig().screenHeight))),
                                     ),
                                   )
                                 : Padding(
                                     padding: EdgeInsets.symmetric(
                                       horizontal: (screenWidth *
-                                          (188 / AppConfig().screenWidth)),
+                                          (170 / AppConfig().screenWidth)),
                                     ),
                                     child: Text(
                                       getLanguageCode == 'en'
@@ -1584,8 +1602,11 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                           : "ऊपर ढकेलें",
                                       style: TextStyle(
                                         color: const Color(0xFF999999),
-                                        fontSize: (screenHeight *
-                                            (10 / AppConfig().screenHeight)),
+                                        fontSize: MediaQuery.of(context)
+                                            .textScaler
+                                            .scale((screenHeight *
+                                                (10 /
+                                                    AppConfig().screenHeight))),
                                       ),
                                     ),
                                   ),
