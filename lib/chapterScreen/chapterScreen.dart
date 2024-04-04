@@ -212,6 +212,7 @@ class chapterPage extends State<chapterScreen> {
             }
 
             if (count == 0) {
+              print("No books");
               const Text(
                 "No Books Avilable For New Tesaments",
                 style: TextStyle(color: Colors.red),
@@ -649,7 +650,7 @@ class chapterPage extends State<chapterScreen> {
             }
           }
         }
-       // getSharedPreferenceData(getResult);
+        // getSharedPreferenceData(getResult);
       },
     );
   }

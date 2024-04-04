@@ -188,6 +188,9 @@ flutter:
     - family: OutfitRegular
       fonts:
         - asset: assets/font/Outfit-Regular.ttf
+    - family: NotoSans
+      fonts:
+        - asset: assets/font/NotoSans-Regular.ttf
 
   #
   # For details regarding fonts from package dependencies,

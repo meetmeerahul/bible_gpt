@@ -12,17 +12,37 @@ import '../config/app_config.dart';
 
 class ApiHandler {
   static Future<List<LanguagesAndTransilations>> getLanguages() async {
-    const url = "https://bolls.life/static/bolls/app/views/languages.json";
+    
 
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {'Accept-Charset': 'utf-8'},
-    );
+
     List tempList = [];
+
+
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Basic Og=='
+    };
+    var request = http.Request('GET',
+        Uri.parse('https://bolls.life/static/bolls/app/views/languages.json'));
+    request.body = '''{"query":"","variables":{}}''';
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
     if (response.statusCode == 200) {
-      for (var v in jsonDecode(response.body)) {
+     
+
+      var resposeResult = await response.stream.bytesToString();
+      print(" responseResult : $resposeResult");
+      var resposeMap = json.decode(resposeResult);
+
+      for (var v in resposeMap) {
+        print("Language result : $v");
         tempList.add(v);
       }
+    } else {
+      print(response.reasonPhrase);
     }
 
     return LanguagesAndTransilations.languagesFromAPi(tempList);

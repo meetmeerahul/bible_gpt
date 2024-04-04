@@ -715,12 +715,23 @@ class BookDetail extends State<BookDetailScreen> {
                                     }),
                                     value: selectedChapter,
                                     onChanged: (String? value) {
+                                      String? oldValue;
                                       setState(() {
-                                        selectedChapter = value!;
-                                        print(
-                                            " Selected chapter : $selectedChapter");
-                                        _booksFuture = getBookChapters(
-                                            int.parse(selectedChapter));
+                                        if (musicApiIsLoading) {
+                                          selectedChapter = oldValue!;
+                                        }
+                                        if (!musicApiIsLoading) {
+                                          oldValue = value;
+                                          selectedChapter = value!;
+                                          print(
+                                              " Selected chapter : $selectedChapter");
+                                          _booksFuture = getBookChapters(
+                                              int.parse(selectedChapter));
+                                          _audioPlayer.stop();
+                                          checkedIndex = -1;
+                                          playAllIsPlaying = false;
+                                          isPlaying = false;
+                                        }
                                       });
                                     },
                                     buttonStyleData: ButtonStyleData(
@@ -886,14 +897,25 @@ class BookDetail extends State<BookDetailScreen> {
                                                         .first, // Set default value
                                                 onChanged:
                                                     (Translations? value) {
+                                                  Translations? oldTrans;
+
                                                   setState(() {
-                                                    userSelectedTranslation =
-                                                        value;
-                                                    changableShortName =
-                                                        value!.shortName!;
-                                                    _booksFuture =
-                                                        getBookChapters(int.parse(
-                                                            selectedChapter));
+                                                    if (musicApiIsLoading) {
+                                                      value = oldTrans;
+                                                    } else {
+                                                      userSelectedTranslation =
+                                                          value;
+                                                      changableShortName =
+                                                          value!.shortName!;
+                                                      _booksFuture =
+                                                          getBookChapters(int.parse(
+                                                              selectedChapter));
+                                                      oldTrans = value;
+                                                      _audioPlayer.stop();
+                                                      playAllIsPlaying = false;
+                                                      isPlaying = false;
+                                                      playingIndex = -1;
+                                                    }
                                                   });
                                                 },
                                                 buttonStyleData:
@@ -1043,10 +1065,6 @@ class BookDetail extends State<BookDetailScreen> {
                                                               .screenHeight)),
                                                 ),
                                                 child: Container(
-                                                  // height: (screenHeight *
-                                                  //     (230 /
-                                                  //         AppConfig()
-                                                  //             .screenHeight)),
                                                   // width: (screenWidth *
                                                   //     (396 /
                                                   //         AppConfig()
@@ -1188,51 +1206,39 @@ class BookDetail extends State<BookDetailScreen> {
                                                               AppConfig()
                                                                   .screenWidth),
                                                         ),
-                                                        child:
-                                                            index ==
-                                                                    playingIndex
-                                                                ? Container(
-                                                                    decoration:
-                                                                        const BoxDecoration(
-                                                                      borderRadius:
-                                                                          BorderRadius.all(
-                                                                              Radius.circular(10)),
-                                                                      gradient:
-                                                                          LinearGradient(
-                                                                        begin: Alignment
-                                                                            .topCenter,
-                                                                        end: Alignment
-                                                                            .bottomCenter,
-                                                                        colors: [
-                                                                          Color(
-                                                                              0xFFC47807),
-                                                                          Color(
-                                                                              0xFF643402),
-                                                                        ],
-                                                                      ), // Set the background color to green
-                                                                    ),
-                                                                    child:
-                                                                        Padding(
-                                                                      padding: const EdgeInsets
+                                                        child: index ==
+                                                                    playingIndex &&
+                                                                _audioPlayer
+                                                                        .state ==
+                                                                    PlayerState
+                                                                        .playing
+                                                            ? Container(
+                                                                decoration:
+                                                                    const BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              10)),
+                                                                  gradient:
+                                                                      LinearGradient(
+                                                                    begin: Alignment
+                                                                        .topCenter,
+                                                                    end: Alignment
+                                                                        .bottomCenter,
+                                                                    colors: [
+                                                                      Color(
+                                                                          0xFFC47807),
+                                                                      Color(
+                                                                          0xFF643402),
+                                                                    ],
+                                                                  ), // Set the background color to green
+                                                                ),
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
                                                                           .all(
                                                                           8.0),
-                                                                      child:
-                                                                          Text(
-                                                                        textAlign:
-                                                                            TextAlign.center,
-                                                                        item.text!,
-                                                                        style:
-                                                                            TextStyle(
-                                                                          color: darkMode
-                                                                              ? const Color(0xFFFFFFFF)
-                                                                              : const Color(0xFF353535),
-                                                                          fontSize:
-                                                                              (screenHeight * (14 / AppConfig().screenHeight)),
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  )
-                                                                : Text(
+                                                                  child: Text(
                                                                     textAlign:
                                                                         TextAlign
                                                                             .center,
@@ -1249,6 +1255,26 @@ class BookDetail extends State<BookDetailScreen> {
                                                                               (14 / AppConfig().screenHeight)),
                                                                     ),
                                                                   ),
+                                                                ),
+                                                              )
+                                                            : Text(
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                item.text!,
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: darkMode
+                                                                      ? const Color(
+                                                                          0xFFFFFFFF)
+                                                                      : const Color(
+                                                                          0xFF353535),
+                                                                  fontSize:
+                                                                      (screenHeight *
+                                                                          (14 /
+                                                                              AppConfig().screenHeight)),
+                                                                ),
+                                                              ),
                                                       ),
                                                       Padding(
                                                         padding:
@@ -1413,6 +1439,7 @@ class BookDetail extends State<BookDetailScreen> {
     });
 
     for (int i = 0; i < chaptersList.length; i++) {
+      print("i value : $i");
       //  getClass.verse = getClass.verse! + 1; // Incrementing getClass.verse by 1
 
       if (chaptersList[i].verse == getClass.verse) {
