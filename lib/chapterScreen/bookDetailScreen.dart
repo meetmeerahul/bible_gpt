@@ -1241,7 +1241,10 @@ class BookDetail extends State<BookDetailScreen> {
                                                                     languageCode:
                                                                         getLanguageCode,
                                                                     text: item
-                                                                        .text!,
+                                                                        .text!
+                                                                        .replaceAll(
+                                                                            '<br/>',
+                                                                            '\n'),
                                                                   );
 
                                                                   // meaningClick(item);
@@ -1307,46 +1310,35 @@ class BookDetail extends State<BookDetailScreen> {
                                                                     PlayerState
                                                                         .playing
                                                             ? Container(
-                                                                decoration:
-                                                                    const BoxDecoration(
-                                                                  borderRadius:
-                                                                      BorderRadius.all(
-                                                                          Radius.circular(
-                                                                              10)),
-                                                                  gradient:
-                                                                      LinearGradient(
-                                                                    begin: Alignment
-                                                                        .topCenter,
-                                                                    end: Alignment
-                                                                        .bottomCenter,
-                                                                    colors: [
-                                                                      Color(
-                                                                          0xFFC47807),
-                                                                      Color(
-                                                                          0xFF643402),
-                                                                    ],
-                                                                  ), // Set the background color to green
-                                                                ),
+                                                                decoration: BoxDecoration(
+                                                                    borderRadius: const BorderRadius
+                                                                        .all(
+                                                                        Radius.circular(
+                                                                            10)),
+                                                                    color: const Color(
+                                                                            0xFFffefd7)
+                                                                        .withOpacity(
+                                                                            1) // Set the background color to green
+                                                                    ),
                                                                 child: Padding(
                                                                   padding:
                                                                       const EdgeInsets
                                                                           .all(
-                                                                          8.0),
+                                                                          5.0),
                                                                   child: Text(
                                                                     textAlign:
                                                                         TextAlign
                                                                             .center,
-                                                                    item.text!,
+                                                                    item.text!.replaceAll(
+                                                                        '<br/>',
+                                                                        '\n'),
                                                                     style:
                                                                         TextStyle(
                                                                       color: darkMode
-                                                                          ? const Color(
-                                                                              0xFFFFFFFF)
-                                                                          : const Color(
-                                                                              0xFF353535),
-                                                                      fontSize:
-                                                                          (screenHeight *
-                                                                              (14 / AppConfig().screenHeight)),
+                                                                          ? playAllIsPlaying || isPlaying
+                                                                              ? const Color(0xFF353535)
+                                                                              : const Color(0xFFFFFFFF)
+                                                                          : const Color(0xFF353535),
                                                                     ),
                                                                   ),
                                                                 ),
@@ -1355,7 +1347,10 @@ class BookDetail extends State<BookDetailScreen> {
                                                                 textAlign:
                                                                     TextAlign
                                                                         .center,
-                                                                item.text!,
+                                                                item.text!
+                                                                    .replaceAll(
+                                                                        '<br/>',
+                                                                        '\n'),
                                                                 style:
                                                                     TextStyle(
                                                                   color: darkMode
@@ -1363,12 +1358,6 @@ class BookDetail extends State<BookDetailScreen> {
                                                                           0xFFFFFFFF)
                                                                       : const Color(
                                                                           0xFF353535),
-                                                                  fontSize: MediaQuery.of(
-                                                                          context)
-                                                                      .textScaler
-                                                                      .scale((screenHeight *
-                                                                          (14 /
-                                                                              AppConfig().screenHeight))),
                                                                 ),
                                                               ),
                                                       ),
@@ -1429,7 +1418,7 @@ class BookDetail extends State<BookDetailScreen> {
                     width: 100,
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(colors: [
-                        Color(0xFFC47807),
+                        Color(0xFF643402),
                         Color(0xFF643402),
                       ]),
                     ),
@@ -1471,6 +1460,7 @@ class BookDetail extends State<BookDetailScreen> {
                               .clamp(0.0, duration.inSeconds.toDouble()),
                           min: 0,
                           max: duration.inSeconds.toDouble(),
+                          activeColor: const Color(0XFFAF6A06),
                           onChanged: (value) {
                             setState(() {
                               position = Duration(seconds: value.toInt());
@@ -1551,12 +1541,12 @@ class BookDetail extends State<BookDetailScreen> {
 
         if (i >= 10) {
           playAudio(
-            text: chaptersList[i - 2].text!,
+            text: chaptersList[i - 2].text!.replaceAll("<br/>", "\n"),
             languageCode: getLanguageCode,
           );
         } else {
           playAudio(
-            text: chaptersList[i].text!,
+            text: chaptersList[i].text!.replaceAll("<br/>", "\n"),
             languageCode: getLanguageCode,
           );
         }

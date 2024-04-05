@@ -777,7 +777,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
 
                                   Column(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(
                                         mainAxisAlignment:
