@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:bible_gpt/APIRequest/api_handler.dart';
+import 'package:bible_gpt/config/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -37,6 +39,7 @@ class _SigninScreenState extends State<SigninScreen> {
   TextEditingController mobileNumberController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
+  TextEditingController promoCodeController = TextEditingController();
 
   bool activeMail = true;
   bool showPassword = true;
@@ -224,9 +227,8 @@ class _SigninScreenState extends State<SigninScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           SizedBox(
-                            height: screenHeight *
-                                (AppConfig().signInScreenTopBackButtonPadding /
-                                    AppConfig().screenHeight),
+                            height:
+                                screenHeight * (80 / AppConfig().screenHeight),
                           ),
                           Container(
                             width: screenWidth,
@@ -271,279 +273,8 @@ class _SigninScreenState extends State<SigninScreen> {
                         ],
                       ),
                     ),
-                    Container(
-                      width: screenWidth,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth *
-                              (AppConfig().signInScreenLeftPadding /
-                                  AppConfig().screenWidth)),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          activeMail
-                              ? Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(screenHeight *
-                                            (AppConfig()
-                                                    .signInScreenActiveButtonRadius /
-                                                AppConfig().screenHeight))),
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: <Color>[
-                                        AppConfig()
-                                            .signInScreenActiveButtonBackgroundStartColor
-                                            .withOpacity(0.8),
-                                        AppConfig()
-                                            .signInScreenActiveButtonBackgroundEndColor
-                                            .withOpacity(0.8),
-                                      ],
-                                      tileMode: TileMode.mirror,
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: screenWidth *
-                                            (45 / AppConfig().screenWidth),
-                                        vertical: screenHeight *
-                                            (AppConfig()
-                                                    .signInScreenActiveInnerButtonVerticalPadding /
-                                                AppConfig().screenHeight)),
-                                    // child: languageFutureWidget(
-                                    //     screenWidth: screenWidth,
-                                    //     screenHeight: screenHeight,
-                                    //     selectedLanguage: getLanguageCode,
-                                    //     getLanguageTranslatorMethod:
-                                    //         emailButtonTextFutureMethod,
-                                    //     getFontSize: AppConfig()
-                                    //         .signInScreenActiveButtonTextSize,
-                                    //     getDarkMode: darkMode,
-                                    //     getTextAlign: TextAlign.center,
-                                    //     getTextColor: AppConfig()
-                                    //         .signInScreenActiveButtonTextColor,
-                                    //     getFontFamily:
-                                    //         AppConfig().outfitFontRegular,
-                                    //     getTextDirection: LanguageTextFile()
-                                    //         .getTextDirection(getLanguageCode),
-                                    //     getSoftWrap: true),
-                                    child: Text(
-                                      LanguageTextFile()
-                                          .getSignInScreenEmailButtonText(
-                                              getLanguageCode),
-                                      textScaler: const TextScaler.linear(1.0),
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: MediaQuery.of(context)
-                                              .textScaler
-                                              .scale(screenHeight *
-                                                  (AppConfig()
-                                                          .signInScreenActiveButtonTextSize /
-                                                      AppConfig()
-                                                          .screenHeight)),
-                                          color: AppConfig()
-                                              .signInScreenActiveButtonTextColor,
-                                          fontFamily:
-                                              AppConfig().outfitFontRegular),
-                                    ),
-                                  ),
-                                )
-                              : Container(
-                                  child: TextButton(
-                                    onPressed: () {
-                                      resetControl();
-                                      setState(() {
-                                        activeMail = true;
-                                      });
-                                    },
-                                    style: TextButton.styleFrom(
-                                      minimumSize: Size.zero,
-                                      padding: EdgeInsets.zero,
-                                      tapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                    ),
-                                    // child: languageFutureWidget(
-                                    //     screenWidth: screenWidth,
-                                    //     screenHeight: screenHeight,
-                                    //     selectedLanguage: getLanguageCode,
-                                    //     getLanguageTranslatorMethod:
-                                    //         emailButtonTextFutureMethod,
-                                    //     getFontSize: AppConfig()
-                                    //         .signInScreenInActiveButtonTextSize,
-                                    //     getDarkMode: darkMode,
-                                    //     getTextAlign: TextAlign.end,
-                                    //     getTextColor: darkMode
-                                    //         ? AppConfig()
-                                    //             .signInScreenInActiveTextDarkColor
-                                    //         : AppConfig()
-                                    //             .signInScreenInActiveTextLightColor,
-                                    //     getFontFamily:
-                                    //         AppConfig().outfitFontRegular,
-                                    //     getTextDirection: LanguageTextFile()
-                                    //         .getTextDirection(getLanguageCode),
-                                    //     getSoftWrap: true),
-                                    child: Text(
-                                      LanguageTextFile()
-                                          .getSignInScreenEmailButtonText(
-                                              getLanguageCode),
-                                      textScaler: const TextScaler.linear(1.0),
-                                      textAlign: TextAlign.end,
-                                      style: TextStyle(
-                                          fontSize: MediaQuery.of(context)
-                                              .textScaler
-                                              .scale(screenHeight *
-                                                  (AppConfig()
-                                                          .signInScreenActiveButtonTextSize /
-                                                      AppConfig()
-                                                          .screenHeight)),
-                                          color: darkMode
-                                              ? AppConfig()
-                                                  .signInScreenInActiveTextDarkColor
-                                              : AppConfig()
-                                                  .signInScreenInActiveTextLightColor,
-                                          fontFamily:
-                                              AppConfig().outfitFontRegular),
-                                    ),
-                                  ),
-                                ),
-                          activeMail
-                              ? Container(
-                                  child: TextButton(
-                                    onPressed: () {
-                                      if (isAPILoading) {
-                                      } else {
-                                        resetControl();
-                                        setState(() {
-                                          activeMail = false;
-                                        });
-                                      }
-                                    },
-                                    style: TextButton.styleFrom(
-                                      minimumSize: Size.zero,
-                                      padding: EdgeInsets.zero,
-                                      tapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                    ),
-                                    // child:
-                                    //   languageFutureWidget(
-                                    //       screenWidth: screenWidth,
-                                    //       screenHeight: screenHeight,
-                                    //       selectedLanguage: getLanguageCode,
-                                    //       getLanguageTranslatorMethod:
-                                    //           numberButtonTextFutureMethod,
-                                    //       getFontSize: AppConfig()
-                                    //           .signInScreenInActiveButtonTextSize,
-                                    //       getDarkMode: darkMode,
-                                    //       getTextAlign: TextAlign.end,
-                                    //       getTextColor: darkMode
-                                    //           ? AppConfig()
-                                    //               .signInScreenInActiveTextDarkColor
-                                    //           : AppConfig()
-                                    //               .signInScreenInActiveTextLightColor,
-                                    //       getFontFamily:
-                                    //           AppConfig().outfitFontRegular,
-                                    //       getTextDirection: LanguageTextFile()
-                                    //           .getTextDirection(getLanguageCode),
-                                    //       getSoftWrap: true),
-                                    child: Text(
-                                      LanguageTextFile()
-                                          .getSignInScreenNumberButtonText(
-                                              getLanguageCode),
-                                      textScaler: const TextScaler.linear(1.0),
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: MediaQuery.of(context)
-                                              .textScaler
-                                              .scale(screenHeight *
-                                                  (AppConfig()
-                                                          .signInScreenActiveButtonTextSize /
-                                                      AppConfig()
-                                                          .screenHeight)),
-                                          color: darkMode
-                                              ? AppConfig()
-                                                  .signInScreenInActiveTextDarkColor
-                                              : AppConfig()
-                                                  .signInScreenInActiveTextLightColor,
-                                          fontFamily:
-                                              AppConfig().outfitFontRegular),
-                                    ),
-                                  ),
-                                )
-                              : Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(screenHeight *
-                                            (AppConfig()
-                                                    .signInScreenActiveButtonRadius /
-                                                AppConfig().screenHeight))),
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: <Color>[
-                                        AppConfig()
-                                            .signInScreenActiveButtonBackgroundStartColor
-                                            .withOpacity(0.8),
-                                        AppConfig()
-                                            .signInScreenActiveButtonBackgroundEndColor
-                                            .withOpacity(0.8),
-                                      ],
-                                      tileMode: TileMode.mirror,
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: screenWidth *
-                                            (40 / AppConfig().screenWidth),
-                                        vertical: screenHeight *
-                                            (AppConfig()
-                                                    .signInScreenActiveInnerButtonVerticalPadding /
-                                                AppConfig().screenHeight)),
-                                    // child: languageFutureWidget(
-                                    //     screenWidth: screenWidth,
-                                    //     screenHeight: screenHeight,
-                                    //     selectedLanguage: getLanguageCode,
-                                    //     getLanguageTranslatorMethod:
-                                    //         numberButtonTextFutureMethod,
-                                    //     getFontSize: AppConfig()
-                                    //         .signInScreenActiveButtonTextSize,
-                                    //     getDarkMode: darkMode,
-                                    //     getTextAlign: TextAlign.center,
-                                    //     getTextColor: AppConfig()
-                                    //         .signInScreenActiveButtonTextColor,
-                                    //     getFontFamily:
-                                    //         AppConfig().outfitFontRegular,
-                                    //     getTextDirection: LanguageTextFile()
-                                    //         .getTextDirection(getLanguageCode),
-                                    //     getSoftWrap: true),
-                                    child: Text(
-                                      LanguageTextFile()
-                                          .getSignInScreenNumberButtonText(
-                                              getLanguageCode),
-                                      textScaler: const TextScaler.linear(1.0),
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: MediaQuery.of(context)
-                                              .textScaler
-                                              .scale(screenHeight *
-                                                  (AppConfig()
-                                                          .signInScreenActiveButtonTextSize /
-                                                      AppConfig()
-                                                          .screenHeight)),
-                                          color: AppConfig()
-                                              .signInScreenActiveButtonTextColor,
-                                          fontFamily:
-                                              AppConfig().outfitFontRegular),
-                                    ),
-                                  ),
-                                ),
-                        ],
-                      ),
-                    ),
                     SizedBox(
-                      height: screenHeight *
-                          (AppConfig().signInScreenBottomMailButtonPadding /
-                              AppConfig().screenHeight),
+                      height: screenHeight * (10 / AppConfig().screenHeight),
                     ),
                     logInScreen
                         ? const SizedBox()
@@ -601,28 +332,34 @@ class _SigninScreenState extends State<SigninScreen> {
                                 (AppConfig().signInScreenEdittextPadding /
                                     AppConfig().screenHeight),
                           ),
-                    activeMail
-                        ? LogInTextFieldWidget(
-                            context,
-                            screenWidth,
-                            screenHeight,
-                            scaleFactor,
-                            AppConfig().logInWidgetEdittextWidth,
-                            AppConfig().logInWidgetEdittextHeight,
-                            emailController,
-                            false,
-                            false,
-                            LanguageTextFile()
-                                .getSignInScreenEmailHintText(getLanguageCode),
-                            TextInputAction.next,
-                            TextInputType.emailAddress,
-                            darkMode,
-                            "en",
-                            isAPILoading ? true : false,
-                            (getText) {},
-                            (getSelected) {},
-                          )
+                    LogInTextFieldWidget(
+                      context,
+                      screenWidth,
+                      screenHeight,
+                      scaleFactor,
+                      AppConfig().logInWidgetEdittextWidth,
+                      AppConfig().logInWidgetEdittextHeight,
+                      emailController,
+                      false,
+                      false,
+                      LanguageTextFile()
+                          .getSignInScreenEmailHintText(getLanguageCode),
+                      TextInputAction.next,
+                      TextInputType.emailAddress,
+                      darkMode,
+                      "en",
+                      isAPILoading ? true : false,
+                      (getText) {},
+                      (getSelected) {},
+                    ),
+                    SizedBox(
+                      height: screenHeight * (10 / AppConfig().screenHeight),
+                    ),
+                    logInScreen
+                        ? const SizedBox()
                         : SizedBox(
+                            height: (screenHeight *
+                                (100 / AppConfig().screenHeight)),
                             width: screenWidth -
                                 screenWidth *
                                     (AppConfig().signInScreenLeftPadding *
@@ -651,22 +388,6 @@ class _SigninScreenState extends State<SigninScreen> {
                                           CrossAxisAlignment.center,
                                       children: [
                                         Container(
-                                          // child: TextWidget(
-                                          //     screenWidth: screenWidth,
-                                          //     screenHeight: screenHeight,
-                                          //     getText:
-                                          //         "${selectedCountry == null ? "+00" : selectedCountry?.countryDialCode}",
-                                          //     fontSize: 12,
-                                          //     getTextAlign: TextAlign.center,
-                                          //     getTextColor: darkMode
-                                          //         ? AppConfig()
-                                          //             .signInScreenLogInTextDarkColor
-                                          //         : AppConfig()
-                                          //             .signInScreenLogInTextLightColor,
-                                          //     getFontFamily: AppConfig()
-                                          //         .outfitFontSemiBold,
-                                          //     getSoftWrap: true),
-                                          //child: languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getLanguageCode,getLanguageTranslatorMethod: countryCodeTextFutureMethod, getFontSize: 12, getDarkMode: darkMode, getTextAlign: TextAlign.center, getTextColor: darkMode?AppConfig().signInScreenLogInTextDarkColor:AppConfig().signInScreenLogInTextLightColor, getFontFamily: AppConfig().outfitFontSemiBold, getTextDirection: LanguageTextFile().getTextDirection(getLanguageCode), getSoftWrap: true),
                                           child: Text(
                                             "${selectedCountry == null ? "+00" : selectedCountry?.countryDialCode}",
                                             textScaler:
@@ -729,33 +450,6 @@ class _SigninScreenState extends State<SigninScreen> {
                                                 CrossAxisAlignment.center,
                                             children: [
                                               Container(
-                                                // child: languageFutureWidget(
-                                                //     screenWidth: screenWidth,
-                                                //     screenHeight: screenHeight,
-                                                //     selectedLanguage:
-                                                //         getLanguageCode,
-                                                //     getLanguageTranslatorMethod:
-                                                //         languageTranslatorMethod(
-                                                //             getText:
-                                                //                 "${getCountryItem.countryDialCode}(${getCountryItem.countryCode})",
-                                                //             getLanguageCode:
-                                                //                 getLanguageCode),
-                                                //     getFontSize: 12,
-                                                //     getDarkMode: darkMode,
-                                                //     getTextAlign:
-                                                //         TextAlign.center,
-                                                //     getTextColor: darkMode
-                                                //         ? AppConfig()
-                                                //             .signInScreenLogInTextDarkColor
-                                                //         : AppConfig()
-                                                //             .signInScreenLogInTextLightColor,
-                                                //     getFontFamily: AppConfig()
-                                                //         .outfitFontSemiBold,
-                                                //     getTextDirection:
-                                                //         LanguageTextFile()
-                                                //             .getTextDirection(
-                                                //                 getLanguageCode),
-                                                //     getSoftWrap: true),
                                                 child: Text(
                                                   "${getCountryItem.countryDialCode}(${getCountryItem.countryCode})",
                                                   textScaler:
@@ -783,34 +477,6 @@ class _SigninScreenState extends State<SigninScreen> {
                                                             .screenWidth),
                                               ),
                                               Container(
-                                                // child: languageFutureWidget(
-                                                //     screenWidth: screenWidth,
-                                                //     screenHeight: screenHeight,
-                                                //     selectedLanguage:
-                                                //         getLanguageCode,
-                                                //     getLanguageTranslatorMethod:
-                                                //         languageTranslatorMethod(
-                                                //             getText:
-                                                //                 getCountryItem
-                                                //                     .countryName,
-                                                //             getLanguageCode:
-                                                //                 getLanguageCode),
-                                                //     getFontSize: 10,
-                                                //     getDarkMode: darkMode,
-                                                //     getTextAlign:
-                                                //         TextAlign.center,
-                                                //     getTextColor: darkMode
-                                                //         ? AppConfig()
-                                                //             .signInScreenLogInTextDarkColor
-                                                //         : AppConfig()
-                                                //             .signInScreenLogInTextLightColor,
-                                                //     getFontFamily: AppConfig()
-                                                //         .outfitFontMedium,
-                                                //     getTextDirection:
-                                                //         LanguageTextFile()
-                                                //             .getTextDirection(
-                                                //                 getLanguageCode),
-                                                //     getSoftWrap: true),
                                                 child: Text(
                                                   getCountryItem.countryName,
                                                   textScaler:
@@ -886,6 +552,34 @@ class _SigninScreenState extends State<SigninScreen> {
                           (AppConfig().signInScreenEdittextPadding /
                               AppConfig().screenHeight),
                     ),
+                    logInScreen
+                        ? const SizedBox()
+                        : LogInTextFieldWidget(
+                            context,
+                            screenWidth,
+                            screenHeight,
+                            scaleFactor,
+                            AppConfig().logInWidgetEdittextWidth,
+                            AppConfig().logInWidgetEdittextHeight,
+                            promoCodeController,
+                            false,
+                            false,
+                            LanguageTextFile()
+                                .getPoromoCodeHintText(getLanguageCode),
+                            TextInputAction.next,
+                            TextInputType.name,
+                            darkMode,
+                            "en",
+                            isAPILoading ? true : false,
+                            (getPassword) {},
+                            (getSelected) {}),
+                    logInScreen
+                        ? const SizedBox()
+                        : SizedBox(
+                            height: screenHeight *
+                                (AppConfig().signInScreenEdittextPadding /
+                                    AppConfig().screenHeight),
+                          ),
                     LogInTextFieldWidget(
                         context,
                         screenWidth,
@@ -956,27 +650,6 @@ class _SigninScreenState extends State<SigninScreen> {
                           (AppConfig().signInScreenBottomEdittextPadding /
                               AppConfig().screenHeight),
                     ),
-                    /*logInScreen?Container(
-                          width: screenWidth*(AppConfig().logInWidgetEdittextWidth/AppConfig().screenWidth),
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: (){
-                              if(isAPILoading){
-
-                              }
-                              else{
-                                navigateToForgetPasswordScreen();
-                              }
-                            },
-                            style: TextButton.styleFrom(
-                              minimumSize: Size.zero,
-                              padding: EdgeInsets.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getLanguageCode,getLanguageTranslatorMethod:forgetPasswordTextFutureMethod, getFontSize: AppConfig().signInScreenInActiveButtonTextSize, getDarkMode: darkMode, getTextAlign: TextAlign.end, getTextColor: Color(0xFFE05624), getFontFamily: AppConfig().outfitFontRegular, getTextDirection: LanguageTextFile().getTextDirection(getLanguageCode), getSoftWrap:true),
-                            //child: Text("Forgot password",textScaler: TextScaler.linear(1.0),textAlign: TextAlign.end,style: TextStyle(fontSize: screenHeight*(AppConfig().signInScreenInActiveButtonTextSize/AppConfig().screenHeight),color: Color(0xFFE05624),fontFamily: AppConfig().outfitFontRegular),textDirection: LanguageTextFile().getTextDirection(getLanguageCode),),
-                          ),
-                        ):SizedBox(),*/
                     SizedBox(
                       height: screenHeight *
                           (AppConfig().signInScreenBottomEdittextPadding *
@@ -1034,6 +707,8 @@ class _SigninScreenState extends State<SigninScreen> {
                               } else {
                                 if (nameValidation(
                                         firstNameController.text.toString()) &&
+                                    mailIdValidation(
+                                        emailController.text.toString()) &&
                                     nameValidation(
                                         lastNameController.text.toString()) &&
                                     mailIdValidation(
@@ -1054,11 +729,11 @@ class _SigninScreenState extends State<SigninScreen> {
                                       "mail Id : ${emailController.text.toString()}");
                                   print(
                                       "password : ${passwordController.text.toString()}");
-                                  // callRegisterAPI(
-                                  //     firstNameController.text.toString(),
-                                  //     lastNameController.text.toString(),
-                                  //     emailController.text.toString(),
-                                  //     passwordController.text.toString());
+                                  callRegisterAPI(
+                                      firstNameController.text.toString(),
+                                      lastNameController.text.toString(),
+                                      emailController.text.toString(),
+                                      passwordController.text.toString());
                                 } else {
                                   if (!nameValidation(
                                       firstNameController.text.toString())) {
@@ -1221,24 +896,6 @@ class _SigninScreenState extends State<SigninScreen> {
                                     AppConfig().screenWidth),
                           ),
                           Container(
-                            // child: languageFutureWidget(
-                            //     screenWidth: screenWidth,
-                            //     screenHeight: screenHeight,
-                            //     selectedLanguage: getLanguageCode,
-                            //     getLanguageTranslatorMethod:
-                            //         googleContentTextFutureMethod,
-                            //     getFontSize:
-                            //         AppConfig().signInScreenLogInTextSize,
-                            //     getDarkMode: darkMode,
-                            //     getTextAlign: TextAlign.center,
-                            //     getTextColor: darkMode
-                            //         ? AppConfig().signInScreenLogInTextDarkColor
-                            //         : AppConfig()
-                            //             .signInScreenLogInTextLightColor,
-                            //     getFontFamily: AppConfig().outfitFontRegular,
-                            //     getTextDirection: LanguageTextFile()
-                            //         .getTextDirection(getLanguageCode),
-                            //     getSoftWrap: true),
                             child: Text(
                               LanguageTextFile()
                                   .getSignInScreenGoogleContentText(
@@ -1286,35 +943,6 @@ class _SigninScreenState extends State<SigninScreen> {
                           (AppConfig().signInScreenBottomButtonPadding /
                               AppConfig().screenHeight),
                     ),
-                    /*  Platform.isIOS
-                        ? AppleButton(
-                            screenWidth: screenWidth,
-                            screenHeight: screenHeight,
-                            buttonWidth:
-                                AppConfig().signInScreenAppleButtonWidth,
-                            buttonHeight:
-                                AppConfig().signInScreenAppleButtonHeight,
-                            buttonTextFunction: appleButtonTextFutureMethod!,
-                            getLanguageCode: getLanguageCode,
-                            isAPILoading: isAPILoading,
-                            buttonPressedFunction: (isClick) {
-                              if (isClick) {
-                                if (isAPILoading) {
-                                } else {
-                                  print("Apple click");
-                                  appleClick();
-                                }
-                              }
-                            })
-                        : const SizedBox(),
-                    Platform.isIOS
-                        ? SizedBox(
-                            height: screenHeight *
-                                (AppConfig().signInScreenBottomButtonPadding /
-                                    AppConfig().screenHeight),
-                          )
-                        : const SizedBox(),
-                        */
                     GoogleButton(
                         context: context,
                         screenWidth: screenWidth,
@@ -1399,46 +1027,8 @@ class _SigninScreenState extends State<SigninScreen> {
                                             .signInScreenSwitchTextLightColor1,
                                     fontFamily: AppConfig().outfitFontRegular),
                               ),
-                              // child: languageFutureWidget(
-                              //     screenWidth: screenWidth,
-                              //     screenHeight: screenHeight,
-                              //     selectedLanguage: getLanguageCode,
-                              //     getLanguageTranslatorMethod:
-                              //         switchLogIn1TextFutureMethod,
-                              //     getFontSize:
-                              //         AppConfig().signInScreenSwitchTextSize,
-                              //     getDarkMode: darkMode,
-                              //     getTextAlign: TextAlign.center,
-                              //     getTextColor: darkMode
-                              //         ? AppConfig()
-                              //             .signInScreenSwitchTextDarkColor1
-                              //         : AppConfig()
-                              //             .signInScreenSwitchTextLightColor1,
-                              //     getFontFamily: AppConfig().outfitFontRegular,
-                              //     getTextDirection: LanguageTextFile()
-                              //         .getTextDirection(getLanguageCode),
-                              //     getSoftWrap: true),
                             ),
                             Container(
-                              // child: languageFutureWidget(
-                              //     screenWidth: screenWidth,
-                              //     screenHeight: screenHeight,
-                              //     selectedLanguage: getLanguageCode,
-                              //     getLanguageTranslatorMethod:
-                              //         switchLogIn2TextFutureMethod,
-                              //     getFontSize:
-                              //         AppConfig().signInScreenSwitchTextSize,
-                              //     getDarkMode: darkMode,
-                              //     getTextAlign: TextAlign.center,
-                              //     getTextColor: darkMode
-                              //         ? AppConfig()
-                              //             .signInScreenSwitchTextDarkColor2
-                              //         : AppConfig()
-                              //             .signInScreenSwitchTextLightColor2,
-                              //     getFontFamily: AppConfig().outfitFontRegular,
-                              //     getTextDirection: LanguageTextFile()
-                              //         .getTextDirection(getLanguageCode),
-                              //     getSoftWrap: true),
                               child: Text(
                                 logInScreen
                                     ? LanguageTextFile()
@@ -1464,16 +1054,6 @@ class _SigninScreenState extends State<SigninScreen> {
                             )
                           ],
                         ),
-                        /*child: RichText(
-                              textScaler: TextScaler.linear(1),
-                              textDirection: LanguageTextFile().getTextDirection(getLanguageCode),
-                              text: TextSpan(
-                                  children: <TextSpan>[
-                                    TextSpan(text:logInScreen?LanguageTextFile().getSignInScreenSwitchLogInText1():LanguageTextFile().getSignInScreenSwitchRegisterText1(),style: TextStyle(fontSize: screenHeight*(AppConfig().signInScreenSwitchTextSize/AppConfig().screenHeight),color: darkMode?AppConfig().signInScreenSwitchTextDarkColor1:AppConfig().signInScreenSwitchTextLightColor1,fontFamily: AppConfig().outfitFontRegular),),
-                                    TextSpan(text:logInScreen?LanguageTextFile().getSignInScreenSwitchLogInText2():LanguageTextFile().getSignInScreenSwitchRegisterText2(),style: TextStyle(fontSize: screenHeight*(AppConfig().signInScreenSwitchTextSize/AppConfig().screenHeight),color: darkMode?AppConfig().signInScreenSwitchTextDarkColor2:AppConfig().signInScreenSwitchTextLightColor2,fontFamily: AppConfig().outfitFontRegular),),
-                                  ]
-                              ),
-                            ),*/
                       ),
                     ),
                     SizedBox(
@@ -1538,5 +1118,37 @@ class _SigninScreenState extends State<SigninScreen> {
 
       ToastMessage(screenHeight, userDetails, true);
     }
+  }
+
+  callRegisterAPI(String getFirstName, String getLastName, String getUserName,
+      String getPassword) async {
+    setState(() {
+      isAPILoading = true;
+    });
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+    if (internetConnectCheck) {
+      var registerAPIResponse = await ApiHandler().registerAPI(
+          getFirstName: getFirstName,
+          getLastName: getLastName,
+          getUserName: getUserName,
+          getPassword: getPassword);
+      print(registerAPIResponse);
+      if (registerAPIResponse["status"]) {
+        String getToken = registerAPIResponse["token"];
+        SharedPreference.instance.setUserToken("token", getToken);
+        Map<String, dynamic> getUserMap = registerAPIResponse["user"];
+        SharedPreference.instance.setUserProfileDetail("user", getUserMap);
+        String getResponseMessage = registerAPIResponse["message"];
+        Navigator.pop(context, getResponseMessage);
+      } else {
+        ToastMessage(screenHeight, registerAPIResponse["message"],
+            registerAPIResponse["status"]);
+      }
+    } else {
+      navigateToNoInternetScreen(false);
+    }
+    setState(() {
+      isAPILoading = false;
+    });
   }
 }

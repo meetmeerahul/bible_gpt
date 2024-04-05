@@ -1334,6 +1334,11 @@ class BookDetail extends State<BookDetailScreen> {
                                                                         '\n'),
                                                                     style:
                                                                         TextStyle(
+                                                                      fontSize: MediaQuery.of(
+                                                                              context)
+                                                                          .textScaler
+                                                                          .scale((screenHeight *
+                                                                              (12 / AppConfig().screenHeight))),
                                                                       color: darkMode
                                                                           ? playAllIsPlaying || isPlaying
                                                                               ? const Color(0xFF353535)
@@ -1353,6 +1358,12 @@ class BookDetail extends State<BookDetailScreen> {
                                                                         '\n'),
                                                                 style:
                                                                     TextStyle(
+                                                                  fontSize: MediaQuery.of(
+                                                                          context)
+                                                                      .textScaler
+                                                                      .scale((screenHeight *
+                                                                          (12 /
+                                                                              AppConfig().screenHeight))),
                                                                   color: darkMode
                                                                       ? const Color(
                                                                           0xFFFFFFFF)

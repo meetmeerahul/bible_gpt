@@ -350,6 +350,18 @@ class LanguageTextFile {
     return "";
   }
 
+
+  String getPoromoCodeHintText(String language){
+
+        if (language == 'en') {
+      return "Promocode";
+    } else if (language == "hi") {
+      return "प्रचार कोड";
+    }
+
+    return "";
+  }
+
   //SignIn Screen
   String getSignInScreenEmailHintText(String language) {
     if (language == 'en') {

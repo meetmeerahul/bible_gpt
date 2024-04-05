@@ -12,11 +12,7 @@ import '../config/app_config.dart';
 
 class ApiHandler {
   static Future<List<LanguagesAndTransilations>> getLanguages() async {
-    
-
-
     List tempList = [];
-
 
     var headers = {
       'Content-Type': 'application/json',
@@ -31,8 +27,6 @@ class ApiHandler {
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 200) {
-     
-
       var resposeResult = await response.stream.bytesToString();
       print(" responseResult : $resposeResult");
       var resposeMap = json.decode(resposeResult);
@@ -180,5 +174,58 @@ class ApiHandler {
       getSearchGPTResponse["message"] = getErrorMessage;
     }
     return getSearchGPTResponse;
+  }
+
+  Future<Map<String, dynamic>> registerAPI(
+      {required String getFirstName,
+      required String getLastName,
+      required String getUserName,
+      required String getPassword}) async {
+    Map<String, dynamic> registerResponse = {
+      "status": false,
+      "message": "",
+      "token": "",
+      "user": {}
+    };
+    String registerAPIUrl = "https://api.qurangpt.com/api/v1/user/register/";
+
+    try {
+      var registerAPIResponse =
+          await http.post(Uri.parse(registerAPIUrl), body: {
+        "first_name": getFirstName,
+        "last_name": getLastName,
+        "username": getUserName,
+        "password": getPassword
+      });
+      print(registerAPIResponse.body);
+      if (registerAPIResponse.statusCode >= 200 &&
+          registerAPIResponse.statusCode < 300 &&
+          registerAPIResponse.statusCode != 203) {
+        registerResponse["status"] = true;
+        Map getResponseMap = jsonDecode(registerAPIResponse.body);
+        print(getResponseMap);
+        Map getDataMap = getResponseMap["data"] ?? {};
+        String getResponseMessage = getResponseMap["message"] ?? "";
+        registerResponse["message"] = getResponseMessage;
+        if (getDataMap.isNotEmpty) {
+          String getToken = getDataMap["token"] ?? "";
+          registerResponse["token"] = getToken;
+          Map<String, dynamic> getUserMap = getDataMap["user"] ?? {};
+          registerResponse["user"] = getUserMap;
+          print("Token : $getToken");
+          print("User : $getUserMap");
+        }
+      } else {
+        registerResponse["status"] = false;
+        Map getResponseMap = jsonDecode(registerAPIResponse.body);
+        String getErrorMessage = getResponseMap["message"] ?? "";
+        registerResponse["message"] = getErrorMessage;
+      }
+    } catch (e) {
+      registerResponse["status"] = false;
+      String getErrorMessage = e.toString() ?? "";
+      registerResponse["message"] = getErrorMessage;
+    }
+    return registerResponse;
   }
 }

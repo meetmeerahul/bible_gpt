@@ -487,25 +487,6 @@ Widget MenuBarSettingWidget({
                     children: [
                       Container(
                         alignment: Alignment.centerLeft,
-                        // child: languageFutureWidget(
-                        //     screenWidth: screenWidth,
-                        //     screenHeight: screenHeight,
-                        //     selectedLanguage: getLanguageCode,
-                        //     getLanguageTranslatorMethod:
-                        //         languageTranslatorMethod(
-                        //             getText: LanguageTextFile()
-                        //                 .getLanguageSettingRateUsText(),
-                        //             getLanguageCode: getLanguageCode),
-                        //     getFontSize: 14,
-                        //     getDarkMode: getDarkMode,
-                        //     getTextAlign: TextAlign.start,
-                        //     getTextColor: getDarkMode
-                        //         ? const Color(0xFFFFFFFF)
-                        //         : const Color(0xFF8A8A8A),
-                        //     getFontFamily: AppConfig().outfitFontRegular,
-                        //     getTextDirection: LanguageTextFile()
-                        //         .getTextDirection(getLanguageCode),
-                        //     getSoftWrap: true),
                         child: Text(
                           LanguageTextFile()
                               .getLanguageSettingRateUsText(getLanguageCode),
@@ -550,84 +531,62 @@ Widget MenuBarSettingWidget({
                       SizedBox(
                         height: screenHeight * (10 / AppConfig().screenHeight),
                       ),
-                      Container(
-                        child: Row(
-                          textDirection: LanguageTextFile()
-                              .getTextDirection(getLanguageCode),
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              height: screenHeight *
-                                  (AppConfig().primaryButtonTextSize *
-                                      3.5 /
-                                      AppConfig().screenHeight),
-                              child: isDeleteAPILoading
-                                  ? Wrap(
-                                      children: [
-                                        Container(
-                                          width: screenHeight *
-                                              (AppConfig()
-                                                      .primaryButtonTextSize *
-                                                  2 /
-                                                  AppConfig().screenHeight),
-                                          height: screenHeight *
-                                              (AppConfig()
-                                                      .primaryButtonTextSize *
-                                                  2 /
-                                                  AppConfig().screenHeight),
-                                          alignment: Alignment.center,
-                                          child: CircularProgressIndicator(
-                                            color: AppConfig()
-                                                .primaryButtonTextColor,
-                                            strokeWidth: screenWidth *
-                                                (3 / AppConfig().screenWidth),
-                                            strokeAlign:
-                                                BorderSide.strokeAlignCenter,
-                                          ),
-                                        )
-                                      ],
-                                    )
-                                  :
-                                  // languageFutureWidget(
-                                  //     screenWidth: screenWidth,
-                                  //     screenHeight: screenHeight,
-                                  //     selectedLanguage: getLanguageCode,
-                                  //     getLanguageTranslatorMethod:
-                                  //         languageTranslatorMethod(
-                                  //             getText: LanguageTextFile()
-                                  //                 .getLanguageSettingDeleteAccountText(),
-                                  //             getLanguageCode:
-                                  //                 getLanguageCode),
-                                  //     getFontSize: 14,
-                                  //     getDarkMode: getDarkMode,
-                                  //     getTextAlign: TextAlign.start,
-                                  //     getTextColor: getDarkMode
-                                  //         ? const Color(0xFFFFFFFF)
-                                  //         : const Color(0xFF8A8A8A),
-                                  //     getFontFamily:
-                                  //         AppConfig().outfitFontRegular,
-                                  //     getTextDirection: LanguageTextFile()
-                                  //         .getTextDirection(getLanguageCode),
-                                  //     getSoftWrap: true)
-                                  Text(
-                                      LanguageTextFile()
-                                          .getLanguageSettingDeleteAccountText(),
-                                      textScaler: const TextScaler.linear(1.0),
-                                      textAlign: TextAlign.start,
-                                      style: TextStyle(
-                                          fontSize: screenHeight *
-                                              (14 / AppConfig().screenHeight),
-                                          color: getDarkMode
-                                              ? const Color(0xFFFFFFFF)
-                                              : const Color(0xFF8A8A8A),
-                                          fontFamily:
-                                              AppConfig().outfitFontRegular),
-                                    ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // Container(
+                      //   child: Row(
+                      //     textDirection: LanguageTextFile()
+                      //         .getTextDirection(getLanguageCode),
+                      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //     crossAxisAlignment: CrossAxisAlignment.center,
+                      //     children: [
+                      //       SizedBox(
+                      //         height: screenHeight *
+                      //             (AppConfig().primaryButtonTextSize *
+                      //                 3.5 /
+                      //                 AppConfig().screenHeight),
+                      //         child: isDeleteAPILoading
+                      //             ? Wrap(
+                      //                 children: [
+                      //                   Container(
+                      //                     width: screenHeight *
+                      //                         (AppConfig()
+                      //                                 .primaryButtonTextSize *
+                      //                             2 /
+                      //                             AppConfig().screenHeight),
+                      //                     height: screenHeight *
+                      //                         (AppConfig()
+                      //                                 .primaryButtonTextSize *
+                      //                             2 /
+                      //                             AppConfig().screenHeight),
+                      //                     alignment: Alignment.center,
+                      //                     child: CircularProgressIndicator(
+                      //                       color: AppConfig()
+                      //                           .primaryButtonTextColor,
+                      //                       strokeWidth: screenWidth *
+                      //                           (3 / AppConfig().screenWidth),
+                      //                       strokeAlign:
+                      //                           BorderSide.strokeAlignCenter,
+                      //                     ),
+                      //                   )
+                      //                 ],
+                      //               )
+                      //             : Text(
+                      //                 LanguageTextFile()
+                      //                     .getLanguageSettingDeleteAccountText(),
+                      //                 textScaler: const TextScaler.linear(1.0),
+                      //                 textAlign: TextAlign.start,
+                      //                 style: TextStyle(
+                      //                     fontSize: screenHeight *
+                      //                         (14 / AppConfig().screenHeight),
+                      //                     color: getDarkMode
+                      //                         ? const Color(0xFFFFFFFF)
+                      //                         : const Color(0xFF8A8A8A),
+                      //                     fontFamily:
+                      //                         AppConfig().outfitFontRegular),
+                      //               ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                       SizedBox(
                         height: screenHeight * (10 / AppConfig().screenHeight),
                       ),
