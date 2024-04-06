@@ -273,4 +273,109 @@ class ApiHandler {
     }
     return logInResponse;
   }
+
+  Future<Map<String, dynamic>> socialMediaAPI(
+      {required String getFullName,
+      required String getSocialMediaType,
+      required String getSocialId,
+      required String getMailId,
+      required String getImageUrl}) async {
+    Map<String, dynamic> socialMediaResponse = {
+      "status": false,
+      "message": "",
+      "token": "",
+      "user": {}
+    };
+    String socialMediaAPIUrl =
+        "https://api.qurangpt.com/api/v1/user/continue-with-social/";
+    print(socialMediaAPIUrl);
+    try {
+      var socialMediaAPIResponse =
+          await http.post(Uri.parse(socialMediaAPIUrl), body: {
+        "full_name": getFullName,
+        "social_platform": getSocialMediaType,
+        "social_operator_id": getSocialId,
+        "email": getMailId,
+        "avatar": getImageUrl
+      });
+      print(socialMediaAPIResponse.body);
+      if (socialMediaAPIResponse.statusCode >= 200 &&
+          socialMediaAPIResponse.statusCode < 300 &&
+          socialMediaAPIResponse.statusCode != 203) {
+        socialMediaResponse["status"] = true;
+        Map getResponseMap = jsonDecode(socialMediaAPIResponse.body);
+        print(getResponseMap);
+        Map getDataMap = getResponseMap["data"] ?? {};
+        String getResponseMessage = getResponseMap["message"] ?? "";
+        socialMediaResponse["message"] = getResponseMessage;
+        if (getDataMap.isNotEmpty) {
+          String getToken = getDataMap["token"] ?? "";
+          socialMediaResponse["token"] = getToken;
+          Map<String, dynamic> getUserMap = getDataMap["user"] ?? {};
+          socialMediaResponse["user"] = getUserMap;
+          print("Token : $getToken");
+          print("User : $getUserMap");
+        }
+      } else {
+        socialMediaResponse["status"] = false;
+        Map getResponseMap = jsonDecode(socialMediaAPIResponse.body);
+        String getErrorMessage = getResponseMap["message"] ?? "";
+        socialMediaResponse["message"] = getErrorMessage;
+      }
+    } catch (e) {
+      socialMediaResponse["status"] = false;
+      String getErrorMessage = e.toString() ?? "";
+      socialMediaResponse["message"] = getErrorMessage;
+    }
+    return socialMediaResponse;
+  }
+
+  Future<Map<String, dynamic>> socialMediaLogInAPI(
+      {required String getSocialMediaType, required String getSocialId}) async {
+    Map<String, dynamic> socialLogInMediaResponse = {
+      "status": false,
+      "message": "",
+      "token": "",
+      "user": {}
+    };
+    String socialMediaLogInAPIUrl =
+        "https://api.qurangpt.com/api/v1/user/login-with-social/";
+    print(socialMediaLogInAPIUrl);
+    try {
+      var socialMediaLogInAPIResponse =
+          await http.post(Uri.parse(socialMediaLogInAPIUrl), body: {
+        "social_platform": getSocialMediaType,
+        "social_operator_id": getSocialId,
+      });
+      print(socialMediaLogInAPIResponse.body);
+      if (socialMediaLogInAPIResponse.statusCode >= 200 &&
+          socialMediaLogInAPIResponse.statusCode < 300 &&
+          socialMediaLogInAPIResponse.statusCode != 203) {
+        socialLogInMediaResponse["status"] = true;
+        Map getResponseMap = jsonDecode(socialMediaLogInAPIResponse.body);
+        print(getResponseMap);
+        Map getDataMap = getResponseMap["data"] ?? {};
+        String getResponseMessage = getResponseMap["message"] ?? "";
+        socialLogInMediaResponse["message"] = getResponseMessage;
+        if (getDataMap.isNotEmpty) {
+          String getToken = getDataMap["token"] ?? "";
+          socialLogInMediaResponse["token"] = getToken;
+          Map<String, dynamic> getUserMap = getDataMap["user"] ?? {};
+          socialLogInMediaResponse["user"] = getUserMap;
+          print("Token : $getToken");
+          print("User : $getUserMap");
+        }
+      } else {
+        socialLogInMediaResponse["status"] = false;
+        Map getResponseMap = jsonDecode(socialMediaLogInAPIResponse.body);
+        String getErrorMessage = getResponseMap["message"] ?? "";
+        socialLogInMediaResponse["message"] = getErrorMessage;
+      }
+    } catch (e) {
+      socialLogInMediaResponse["status"] = false;
+      String getErrorMessage = e.toString() ?? "";
+      socialLogInMediaResponse["message"] = getErrorMessage;
+    }
+    return socialLogInMediaResponse;
+  }
 }

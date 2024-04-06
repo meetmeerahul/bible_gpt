@@ -2,13 +2,16 @@ import 'dart:convert';
 
 import 'package:bible_gpt/APIRequest/api_handler.dart';
 import 'package:bible_gpt/config/shared_preferences.dart';
+import 'package:bible_gpt/dashBoardScreen/dash_board_screen.dart';
+import 'package:bible_gpt/signInScreen/google_signin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../class/LanguageMethod.dart';
 import '../class/country_class.dart';
-import '../class/google_auth.dart';
+
 import '../class/theme_method.dart';
 import '../config/app_config.dart';
 import '../config/language_text_file.dart';
@@ -1108,15 +1111,28 @@ class _SigninScreenState extends State<SigninScreen> {
     );
   }
 
-  Future googleClick() async {
-    final user = await GoogleAuth.login();
-
-    if (user == null) {
-      ToastMessage(screenHeight, "No user found", false);
+  googleClick() async {
+    await GoogleSignInMethod().signOut();
+    GoogleSignInAccount? googleUser = await GoogleSignInMethod().logIn();
+    if (googleUser != null) {
+      print("user name ${googleUser.displayName}");
+      print("mail id ${googleUser.email}");
+      print("id ${googleUser.id}");
+      print("image ${googleUser.photoUrl}");
+      String? getFullName = googleUser.displayName;
+      String getSocialMediaType = AppConfig().googleSocialMediaText;
+      String getSocialMediaId = googleUser.id;
+      String getMailId = googleUser.email;
+      String? getImageUrl = googleUser.photoUrl;
+      if (logInScreen) {
+        callSignInSocialMediaAPI(getFullName ?? "", getSocialMediaType,
+            getSocialMediaId, getMailId, getImageUrl ?? "");
+      } else {
+        callSignUpSocialMediaAPI(getFullName ?? "", getSocialMediaType,
+            getSocialMediaId, getMailId, getImageUrl ?? "");
+      }
     } else {
-      String userDetails = "${user.displayName!} ${user.email}";
-
-      ToastMessage(screenHeight, userDetails, true);
+      ToastMessage(screenHeight, "Google Sign in Account Failed", false);
     }
   }
 
@@ -1168,10 +1184,87 @@ class _SigninScreenState extends State<SigninScreen> {
         String getResponseMessage = logInAPIResponse["message"];
         Map<String, dynamic> getUserMap = logInAPIResponse["user"];
         SharedPreference.instance.setUserProfileDetail("user", getUserMap);
-        Navigator.pop(context, getResponseMessage);
+        ToastMessage(screenHeight, logInAPIResponse["message"],
+            logInAPIResponse["status"]);
+        Navigator.of(context).pushAndRemoveUntil(
+            (MaterialPageRoute(builder: (context) => const DashboardScreen())),
+            (route) => false);
       } else {
         ToastMessage(screenHeight, logInAPIResponse["message"],
             logInAPIResponse["status"]);
+      }
+    } else {
+      navigateToNoInternetScreen(false);
+    }
+    setState(() {
+      isAPILoading = false;
+    });
+  }
+
+  callSignUpSocialMediaAPI(String getFullName, String getSocialMediaType,
+      String getSocialMediaId, String getMailId, String getImageUrl) async {
+    setState(() {
+      isAPILoading = true;
+    });
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+    if (internetConnectCheck) {
+      var socialMediaAPIResponse = await ApiHandler().socialMediaAPI(
+          getFullName: getFullName,
+          getSocialMediaType: getSocialMediaType,
+          getSocialId: getSocialMediaId,
+          getMailId: getMailId,
+          getImageUrl: getImageUrl);
+      print(socialMediaAPIResponse);
+      if (socialMediaAPIResponse["status"]) {
+        String getToken = socialMediaAPIResponse["token"];
+        SharedPreference.instance.setUserToken("token", getToken);
+        String getResponseMessage = socialMediaAPIResponse["message"];
+        Map<String, dynamic> getUserMap = socialMediaAPIResponse["user"];
+        SharedPreference.instance.setUserProfileDetail("user", getUserMap);
+        ToastMessage(screenHeight, socialMediaAPIResponse["message"],
+            socialMediaAPIResponse["status"]);
+        Navigator.of(context).pushAndRemoveUntil(
+            (MaterialPageRoute(builder: (context) => const DashboardScreen())),
+            (route) => false);
+      } else {
+        ToastMessage(screenHeight, socialMediaAPIResponse["message"],
+            socialMediaAPIResponse["status"]);
+      }
+    } else {
+      navigateToNoInternetScreen(false);
+    }
+    setState(() {
+      isAPILoading = false;
+    });
+  }
+
+  callSignInSocialMediaAPI(String getFullName, String getSocialMediaType,
+      String getSocialMediaId, String getMailId, String getImageUrl) async {
+    setState(() {
+      isAPILoading = true;
+    });
+    print("Id : $getSocialMediaId");
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+    if (internetConnectCheck) {
+      var socialMediaLogInAPIResponse = await ApiHandler().socialMediaLogInAPI(
+          getSocialMediaType: getSocialMediaType,
+          getSocialId: getSocialMediaId);
+      print(socialMediaLogInAPIResponse);
+      if (socialMediaLogInAPIResponse["status"]) {
+        String getToken = socialMediaLogInAPIResponse["token"];
+        SharedPreference.instance.setUserToken("token", getToken);
+        String getResponseMessage = socialMediaLogInAPIResponse["message"];
+        Map<String, dynamic> getUserMap = socialMediaLogInAPIResponse["user"];
+        SharedPreference.instance.setUserProfileDetail("user", getUserMap);
+        Navigator.pop(context, getResponseMessage);
+      } else {
+        if ("User is not found" == socialMediaLogInAPIResponse["message"]) {
+          callSignUpSocialMediaAPI(getFullName, getSocialMediaType,
+              getSocialMediaId, getMailId, getImageUrl);
+        } else {
+          ToastMessage(screenHeight, socialMediaLogInAPIResponse["message"],
+              socialMediaLogInAPIResponse["status"]);
+        }
       }
     } else {
       navigateToNoInternetScreen(false);

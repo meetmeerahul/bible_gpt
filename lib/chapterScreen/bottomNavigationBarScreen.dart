@@ -353,6 +353,23 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
     setState(() {});
   }
 
+  changeScreen(int getCurrentScreen) {
+    setState(() {
+      navigateToChapterScreen(getCurrentScreen);
+    });
+  }
+
+  navigateToChapterScreen(int page) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => bottomNavigationBarScreen(
+                  currentPage: page,
+                ))).then((value) {
+      setState(() {});
+    });
+  }
+
   callInitState() async {
     bool internetConnectCheck = await CheckInternetConnectionMethod();
 
@@ -500,7 +517,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
               _scaffoldKey.currentState!.closeEndDrawer();
               if (pageIndex == getSelectedCategory) {
               } else {
-                //changeScreen(getSelectedCategory);
+                changeScreen(getSelectedCategory);
               }
             },
             callBackSettingSelected: (int getSettingSelected) {
