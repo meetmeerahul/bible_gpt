@@ -58,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   late ChangeLanguageLocal languageLocal;
   bool userLoggedIn = false;
   bool isDeleteAPILoading = false;
-  //late String getToken;
+  late String getToken;
   late bool switchValue;
   late ChangeThemeLocal theme;
   late String bottomNavigationContent;
@@ -69,6 +69,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String copyRightContentTextFutureMethod = "© 2023 Copyright by Bible GPT";
 
   //String searchGptHintText = "Tell us how can we help you!";
+
+  changeScreen(int getCurrentScreen) {
+    setState(() {
+      navigateToChapterScreen(getCurrentScreen);
+    });
+  }
 
   navigateToGPTScreen() {
     Navigator.push(
@@ -89,13 +95,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  navigateToSignInScreen() {
+  navigateToProfileScreen() {
     Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const SigninScreen()))
+            MaterialPageRoute(builder: (context) => const ProfilePage()))
         .then((value) {
       if (value != "") {
         ToastMessage(screenHeight, value, true);
-        // getUserData();
+        getUserData();
       }
     });
   }
@@ -110,17 +116,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  navigateToProfileScreen() {
-    Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const ProfilePage()))
-        .then((value) {
-      if (value != "") {
-        ToastMessage(screenHeight, value, true);
-        // getUserData();
-      }
-    });
-  }
-
   callInitState() async {
     bool internetConnectCheck = await CheckInternetConnectionMethod();
 
@@ -129,7 +124,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
     if (internetConnectCheck) {
       futureFunctionMethod();
-      // getUserData();
+      getUserData();
     } else {
       print("No internet");
       navigateToNoInternetScreen(true);
@@ -181,6 +176,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  navigateToSignInScreen() {
+    Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const SigninScreen()))
+        .then((value) {
+      if (value != "") {
+        ToastMessage(screenHeight, value, true);
+        getUserData();
+      }
+    });
+  }
+
   callDeleteAccountAPI(String getToken) async {
     setState(() {
       isDeleteAPILoading = true;
@@ -213,6 +219,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
       androidAppId: AppConfig().googleStoreId,
       iOSAppId: AppConfig().appleStoreId,
     );
+  }
+
+  getUserToken() async {
+    getToken = await SharedPreference.instance.getUserToken('token');
+    setState(() {
+      if (getToken != "") {
+        userLoggedIn = true;
+      } else {
+        userLoggedIn = false;
+      }
+    });
+  }
+
+  getUserData() async {
+    getUserToken();
+    Map<String, dynamic> getUserDetail =
+        await SharedPreference.instance.getUserProfileDetail("user");
+    print("user info: $getUserDetail");
+    setState(() {
+      profileName =
+          "${getUserDetail["first_name"] ?? ""} ${getUserDetail["last_name"] ?? ""}";
+      profilePictureUrl = "${getUserDetail["avatar"] ?? ""}";
+      if (profileName == "" || profileName == " ") {
+        profileName = "Guest";
+      }
+    });
+  }
+
+  checkUserLogIn() async {
+    String getToken = await SharedPreference.instance.getUserToken('token');
+    if (getToken == "") {
+      navigateToSignInScreen();
+    } else {
+      navigateToProfileScreen();
+    }
   }
 
   callSettingControl(int getSelectedSetting) {
@@ -346,7 +387,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             callBackProfileClickFunction: (isClick) {
               if (isClick) {
                 _scaffoldKey.currentState!.closeEndDrawer();
-                //   checkUserLogIn();
+                checkUserLogIn();
               }
             },
             callBackSocialMediaFunction: (int getSocialMedia) {
@@ -355,7 +396,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
             callBackSelectedCategory: (int getSelectedCategory) {
               _scaffoldKey.currentState!.closeEndDrawer();
-              //  changeScreen(getSelectedCategory);
+              changeScreen(getSelectedCategory);
             },
             callBackSettingSelected: (int getSettingSelected) {
               if (getSettingSelected == 6) {
@@ -416,7 +457,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               child: TextButton(
                                 onPressed: () {
                                   navigateToSignInScreen();
-                                  // checkUserLogIn();
+                                  checkUserLogIn();
                                   // print("Pressed drawer");
                                 },
                                 style: TextButton.styleFrom(
@@ -451,7 +492,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               child: TextButton(
                                 onPressed: () {
                                   // navigateToSignInScreen();
-                                  //checkUserLogIn();
+                                  checkUserLogIn();
                                   _scaffoldKey.currentState!.openEndDrawer();
                                 },
                                 style: TextButton.styleFrom(

@@ -112,7 +112,7 @@ class _SigninScreenState extends State<SigninScreen> {
     setState(() {
       countryList.clear();
       for (int i = 0; i < countryCodeData.length; i++) {
-        print(countryCodeData[i]);
+        //  print(countryCodeData[i]);
         Map getCountryMap = countryCodeData[i] ?? {};
         if (getCountryMap.isNotEmpty) {
           String getCountryName = getCountryMap["name"] ?? "";
@@ -690,8 +690,8 @@ class _SigninScreenState extends State<SigninScreen> {
                                       "mail Id : ${emailController.text.toString()}");
                                   print(
                                       "password : ${passwordController.text.toString()}");
-                                  // callLogInAPI(emailController.text.toString(),
-                                  // passwordController.text.toString());
+                                  callLogInAPI(emailController.text.toString(),
+                                      passwordController.text.toString());
                                 } else {
                                   if (!mailIdValidation(
                                       emailController.text.toString())) {
@@ -1143,6 +1143,35 @@ class _SigninScreenState extends State<SigninScreen> {
       } else {
         ToastMessage(screenHeight, registerAPIResponse["message"],
             registerAPIResponse["status"]);
+      }
+    } else {
+      navigateToNoInternetScreen(false);
+    }
+    setState(() {
+      isAPILoading = false;
+    });
+  }
+
+  callLogInAPI(String getUserName, String getPassword) async {
+    setState(() {
+      isAPILoading = true;
+    });
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+    if (internetConnectCheck) {
+      var logInAPIResponse = await ApiHandler()
+          .logInAPI(getUserName: getUserName, getPassword: getPassword);
+
+      print(logInAPIResponse);
+      if (logInAPIResponse["status"]) {
+        String getToken = logInAPIResponse["token"];
+        SharedPreference.instance.setUserToken("token", getToken);
+        String getResponseMessage = logInAPIResponse["message"];
+        Map<String, dynamic> getUserMap = logInAPIResponse["user"];
+        SharedPreference.instance.setUserProfileDetail("user", getUserMap);
+        Navigator.pop(context, getResponseMessage);
+      } else {
+        ToastMessage(screenHeight, logInAPIResponse["message"],
+            logInAPIResponse["status"]);
       }
     } else {
       navigateToNoInternetScreen(false);

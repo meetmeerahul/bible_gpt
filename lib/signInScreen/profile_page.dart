@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../config/app_config.dart';
 import '../config/language_text_file.dart';
 import '../config/shared_preferences.dart';
+import '../dashBoardScreen/noInternetScreen.dart';
 import '../reuseable/button/BackArrowWidget.dart';
 import '../reuseable/button/PrimaryButton.dart';
 import '../widgets/background_color_widget.dart';
@@ -38,21 +39,35 @@ class _ProfilePageState extends State<ProfilePage> {
 
   String getLanguageCode = "en";
 
+  getUserData() async {
+    Map<String, dynamic> getUserDetail =
+        await SharedPreference.instance.getUserProfileDetail("user");
+    print("user info: $getUserDetail");
+    setState(() {
+      fullNameController.text =
+          "${getUserDetail["first_name"] ?? ""} ${getUserDetail["last_name"] ?? ""}";
+      userNameController.text =
+          "${getUserDetail["email"] ?? getUserDetail["username"] ?? ""}";
+      profilePictureUrl = "${getUserDetail["avatar"] ?? ""}";
+    });
+  }
+
   navigateToNoInternetScreen(bool callInit) {
-    // Navigator.push(context,
-    //         MaterialPageRoute(builder: (context) => NoInternetScreen()))
-    //     .then((value) {
-    //   if (callInit) {
-    //     callInitState();
-    //   }
-    // });
+    Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetScreen()))
+        .then((value) {
+      if (callInit) {
+        callInitState();
+      }
+    });
   }
 
   callInitState() async {
     bool internetConnectCheck = await CheckInternetConnectionMethod();
     if (internetConnectCheck) {
       //  futureFunctionMethod();
-      //  getUserData();
+
+      getUserData();
     } else {
       navigateToNoInternetScreen(true);
     }
@@ -140,26 +155,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                       }),
                                 ),
                                 Container(
-                                  // child: languageFutureWidget(
-                                  //     screenWidth: screenWidth,
-                                  //     screenHeight: screenHeight,
-                                  //     selectedLanguage: getLanguageCode,
-                                  //     getLanguageTranslatorMethod:
-                                  //         profileTitleFutureMethod,
-                                  //     getFontSize: AppConfig()
-                                  //         .settingScreenTitleTextSize,
-                                  //     getDarkMode: darkMode,
-                                  //     getTextAlign: TextAlign.center,
-                                  //     getTextColor: darkMode
-                                  //         ? AppConfig()
-                                  //             .settingScreenTitleTextDarkColor
-                                  //         : AppConfig()
-                                  //             .settingScreenTitleTextLightColor,
-                                  //     getFontFamily:
-                                  //         AppConfig().outfitFontRegular,
-                                  //     getTextDirection: LanguageTextFile()
-                                  //         .getTextDirection(getLanguageCode),
-                                  //     getSoftWrap: true),
                                   child: Text(
                                     LanguageTextFile()
                                         .getProfileScreenProfileTitleText(),

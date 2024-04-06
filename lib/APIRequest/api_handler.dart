@@ -228,4 +228,49 @@ class ApiHandler {
     }
     return registerResponse;
   }
+
+  Future<Map<String, dynamic>> logInAPI(
+      {required String getUserName, required String getPassword}) async {
+    Map<String, dynamic> logInResponse = {
+      "status": false,
+      "message": "",
+      "token": "",
+      "user": {}
+    };
+    String logInAPIUrl = "https://api.qurangpt.com/api/v1/user/login/";
+    print(logInAPIUrl);
+    try {
+      var logInAPIResponse = await http.post(Uri.parse(logInAPIUrl),
+          body: {"username": getUserName, "password": getPassword});
+      print(logInAPIResponse.body);
+      if (logInAPIResponse.statusCode >= 200 &&
+          logInAPIResponse.statusCode < 300 &&
+          logInAPIResponse.statusCode != 203) {
+        logInResponse["status"] = true;
+        Map getResponseMap = jsonDecode(logInAPIResponse.body);
+        print(getResponseMap);
+        Map getDataMap = getResponseMap["data"] ?? {};
+        String getResponseMessage = getResponseMap["message"] ?? "";
+        logInResponse["message"] = getResponseMessage;
+        if (getDataMap.isNotEmpty) {
+          String getToken = getDataMap["token"] ?? "";
+          logInResponse["token"] = getToken;
+          Map<String, dynamic> getUserMap = getDataMap["user"] ?? {};
+          logInResponse["user"] = getUserMap;
+          print("Token : $getToken");
+          print("User : $getUserMap");
+        }
+      } else {
+        logInResponse["status"] = false;
+        Map getResponseMap = jsonDecode(logInAPIResponse.body);
+        String getErrorMessage = getResponseMap["message"] ?? "";
+        logInResponse["message"] = getErrorMessage;
+      }
+    } catch (e) {
+      logInResponse["status"] = false;
+      String getErrorMessage = e.toString() ?? "";
+      logInResponse["message"] = getErrorMessage;
+    }
+    return logInResponse;
+  }
 }
