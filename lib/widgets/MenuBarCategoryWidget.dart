@@ -52,9 +52,7 @@ Widget MenuBarCategoryWidget(
                 SizedBox(
                   width:
                       screenWidth * ((346 - 16 - 16) / AppConfig().screenWidth),
-                  // child: languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getLanguageCode,getLanguageTranslatorMethod:chapterTextFuture, getFontSize: 14, getDarkMode: getDarkMode, getTextAlign: TextAlign.start, getTextColor:  currentCategory==0?(getDarkMode?Color(0xFFDB7F5E):Color(0xFFDB7F5E)):(getDarkMode?Color(0xFFFFFFFF):Color(0xFF8A8A8A)), getFontFamily: AppConfig().outfitFontRegular, getTextDirection: LanguageTextFile().getTextDirection(getLanguageCode), getSoftWrap: true),
                   child: Text(
-                    //LanguageTextFile().getBottomNavigationChapterText(),
                     chapterText,
                     textScaler: const TextScaler.linear(1.0),
                     textAlign: TextAlign.start,

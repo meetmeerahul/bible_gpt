@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bible_gpt/class/theme_method.dart';
+import 'package:bible_gpt/dashBoardScreen/dash_board_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -150,7 +151,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                       getCallBackFunction:
                                           (getCallBackFunction) {
                                         if (getCallBackFunction) {
-                                          Navigator.pop(context);
+                                          Navigator.of(context).pushAndRemoveUntil(
+                                              (MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const DashboardScreen())),
+                                              (route) => false);
                                         }
                                       }),
                                 ),
@@ -304,8 +309,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                     .setUserToken("token", "");
                                 SharedPreference.instance
                                     .setUserProfileDetail("user", {});
+
                                 Navigator.pop(
                                     context, "User Logged out successfully");
+                                    
                               }),
                         ],
                       ),

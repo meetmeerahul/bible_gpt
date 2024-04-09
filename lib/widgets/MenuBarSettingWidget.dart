@@ -31,7 +31,6 @@ Widget MenuBarSettingWidget({
           height: screenHeight * (24 / AppConfig().screenHeight),
         ),
         Container(
-          //child: languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getLanguageCode,getLanguageTranslatorMethod: languageTranslatorMethod(getText: LanguageTextFile().getLanguageSettingTitleText(), getLanguageCode: getLanguageCode), getFontSize: 18, getDarkMode: getDarkMode, getTextAlign: TextAlign.start, getTextColor: getDarkMode?const Color(0xFFDB7F5E):const Color(0xFFDB7F5E), getFontFamily: AppConfig().outfitFontRegular, getTextDirection: LanguageTextFile().getTextDirection(getLanguageCode), getSoftWrap: true),
           child: Text(
             LanguageTextFile().getLanguageSettingTitleText(getLanguageCode),
             textScaler: const TextScaler.linear(1.0),
@@ -86,25 +85,6 @@ Widget MenuBarSettingWidget({
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                        // child: languageFutureWidget(
-                        //     screenWidth: screenWidth,
-                        //     screenHeight: screenHeight,
-                        //     selectedLanguage: getLanguageCode,
-                        //     getLanguageTranslatorMethod:
-                        //         languageTranslatorMethod(
-                        //             getText: LanguageTextFile()
-                        //                 .getLanguageSettingLanguageChangeText(),
-                        //             getLanguageCode: getLanguageCode),
-                        //     getFontSize: 14,
-                        //     getDarkMode: getDarkMode,
-                        //     getTextAlign: TextAlign.start,
-                        //     getTextColor: getDarkMode
-                        //         ? const Color(0xFFFFFFFF)
-                        //         : const Color(0xFF8A8A8A),
-                        //     getFontFamily: AppConfig().outfitFontRegular,
-                        //     getTextDirection: LanguageTextFile()
-                        //         .getTextDirection(getLanguageCode),
-                        //     getSoftWrap: true),
                         child: Text(
                           LanguageTextFile()
                               .getLanguageSettingLanguageChangeText(
@@ -146,8 +126,6 @@ Widget MenuBarSettingWidget({
                                   getTextDirection: LanguageTextFile()
                                       .getTextDirection(getLanguageCode),
                                   getSoftWrap: true),
-                              //child: languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getLanguageCode,getLanguageTranslatorMethod: languageTranslatorMethod(getText: LanguageTextFile().getLanguageName(getLanguageCode), getLanguageCode: getLanguageCode), getFontSize: 12, getDarkMode: getDarkMode, getTextAlign: TextAlign.start, getTextColor: getDarkMode?Color(0xFF999999):Color(0xFF999999), getFontFamily: AppConfig().outfitFontRegular, getTextDirection: LanguageTextFile().getTextDirection(getLanguageCode), getSoftWrap: true),
-                              //child: Text(LanguageTextFile().getLanguageName(getLanguageCode),textScaler: TextScaler.linear(1.0),textAlign: TextAlign.start,style: TextStyle(fontSize: screenHeight*(12/AppConfig().screenHeight),color: getDarkMode?Color(0xFF999999):Color(0xFF999999),fontFamily: AppConfig().outfitFontRegular),textDirection: LanguageTextFile().getTextDirection(getLanguageCode),),
                             ),
                             SizedBox(
                               width: screenWidth *
@@ -213,25 +191,6 @@ Widget MenuBarSettingWidget({
                     children: [
                       Container(
                         alignment: Alignment.centerLeft,
-                        // child: languageFutureWidget(
-                        //     screenWidth: screenWidth,
-                        //     screenHeight: screenHeight,
-                        //     selectedLanguage: getLanguageCode,
-                        //     getLanguageTranslatorMethod:
-                        //         languageTranslatorMethod(
-                        //             getText: LanguageTextFile()
-                        //                 .getLanguageSettingDarkModeText(),
-                        //             getLanguageCode: getLanguageCode),
-                        //     getFontSize: 14,
-                        //     getDarkMode: getDarkMode,
-                        //     getTextAlign: TextAlign.start,
-                        //     getTextColor: getDarkMode
-                        //         ? const Color(0xFFFFFFFF)
-                        //         : const Color(0xFF8A8A8A),
-                        //     getFontFamily: AppConfig().outfitFontRegular,
-                        //     getTextDirection: LanguageTextFile()
-                        //         .getTextDirection(getLanguageCode),
-                        //     getSoftWrap: true),
                         child: Text(
                           LanguageTextFile()
                               .getLanguageSettingDarkModeText(getLanguageCode),
@@ -345,25 +304,6 @@ Widget MenuBarSettingWidget({
                     children: [
                       Container(
                         alignment: Alignment.centerLeft,
-                        // child: languageFutureWidget(
-                        //     screenWidth: screenWidth,
-                        //     screenHeight: screenHeight,
-                        //     selectedLanguage: getLanguageCode,
-                        //     getLanguageTranslatorMethod:
-                        //         languageTranslatorMethod(
-                        //             getText: LanguageTextFile()
-                        //                 .getLanguageSettingTermPrivacyText(),
-                        //             getLanguageCode: getLanguageCode),
-                        //     getFontSize: 14,
-                        //     getDarkMode: getDarkMode,
-                        //     getTextAlign: TextAlign.start,
-                        //     getTextColor: getDarkMode
-                        //         ? const Color(0xFFFFFFFF)
-                        //         : const Color(0xFF8A8A8A),
-                        //     getFontFamily: AppConfig().outfitFontRegular,
-                        //     getTextDirection: LanguageTextFile()
-                        //         .getTextDirection(getLanguageCode),
-                        //     getSoftWrap: true),
                         child: Text(
                           LanguageTextFile().getLanguageSettingTermPrivacyText(
                               getLanguageCode),
@@ -416,25 +356,6 @@ Widget MenuBarSettingWidget({
                     children: [
                       Container(
                         alignment: Alignment.centerLeft,
-                        // child: languageFutureWidget(
-                        //     screenWidth: screenWidth,
-                        //     screenHeight: screenHeight,
-                        //     selectedLanguage: getLanguageCode,
-                        //     getLanguageTranslatorMethod:
-                        //         languageTranslatorMethod(
-                        //             getText: LanguageTextFile()
-                        //                 .getLanguageSettingContactText(),
-                        //             getLanguageCode: getLanguageCode),
-                        //     getFontSize: 14,
-                        //     getDarkMode: getDarkMode,
-                        //     getTextAlign: TextAlign.start,
-                        //     getTextColor: getDarkMode
-                        //         ? const Color(0xFFFFFFFF)
-                        //         : const Color(0xFF8A8A8A),
-                        //     getFontFamily: AppConfig().outfitFontRegular,
-                        //     getTextDirection: LanguageTextFile()
-                        //         .getTextDirection(getLanguageCode),
-                        //     getSoftWrap: true),
                         child: Text(
                           LanguageTextFile()
                               .getLanguageSettingContactText(getLanguageCode),
@@ -531,62 +452,20 @@ Widget MenuBarSettingWidget({
                       SizedBox(
                         height: screenHeight * (10 / AppConfig().screenHeight),
                       ),
-                      // Container(
-                      //   child: Row(
-                      //     textDirection: LanguageTextFile()
-                      //         .getTextDirection(getLanguageCode),
-                      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //     crossAxisAlignment: CrossAxisAlignment.center,
-                      //     children: [
-                      //       SizedBox(
-                      //         height: screenHeight *
-                      //             (AppConfig().primaryButtonTextSize *
-                      //                 3.5 /
-                      //                 AppConfig().screenHeight),
-                      //         child: isDeleteAPILoading
-                      //             ? Wrap(
-                      //                 children: [
-                      //                   Container(
-                      //                     width: screenHeight *
-                      //                         (AppConfig()
-                      //                                 .primaryButtonTextSize *
-                      //                             2 /
-                      //                             AppConfig().screenHeight),
-                      //                     height: screenHeight *
-                      //                         (AppConfig()
-                      //                                 .primaryButtonTextSize *
-                      //                             2 /
-                      //                             AppConfig().screenHeight),
-                      //                     alignment: Alignment.center,
-                      //                     child: CircularProgressIndicator(
-                      //                       color: AppConfig()
-                      //                           .primaryButtonTextColor,
-                      //                       strokeWidth: screenWidth *
-                      //                           (3 / AppConfig().screenWidth),
-                      //                       strokeAlign:
-                      //                           BorderSide.strokeAlignCenter,
-                      //                     ),
-                      //                   )
-                      //                 ],
-                      //               )
-                      //             : Text(
-                      //                 LanguageTextFile()
-                      //                     .getLanguageSettingDeleteAccountText(),
-                      //                 textScaler: const TextScaler.linear(1.0),
-                      //                 textAlign: TextAlign.start,
-                      //                 style: TextStyle(
-                      //                     fontSize: screenHeight *
-                      //                         (14 / AppConfig().screenHeight),
-                      //                     color: getDarkMode
-                      //                         ? const Color(0xFFFFFFFF)
-                      //                         : const Color(0xFF8A8A8A),
-                      //                     fontFamily:
-                      //                         AppConfig().outfitFontRegular),
-                      //               ),
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
+                      Text(
+                        LanguageTextFile()
+                            .getLanguageSettingDeleteAccountText(getLanguageCode),
+                        textScaler: const TextScaler.linear(1.0),
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                            fontSize: MediaQuery.of(context).textScaler.scale(
+                                (screenHeight *
+                                    (14 / AppConfig().screenHeight))),
+                            color: getDarkMode
+                                ? const Color(0xFFFFFFFF)
+                                : const Color(0xFF8A8A8A),
+                            fontFamily: AppConfig().outfitFontRegular),
+                      ),
                       SizedBox(
                         height: screenHeight * (10 / AppConfig().screenHeight),
                       ),
@@ -727,8 +606,6 @@ LanguageDialogBox(
                                           AppConfig().outfitFontRegular,
                                       getTextDirection: TextDirection.ltr,
                                       getSoftWrap: true),
-                                  //child: languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getLanguageCode,getLanguageTranslatorMethod: languageTranslatorMethod(getText: LanguageTextFile().getLanguageName(getLanguageList[0]), getLanguageCode: getLanguageCode), getFontSize: AppConfig().settingScreenAlertTextSize, getDarkMode: darkMode, getTextAlign: TextAlign.start, getTextColor: darkMode?AppConfig().settingScreenAlertTextDarkColor:AppConfig().settingScreenAlertTextLightColor, getFontFamily: AppConfig().outfitFontRegular, getTextDirection: LanguageTextFile().getTextDirection(getLanguageCode), getSoftWrap: true),
-                                  //child:Text(LanguageTextFile().getLanguageName(getLanguageList[0]),textScaler: TextScaler.linear(1.0),textAlign: TextAlign.start,style: TextStyle(fontSize: screenHeight*(AppConfig().settingScreenAlertTextSize/AppConfig().screenHeight),color: darkMode?AppConfig().settingScreenAlertTextDarkColor:AppConfig().settingScreenAlertTextLightColor,fontFamily: AppConfig().outfitFontRegular),)
                                 ),
                               ],
                             ),
@@ -813,8 +690,6 @@ LanguageDialogBox(
                                           AppConfig().outfitFontRegular,
                                       getTextDirection: TextDirection.ltr,
                                       getSoftWrap: true),
-                                  //child: languageFutureWidget(screenWidth: screenWidth, screenHeight: screenHeight, selectedLanguage: getLanguageCode,getLanguageTranslatorMethod: languageTranslatorMethod(getText: LanguageTextFile().getLanguageName(getLanguageList[1]), getLanguageCode: getLanguageCode), getFontSize: AppConfig().settingScreenAlertTextSize, getDarkMode: darkMode, getTextAlign: TextAlign.start, getTextColor: darkMode?AppConfig().settingScreenAlertTextDarkColor:AppConfig().settingScreenAlertTextLightColor, getFontFamily: AppConfig().outfitFontRegular, getTextDirection: LanguageTextFile().getTextDirection(getLanguageCode), getSoftWrap: true),
-                                  //child:Text(LanguageTextFile().getLanguageName(getLanguageList[1]),textScaler: TextScaler.linear(1.0),textAlign: TextAlign.start,style: TextStyle(fontSize: screenHeight*(AppConfig().settingScreenAlertTextSize/AppConfig().screenHeight),color: darkMode?AppConfig().settingScreenAlertTextDarkColor:AppConfig().settingScreenAlertTextLightColor,fontFamily: AppConfig().outfitFontRegular),)
                                 ),
                               ],
                             ),

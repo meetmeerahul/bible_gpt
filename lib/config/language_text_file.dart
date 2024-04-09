@@ -322,8 +322,14 @@ class LanguageTextFile {
     return "";
   }
 
-  String getLanguageSettingDeleteAccountText() {
-    return "Delete account";
+  String getLanguageSettingDeleteAccountText(String language) {
+    if (language == 'en') {
+      return "Delete account";
+    } else if (language == 'hi') {
+      return 'खाता हटा दो';
+    }
+
+    return "";
   }
 
   //Terms Policy Screen
@@ -350,10 +356,8 @@ class LanguageTextFile {
     return "";
   }
 
-
-  String getPoromoCodeHintText(String language){
-
-        if (language == 'en') {
+  String getPoromoCodeHintText(String language) {
+    if (language == 'en') {
       return "Promocode";
     } else if (language == "hi") {
       return "प्रचार कोड";

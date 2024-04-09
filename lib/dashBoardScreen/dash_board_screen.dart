@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:provider/provider.dart';
 
+import '../APIRequest/api_handler.dart';
 import '../chapterScreen/bottomNavigationBarScreen.dart';
 import '../chapterScreen/chapterScreen.dart';
 import '../class/LanguageMethod.dart';
@@ -187,31 +188,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  logOutUser(String getMessage) {
+    _scaffoldKey.currentState!.closeEndDrawer();
+    SharedPreference.instance.setUserToken("token", "");
+    SharedPreference.instance.setUserProfileDetail("user", {});
+    ToastMessage(screenHeight, getMessage, true);
+    getUserData();
+  }
+
   callDeleteAccountAPI(String getToken) async {
     setState(() {
       isDeleteAPILoading = true;
     });
     bool internetConnectCheck = await CheckInternetConnectionMethod();
-
     if (internetConnectCheck) {
-      //   var getDeleteAccountAPIResponse = await AllAPIMethod().deleteAccountAPI(
-      //     getToken: getToken,
-      //   );
-      //   print(getDeleteAccountAPIResponse);
-      //   if (getDeleteAccountAPIResponse["status"]) {
-      //     String getResponseMessage = getDeleteAccountAPIResponse["message"];
-      //     logOutUser(getResponseMessage);
-      //   } else {
-      //     ToastMessage(screenHeight, getDeleteAccountAPIResponse["message"],
-      //         getDeleteAccountAPIResponse["status"]);
-      //   }
-      // } else {
-      //   navigateToNoInternetScreen(false);
-      // }
-      setState(() {
-        isDeleteAPILoading = false;
-      });
+      var getDeleteAccountAPIResponse = await ApiHandler().deleteAccountAPI(
+        getToken: getToken,
+      );
+      print(getDeleteAccountAPIResponse);
+      if (getDeleteAccountAPIResponse["status"]) {
+        String getResponseMessage = getDeleteAccountAPIResponse["message"];
+        logOutUser(getResponseMessage);
+      } else {
+        ToastMessage(screenHeight, getDeleteAccountAPIResponse["message"],
+            getDeleteAccountAPIResponse["status"]);
+      }
+    } else {
+      navigateToNoInternetScreen(false);
     }
+    setState(() {
+      isDeleteAPILoading = false;
+    });
   }
 
   navigateToStore() {
@@ -273,7 +280,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       } else if (getSelectedSetting == 5) {
         navigateToStore();
       } else if (getSelectedSetting == 6) {
-        //callDeleteAccountAPI(getToken);
+        callDeleteAccountAPI(getToken);
       }
     });
   }
@@ -456,9 +463,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Container(
                               child: TextButton(
                                 onPressed: () {
-                                  navigateToSignInScreen();
+                                  //navigateToSignInScreen();
                                   checkUserLogIn();
-                                  // print("Pressed drawer");
                                 },
                                 style: TextButton.styleFrom(
                                   minimumSize: Size.zero,
@@ -473,7 +479,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       (31 / AppConfig().screenWidth),
                                   alignment: Alignment.centerLeft,
                                   child: SvgPicture.asset(
-                                    color: const Color(0xFFAF6A06),
                                     darkMode
                                         ? AppConfig()
                                             .chapterScreenProfileDarkIcon
@@ -491,8 +496,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Container(
                               child: TextButton(
                                 onPressed: () {
-                                  // navigateToSignInScreen();
-                                  checkUserLogIn();
+                                  //navigateToSignInScreen();
+                                  //checkUserLogIn();
                                   _scaffoldKey.currentState!.openEndDrawer();
                                 },
                                 style: TextButton.styleFrom(
@@ -508,7 +513,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       (31 / AppConfig().screenWidth),
                                   alignment: Alignment.centerRight,
                                   child: SvgPicture.asset(
-                                    color: const Color(0xFFAF6A06),
                                     darkMode
                                         ? AppConfig().chapterScreenMenuIconDark
                                         : AppConfig()

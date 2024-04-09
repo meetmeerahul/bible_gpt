@@ -63,14 +63,16 @@ class BookDetail extends State<BookDetailScreen> {
       required this.chapterCOunt,
       required this.chapterName});
 
-  bool statusBarVisible = true;
+  bool statusBarVisible = false;
   ScrollController pageScrollController = ScrollController();
   double statusBarHeight = 0;
 
   bool translationIsLoading = false;
 
   final AudioPlayer _audioPlayer = AudioPlayer();
-  String _audioState = 'Stopped';
+  String _audioState = 'Playing';
+
+  bool isPaused = false;
 
   Duration totalDuration = const Duration();
   Duration currentPosition = const Duration();
@@ -94,7 +96,7 @@ class BookDetail extends State<BookDetailScreen> {
   ItemScrollController itemScrollController = ItemScrollController();
 
   bool chapterListIsEmpty = true;
-  late PlayerState audioPlayerState;
+  PlayerState audioPlayerState = PlayerState.stopped;
 
   // List<Translations>? _selectedTranslations;
   List<LanguagesAndTransilations>? languagesList;
@@ -130,6 +132,7 @@ class BookDetail extends State<BookDetailScreen> {
   double positionDouble = 0;
   double durationDouble = 1;
   String selectedAudioId = "";
+  // ignore: prefer_typing_uninitialized_variables
   late var activeSource;
   bool isAudioPlayerLoading = false;
   bool playAllIsPlaying = false;
@@ -162,25 +165,24 @@ class BookDetail extends State<BookDetailScreen> {
     bool internetConnectCheck = await CheckInternetConnectionMethod();
     if (internetConnectCheck) {
       audioPlayerInit();
-      pageScrollController.addListener(() {
-        if (pageScrollController.offset > 0) {
-          if (statusBarVisible) {
-          } else {
-            setState(() {
-              statusBarVisible = true;
-            });
-          }
-        } else {
-          setState(() {
-            statusBarVisible = false;
-          });
-        }
-        if (pageScrollController.position.maxScrollExtent ==
-            pageScrollController.position.pixels) {
-          print("call bottom");
-          // getPageIncreaseCount();
-        }
-      });
+      // pageScrollController.addListener(() {
+      //   if (pageScrollController.offset > 0) {
+      //     if (statusBarVisible) {
+      //       setState(() {
+      //         statusBarVisible = false;
+      //       });
+      //     } else {
+      //       setState(() {
+      //         statusBarVisible = true;
+      //       });
+      //     }
+      //   } else {}
+      //   if (pageScrollController.position.maxScrollExtent ==
+      //       pageScrollController.position.pixels) {
+      //     print("call bottom");
+      //getPageIncreaseCount();
+      // }
+      // });
     } else {
       navigateToNoInternetScreen(true);
     }
@@ -238,11 +240,22 @@ class BookDetail extends State<BookDetailScreen> {
     }
   }
 
+  replayFunction(String getAudio) async {
+    if (Platform.isIOS) {
+      Uint8List audioData = Uint8List.fromList(base64.decode(getAudio));
+      audioPlayerLocalRun(audioData);
+    } else {
+      Uint8List audioData = Uint8List.fromList(base64.decode(getAudio));
+      activeSource = BytesSource(audioData);
+      _audioPlayer.play(BytesSource(audioData));
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    //scrollinit();
+    scrollinit();
     callInitState();
     _booksFuture = getBookChapters(0);
     // audioPlayerInit();
@@ -253,24 +266,25 @@ class BookDetail extends State<BookDetailScreen> {
     });
   }
 
-  // scrollinit() async {
-  //   bool internetConnectCheck = await CheckInternetConnectionMethod();
-  //   if (internetConnectCheck) {
-  //     pageScrollController.addListener(() {
-  //       if (pageScrollController.offset > 0) {
-  //         if (statusBarVisible) {
-  //           setState(() {
-  //             statusBarVisible = !statusBarVisible;
-  //           });
-  //         }
-  //       } else {
-  //         setState(() {
-  //           statusBarVisible = !statusBarVisible;
-  //         });
-  //       }
-  //     });
-  //   }
-  // }
+  scrollinit() async {
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+    if (internetConnectCheck) {
+      pageScrollController.addListener(() {
+        if (pageScrollController.offset > 0) {
+          if (statusBarVisible) {
+          } else {
+            setState(() {
+              statusBarVisible = true;
+            });
+          }
+        } else {
+          setState(() {
+            statusBarVisible = false;
+          });
+        }
+      });
+    }
+  }
 
   Future<List<BookChapters>> getBookChapters(int chapter) async {
     late String chapterNumber;
@@ -346,6 +360,8 @@ class BookDetail extends State<BookDetailScreen> {
         String getAudioText = getResponseMap["audio_content"] ?? "";
         audioText = getResponseMap["audio_content"];
         getTextToSpeechResponse["audio"] = getAudioText;
+
+        audioText = getAudioText;
       } else {
         getTextToSpeechResponse["status"] = false;
         Map getResponseMap = jsonDecode(getTextToSpeechAPIResponse.body);
@@ -367,13 +383,6 @@ class BookDetail extends State<BookDetailScreen> {
       Uint8List audioData = Uint8List.fromList(base64.decode(audioContent));
       activeSource = BytesSource(audioData);
       _audioPlayer.play(BytesSource(audioData));
-      // _audioPlayer.onPlayerStateChanged.listen((event) {
-      //   if (event == PlayerState.completed) {
-      //     setState(() {
-      //       isPlaying = false;
-      //     });
-      //   }
-      // });
     }
 
     setState(() {
@@ -412,6 +421,7 @@ class BookDetail extends State<BookDetailScreen> {
           //isAudioPlaying = false;
           print("completed");
           print("play all : $playAllIsPlaying");
+
           if (playAllIsPlaying) {
             playNumber += 1;
 
@@ -434,6 +444,8 @@ class BookDetail extends State<BookDetailScreen> {
         } else if (state == PlayerState.completed) {
           playAllIsPlaying = true;
           isPlaying = true;
+
+          print("Playing compleated");
         }
       });
     });
@@ -451,6 +463,19 @@ class BookDetail extends State<BookDetailScreen> {
         position = getPosition;
       });
     });
+  }
+
+  replayAudio(String getAudio) async {
+    print(getAudio);
+
+    if (Platform.isIOS) {
+      Uint8List audioData = Uint8List.fromList(base64.decode(getAudio));
+      audioPlayerLocalRun(audioData);
+    } else {
+      Uint8List audioData = Uint8List.fromList(base64.decode(getAudio));
+      activeSource = BytesSource(audioData);
+      _audioPlayer.play(BytesSource(audioData));
+    }
   }
 
   Future<void> stop() async {
@@ -486,258 +511,294 @@ class BookDetail extends State<BookDetailScreen> {
     print("TopKey Height : $topKeyHeight");
     // print(" Chapters-------${chapterCount}");
     return Scaffold(
-      body: Container(
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          controller: pageScrollController,
-          child: Column(
-            children: [
-              Column(
-                children: [
-                  Container(
-                    key: topKey,
-                    height: (screenHeight * (400 / AppConfig().screenHeight)),
-                    width: (screenWidth * (440 / AppConfig().screenWidth)),
-                    decoration: BoxDecoration(
-                      color: darkMode
-                          ? const Color(0xff000000)
-                          : const Color(0xffffffff),
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: AssetImage(darkMode
-                            ? "assets/png/book_image_dark.png"
-                            : "assets/png/book_image.png"),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            controller: pageScrollController,
+            child: Column(
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      key: topKey,
+                      height: (screenHeight * (400 / AppConfig().screenHeight)),
+                      width: (screenWidth * (440 / AppConfig().screenWidth)),
+                      decoration: BoxDecoration(
+                        color: darkMode
+                            ? const Color(0xff000000)
+                            : const Color(0xffffffff),
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: AssetImage(darkMode
+                              ? "assets/png/book_image_dark.png"
+                              : "assets/png/book_image.png"),
+                        ),
                       ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: (screenHeight *
-                                (27 / AppConfig().screenHeight)),
-                          ),
-                          child: SizedBox(
-                            height:
-                                kToolbarHeight, // Assuming you want the widget to have the same height as the app bar
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                GestureDetector(
-                                  onTap: () => Navigator.of(context).pop(),
-                                  child: SvgPicture.asset(
-                                    "assets/svg/back_arrow.svg",
-                                    color: darkMode
-                                        ? Colors.white
-                                        : Colors
-                                            .black, // Change icon color according to dark mode
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    chapterName,
-                                    textAlign: TextAlign.center,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: (screenHeight *
+                                  (27 / AppConfig().screenHeight)),
+                            ),
+                            child: SizedBox(
+                              height:
+                                  kToolbarHeight, // Assuming you want the widget to have the same height as the app bar
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => Navigator.of(context).pop(),
+                                    child: SvgPicture.asset(
+                                      "assets/svg/back_arrow.svg",
                                       color: darkMode
                                           ? Colors.white
-                                          : const Color(0xFF353535),
-                                      fontSize: MediaQuery.of(context)
-                                              .textScaleFactor *
-                                          (screenHeight *
-                                              (18 / AppConfig().screenHeight)),
+                                          : Colors
+                                              .black, // Change icon color according to dark mode
                                     ),
                                   ),
-                                ),
-                                GestureDetector(
-                                  onTap: () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => const GptScreen(),
+                                  Expanded(
+                                    child: Text(
+                                      chapterName,
+                                      textAlign: TextAlign.center,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: darkMode
+                                            ? Colors.white
+                                            : const Color(0xFF353535),
+                                        fontSize: MediaQuery.of(context)
+                                                .textScaleFactor *
+                                            (screenHeight *
+                                                (18 /
+                                                    AppConfig().screenHeight)),
+                                      ),
                                     ),
                                   ),
-                                  child: SvgPicture.asset(
-                                    "assets/svg/search_icon.svg",
-                                    color: darkMode
-                                        ? Colors.white
-                                        : Colors
-                                            .black, // Change icon color according to dark mode
+                                  GestureDetector(
+                                    onTap: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => const GptScreen(),
+                                      ),
+                                    ),
+                                    child: SvgPicture.asset(
+                                      "assets/svg/search_icon.svg",
+                                      color: darkMode
+                                          ? Colors.white
+                                          : Colors
+                                              .black, // Change icon color according to dark mode
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                getLanguageCode == 'en'
-                                    ? "Bible / "
-                                    : " बाइबिल /",
-                                style: TextStyle(
-                                  fontSize: MediaQuery.of(context)
-                                      .textScaler
-                                      .scale((screenHeight *
-                                          (12 / AppConfig().screenHeight))),
-                                  color: darkMode
-                                      ? const Color(0xffffffff)
-                                      : const Color(0xFF353535),
-                                ),
-                              ),
-                              Text(
-                                getLanguageCode == 'en'
-                                    ? " Book / "
-                                    : " किताब /",
-                                style: TextStyle(
-                                    fontSize: MediaQuery.of(context)
-                                        .textScaler
-                                        .scale((screenHeight *
-                                            (12 / AppConfig().screenHeight))),
-                                    color: const Color(0XFFAF6A06)),
-                              ),
-                              Text(
-                                chapterName,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    fontSize: MediaQuery.of(context)
-                                        .textScaler
-                                        .scale((screenHeight *
-                                            (12 / AppConfig().screenHeight))),
-                                    color: const Color(0XFFAF6A06)),
-                              ),
-                            ],
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              if (!musicApiIsLoading) {
-                                if ((playAllIsPlaying || isPlaying) ||
-                                    (playAllIsPlaying && isPlaying) ||
-                                    (playAllIsPlaying && !isPlaying) ||
-                                    (!playAllIsPlaying && isPlaying) ||
-                                    playAllIsPlaying ||
-                                    songIsFetching) {
-                                  playingIndex = -1;
-                                  _audioPlayer.stop();
-
-                                  songIsFetching = false;
-                                  playAllIsPlaying = false;
-                                  isPlaying = false;
-                                  playNumber = 0;
-                                  isPlaying = false;
-                                  print("****************Audio PLayer Stopped");
-                                  isAudioWidget = false;
-                                } else {
-                                  playAllIsPlaying = true;
-                                  isPlaying = true;
-                                  isAudioWidget = true;
-                                  playNumber = 0;
-                                  print(
-                                      "******************Audio PLayer started");
-                                  meaningClick(chaptersList[playNumber]);
-                                }
-                              }
-                            });
-                          },
-                          child: Container(
-                            height: MediaQuery.of(context).textScaler.scale(
-                                (screenHeight *
-                                    (36 / AppConfig().screenHeight))),
-                            width: MediaQuery.of(context).textScaler.scale(
-                                screenWidth * (113 / AppConfig().screenWidth)),
-                            decoration: const BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(30)),
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Color(0xFFC47807),
-                                  Color(0xFF643402),
                                 ],
                               ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                SvgPicture.asset(
-                                    width: MediaQuery.of(context)
-                                        .textScaler
-                                        .scale(((screenWidth *
-                                            (10.87 /
-                                                AppConfig().screenWidth)))),
-                                    height: MediaQuery.of(context)
-                                        .textScaler
-                                        .scale(((screenHeight *
-                                            (12 / AppConfig().screenHeight)))),
-                                    !playAllIsPlaying
-                                        ? "assets/svg/play_icon.svg"
-                                        : "assets/svg/pause.svg"),
-                                Text(
-                                  getLanguageCode == 'en'
-                                      ? playAllIsPlaying
-                                          ? "Stop"
-                                          : "Play All"
-                                      : playAllIsPlaying
-                                          ? "रुकना"
-                                          : "सभी खेलना",
-                                  style: TextStyle(
-                                    color: const Color(0xFFFFFFFF),
-                                    fontSize: MediaQuery.of(context)
-                                        .textScaler
-                                        .scale((screenHeight *
-                                            (16 / AppConfig().screenHeight))),
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
                                   getLanguageCode == 'en'
-                                      ? "Search Chapters"
-                                      : "अध्याय खोजें",
+                                      ? "Bible / "
+                                      : " बाइबिल /",
                                   style: TextStyle(
-                                    color: darkMode
-                                        ? const Color(0xFFAF6A06)
-                                        : const Color(0xFF623301),
                                     fontSize: MediaQuery.of(context)
                                         .textScaler
                                         .scale((screenHeight *
                                             (12 / AppConfig().screenHeight))),
+                                    color: darkMode
+                                        ? const Color(0xffffffff)
+                                        : const Color(0xFF353535),
                                   ),
                                 ),
-                                SizedBox(
-                                  height: MediaQuery.of(context)
-                                      .textScaler
-                                      .scale((screenHeight *
-                                          (5 / AppConfig().screenHeight))),
+                                Text(
+                                  getLanguageCode == 'en'
+                                      ? " Book / "
+                                      : " किताब /",
+                                  style: TextStyle(
+                                      fontSize: MediaQuery.of(context)
+                                          .textScaler
+                                          .scale((screenHeight *
+                                              (12 / AppConfig().screenHeight))),
+                                      color: const Color(0XFFAF6A06)),
                                 ),
-                                DropdownButtonHideUnderline(
-                                  child: DropdownButton2<String>(
-                                    isExpanded: true,
-                                    hint: Row(
-                                      children: [
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                              .textScaler
-                                              .scale(screenWidth *
-                                                  (4 /
-                                                      AppConfig().screenWidth)),
-                                        ),
-                                        Expanded(
+                                Text(
+                                  chapterName,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: MediaQuery.of(context)
+                                          .textScaler
+                                          .scale((screenHeight *
+                                              (12 / AppConfig().screenHeight))),
+                                      color: const Color(0XFFAF6A06)),
+                                ),
+                              ],
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (!musicApiIsLoading) {
+                                  if ((playAllIsPlaying || isPlaying) ||
+                                      (playAllIsPlaying && isPlaying) ||
+                                      (playAllIsPlaying && !isPlaying) ||
+                                      (!playAllIsPlaying && isPlaying) ||
+                                      playAllIsPlaying ||
+                                      songIsFetching) {
+                                    playingIndex = -1;
+
+                                    isPause = true;
+                                    _audioPlayer.stop();
+
+                                    songIsFetching = false;
+                                    playAllIsPlaying = false;
+                                    isPlaying = false;
+                                    playNumber = 0;
+                                    isPlaying = false;
+                                    print(
+                                        "****************Audio PLayer Stopped");
+                                    isAudioWidget = false;
+                                  } else {
+                                    playAllIsPlaying = true;
+                                    isPlaying = true;
+                                    isAudioWidget = true;
+                                    playNumber = 0;
+                                    print(
+                                        "******************Audio PLayer started");
+                                    meaningClick(chaptersList[playNumber]);
+                                  }
+                                }
+                              });
+                            },
+                            child: Container(
+                              height: MediaQuery.of(context).textScaler.scale(
+                                  (screenHeight *
+                                      (36 / AppConfig().screenHeight))),
+                              width: MediaQuery.of(context).textScaler.scale(
+                                  screenWidth *
+                                      (113 / AppConfig().screenWidth)),
+                              decoration: const BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(30)),
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Color(0xFFC47807),
+                                    Color(0xFF643402),
+                                  ],
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  SvgPicture.asset(
+                                      width: MediaQuery.of(context)
+                                          .textScaler
+                                          .scale(((screenWidth *
+                                              (10.87 /
+                                                  AppConfig().screenWidth)))),
+                                      height: MediaQuery.of(context)
+                                          .textScaler
+                                          .scale(((screenHeight *
+                                              (12 /
+                                                  AppConfig().screenHeight)))),
+                                      audioPlayerState != PlayerState.playing
+                                          ? "assets/svg/play_icon.svg"
+                                          : "assets/svg/pause.svg"),
+                                  Text(
+                                    getLanguageCode == 'en'
+                                        ? audioPlayerState ==
+                                                PlayerState.playing
+                                            ? "Pause"
+                                            : "Play All"
+                                        : audioPlayerState ==
+                                                PlayerState.playing
+                                            ? "रुकना"
+                                            : "सभी खेलना",
+                                    style: TextStyle(
+                                      color: const Color(0xFFFFFFFF),
+                                      fontSize: MediaQuery.of(context)
+                                          .textScaler
+                                          .scale((screenHeight *
+                                              (16 / AppConfig().screenHeight))),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    getLanguageCode == 'en'
+                                        ? "Search Chapters"
+                                        : "अध्याय खोजें",
+                                    style: TextStyle(
+                                      color: darkMode
+                                          ? const Color(0xFFAF6A06)
+                                          : const Color(0xFF623301),
+                                      fontSize: MediaQuery.of(context)
+                                          .textScaler
+                                          .scale((screenHeight *
+                                              (12 / AppConfig().screenHeight))),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: MediaQuery.of(context)
+                                        .textScaler
+                                        .scale((screenHeight *
+                                            (5 / AppConfig().screenHeight))),
+                                  ),
+                                  DropdownButtonHideUnderline(
+                                    child: DropdownButton2<String>(
+                                      isExpanded: true,
+                                      hint: Row(
+                                        children: [
+                                          SizedBox(
+                                            width: MediaQuery.of(context)
+                                                .textScaler
+                                                .scale(screenWidth *
+                                                    (4 /
+                                                        AppConfig()
+                                                            .screenWidth)),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              LanguageTextFile().bottomNavAll(
+                                                  getLanguageCode),
+                                              style: TextStyle(
+                                                fontSize: MediaQuery.of(context)
+                                                    .textScaler
+                                                    .scale((screenHeight *
+                                                        (12 /
+                                                            AppConfig()
+                                                                .screenHeight))),
+                                                color: darkMode
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      items: List.generate(
+                                          int.parse(chapterCOunt), (index) {
+                                        return DropdownMenuItem<String>(
+                                          value: (index + 1)
+                                              .toString(), // Assuming chapter numbering starts from 1
                                           child: Text(
-                                            LanguageTextFile()
-                                                .bottomNavAll(getLanguageCode),
+                                            (index + 1)
+                                                .toString(), // Assuming chapter numbering starts from 1
                                             style: TextStyle(
                                               fontSize: MediaQuery.of(context)
                                                   .textScaler
@@ -751,666 +812,665 @@ class BookDetail extends State<BookDetailScreen> {
                                             ),
                                             overflow: TextOverflow.ellipsis,
                                           ),
+                                        );
+                                      }),
+                                      value: selectedChapter,
+                                      onChanged: (String? value) {
+                                        String? oldValue;
+                                        setState(() {
+                                          if (musicApiIsLoading) {
+                                            selectedChapter = oldValue!;
+                                          }
+                                          if (!musicApiIsLoading) {
+                                            oldValue = value;
+                                            selectedChapter = value!;
+                                            print(
+                                                " Selected chapter : $selectedChapter");
+                                            _booksFuture = getBookChapters(
+                                                int.parse(selectedChapter));
+                                            _audioPlayer.stop();
+                                            checkedIndex = -1;
+                                            playAllIsPlaying = false;
+                                            isPlaying = false;
+                                          }
+                                        });
+                                      },
+                                      buttonStyleData: ButtonStyleData(
+                                        height: (screenHeight *
+                                            (40 / AppConfig().screenHeight)),
+                                        width: (screenWidth *
+                                            (311 / AppConfig().screenWidth)),
+                                        padding: const EdgeInsets.only(
+                                            left: 14, right: 14),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(0),
+                                          border: Border.all(
+                                            color: Colors.black26,
+                                          ),
+                                          color: darkMode
+                                              ? const Color(0xFF2D281E)
+                                              : Colors.white,
                                         ),
-                                      ],
+                                        elevation: 0,
+                                      ),
+                                      iconStyleData: IconStyleData(
+                                        icon: SvgPicture.asset(
+                                          "assets/svg/drop_down.svg",
+                                          color: darkMode
+                                              ? Colors.white
+                                              : Colors.black,
+                                        ),
+                                        iconSize: MediaQuery.of(context)
+                                            .textScaler
+                                            .scale((screenHeight *
+                                                (12 /
+                                                    AppConfig().screenHeight))),
+                                        iconEnabledColor: Colors.black,
+                                        iconDisabledColor: Colors.black,
+                                      ),
+                                      dropdownStyleData: DropdownStyleData(
+                                        maxHeight:
+                                            200, // Adjust this value as needed
+                                        width: (screenWidth *
+                                            (311 / AppConfig().screenWidth)),
+                                        decoration: BoxDecoration(
+                                          color: darkMode
+                                              ? const Color(0xFF2D281E)
+                                              : Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(0),
+                                        ),
+                                        offset: const Offset(0, -10),
+                                      ),
+                                      menuItemStyleData:
+                                          const MenuItemStyleData(
+                                        height: 30,
+                                        padding: EdgeInsets.only(
+                                            left: 20, right: 14),
+                                      ),
                                     ),
-                                    items: List.generate(
-                                        int.parse(chapterCOunt), (index) {
-                                      return DropdownMenuItem<String>(
-                                        value: (index + 1)
-                                            .toString(), // Assuming chapter numbering starts from 1
-                                        child: Text(
-                                          (index + 1)
-                                              .toString(), // Assuming chapter numbering starts from 1
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                          color: darkMode ? Colors.black : Colors.white),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: (screenWidth *
+                                  (13 / AppConfig().screenWidth)),
+                              vertical: (screenHeight *
+                                  (21 / AppConfig().screenHeight)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      changableLanguage,
+                                      style: TextStyle(
+                                        color: darkMode
+                                            ? const Color(0xFFAF6A06)
+                                            : const Color(0xFF623301),
+                                        fontSize: MediaQuery.of(context)
+                                            .textScaler
+                                            .scale((screenHeight *
+                                                (12 /
+                                                    AppConfig().screenHeight))),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: (screenHeight *
+                                          (5 / AppConfig().screenHeight)),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          LanguageTextFile()
+                                              .bottomNavEditionDropDown(
+                                                  getLanguageCode),
                                           style: TextStyle(
+                                            color: darkMode
+                                                ? const Color(0xFFAF6A06)
+                                                : const Color(0xFF623301),
                                             fontSize: MediaQuery.of(context)
                                                 .textScaler
                                                 .scale((screenHeight *
                                                     (12 /
                                                         AppConfig()
                                                             .screenHeight))),
-                                            color: darkMode
-                                                ? Colors.white
-                                                : Colors.black,
                                           ),
-                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                      );
-                                    }),
-                                    value: selectedChapter,
-                                    onChanged: (String? value) {
-                                      String? oldValue;
-                                      setState(() {
-                                        if (musicApiIsLoading) {
-                                          selectedChapter = oldValue!;
-                                        }
-                                        if (!musicApiIsLoading) {
-                                          oldValue = value;
-                                          selectedChapter = value!;
-                                          print(
-                                              " Selected chapter : $selectedChapter");
-                                          _booksFuture = getBookChapters(
-                                              int.parse(selectedChapter));
-                                          _audioPlayer.stop();
-                                          checkedIndex = -1;
-                                          playAllIsPlaying = false;
-                                          isPlaying = false;
-                                        }
-                                      });
-                                    },
-                                    buttonStyleData: ButtonStyleData(
-                                      height: (screenHeight *
-                                          (40 / AppConfig().screenHeight)),
-                                      width: (screenWidth *
-                                          (311 / AppConfig().screenWidth)),
-                                      padding: const EdgeInsets.only(
-                                          left: 14, right: 14),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(0),
-                                        border: Border.all(
-                                          color: Colors.black26,
+                                        SizedBox(
+                                          height: (screenHeight *
+                                              (5 / AppConfig().screenHeight)),
                                         ),
-                                        color: darkMode
-                                            ? const Color(0xFF2D281E)
-                                            : Colors.white,
-                                      ),
-                                      elevation: 0,
-                                    ),
-                                    iconStyleData: IconStyleData(
-                                      icon: SvgPicture.asset(
-                                        "assets/svg/drop_down.svg",
-                                        color: darkMode
-                                            ? Colors.white
-                                            : Colors.black,
-                                      ),
-                                      iconSize: MediaQuery.of(context)
-                                          .textScaler
-                                          .scale((screenHeight *
-                                              (12 / AppConfig().screenHeight))),
-                                      iconEnabledColor: Colors.black,
-                                      iconDisabledColor: Colors.black,
-                                    ),
-                                    dropdownStyleData: DropdownStyleData(
-                                      maxHeight:
-                                          200, // Adjust this value as needed
-                                      width: (screenWidth *
-                                          (311 / AppConfig().screenWidth)),
-                                      decoration: BoxDecoration(
-                                        color: darkMode
-                                            ? const Color(0xFF2D281E)
-                                            : Colors.white,
-                                        borderRadius: BorderRadius.circular(0),
-                                      ),
-                                      offset: const Offset(0, -10),
-                                    ),
-                                    menuItemStyleData: const MenuItemStyleData(
-                                      height: 30,
-                                      padding:
-                                          EdgeInsets.only(left: 20, right: 14),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: darkMode ? Colors.black : Colors.white),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal:
-                                (screenWidth * (13 / AppConfig().screenWidth)),
-                            vertical: (screenHeight *
-                                (21 / AppConfig().screenHeight)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    changableLanguage,
-                                    style: TextStyle(
-                                      color: darkMode
-                                          ? const Color(0xFFAF6A06)
-                                          : const Color(0xFF623301),
-                                      fontSize: MediaQuery.of(context)
-                                          .textScaler
-                                          .scale((screenHeight *
-                                              (12 / AppConfig().screenHeight))),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: (screenHeight *
-                                        (5 / AppConfig().screenHeight)),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        LanguageTextFile()
-                                            .bottomNavEditionDropDown(
-                                                getLanguageCode),
-                                        style: TextStyle(
-                                          color: darkMode
-                                              ? const Color(0xFFAF6A06)
-                                              : const Color(0xFF623301),
-                                          fontSize: MediaQuery.of(context)
-                                              .textScaler
-                                              .scale((screenHeight *
-                                                  (12 /
-                                                      AppConfig()
-                                                          .screenHeight))),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: (screenHeight *
-                                            (5 / AppConfig().screenHeight)),
-                                      ),
-                                      translationIsLoading == false
-                                          ? DropdownButtonHideUnderline(
-                                              child:
-                                                  DropdownButton2<Translations>(
-                                                isExpanded: true,
-                                                hint: Row(
-                                                  children: [
-                                                    const SizedBox(
-                                                      width: 4,
-                                                    ),
-                                                    Expanded(
-                                                      child: Text(
-                                                        LanguageTextFile()
-                                                            .bottomNavAll(
-                                                                getLanguageCode),
-                                                        style: TextStyle(
-                                                          fontSize: MediaQuery
-                                                                  .of(context)
-                                                              .textScaler
-                                                              .scale((screenHeight *
-                                                                  (12 /
-                                                                      AppConfig()
-                                                                          .screenHeight))),
-                                                          color: darkMode
-                                                              ? Colors.white
-                                                              : Colors.black,
-                                                        ),
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                items: _translations
-                                                    .map(
-                                                        (Translations item) =>
-                                                            DropdownMenuItem<
-                                                                Translations>(
-                                                              value: item,
-                                                              child: Text(
-                                                                item.fullName!,
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: MediaQuery.of(
-                                                                          context)
-                                                                      .textScaler
-                                                                      .scale((screenHeight *
-                                                                          (12 /
-                                                                              AppConfig().screenHeight))),
-                                                                  color: darkMode
-                                                                      ? Colors
-                                                                          .white
-                                                                      : Colors
-                                                                          .black,
-                                                                ),
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                              ),
-                                                            ))
-                                                    .toList(),
-                                                value: userSelectedTranslation ??
-                                                    _translations
-                                                        .first, // Set default value
-                                                onChanged:
-                                                    (Translations? value) {
-                                                  Translations? oldTrans;
-
-                                                  setState(() {
-                                                    if (musicApiIsLoading) {
-                                                      value = oldTrans;
-                                                    } else {
-                                                      userSelectedTranslation =
-                                                          value;
-                                                      changableShortName =
-                                                          value!.shortName!;
-                                                      _booksFuture =
-                                                          getBookChapters(int.parse(
-                                                              selectedChapter));
-                                                      oldTrans = value;
-                                                      _audioPlayer.stop();
-                                                      playAllIsPlaying = false;
-                                                      isPlaying = false;
-                                                      playingIndex = -1;
-                                                    }
-                                                  });
-                                                },
-                                                buttonStyleData:
-                                                    ButtonStyleData(
-                                                  height: (screenHeight *
-                                                      (40 /
-                                                          AppConfig()
-                                                              .screenHeight)),
-                                                  width: (screenWidth *
-                                                      (200 /
-                                                          AppConfig()
-                                                              .screenWidth)),
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 14, right: 14),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            0),
-                                                    border: Border.all(
-                                                      color: Colors.black26,
-                                                    ),
-                                                    color: darkMode
-                                                        ? const Color(
-                                                            0xFF2D281E)
-                                                        : Colors.white,
-                                                  ),
-                                                  elevation: 0,
-                                                ),
-                                                iconStyleData: IconStyleData(
-                                                  icon: SvgPicture.asset(
-                                                      color: darkMode
-                                                          ? Colors.white
-                                                          : Colors.black,
-                                                      "assets/svg/drop_down.svg"),
-                                                  iconSize: 12,
-                                                  iconEnabledColor:
-                                                      Colors.black,
-                                                  iconDisabledColor:
-                                                      Colors.black,
-                                                ),
-                                                dropdownStyleData:
-                                                    DropdownStyleData(
-                                                  maxHeight: 200,
-                                                  width: (screenWidth *
-                                                      (200 /
-                                                          AppConfig()
-                                                              .screenWidth)),
-                                                  decoration: BoxDecoration(
-                                                    color: darkMode
-                                                        ? const Color(
-                                                            0xFF2D281E)
-                                                        : Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            0),
-                                                  ),
-                                                  offset: const Offset(0, -10),
-                                                ),
-                                                menuItemStyleData:
-                                                    const MenuItemStyleData(
-                                                  height: 30,
-                                                  padding: EdgeInsets.only(
-                                                      left: 20, right: 14),
-                                                ),
-                                              ),
-                                            )
-                                          : TextLoaderWidget(
-                                              200,
-                                              screenHeight *
-                                                  (20 /
-                                                      AppConfig().screenHeight),
-                                              screenHeight *
-                                                  (0 /
-                                                      AppConfig().screenHeight),
-                                              darkMode),
-                                    ],
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
-                        FutureBuilder(
-                          future: _booksFuture,
-                          builder:
-                              (BuildContext context, AsyncSnapshot snapshot) {
-                            if (snapshot.hasError) {
-                              return DetailLoaderScreen(
-                                screenWidth,
-                                screenHeight,
-                                darkMode,
-                              );
-                            } else {
-                              chaptersList.clear();
-
-                              return snapshot.data == null
-                                  ? DetailLoaderScreen(
-                                      screenWidth,
-                                      screenHeight,
-                                      darkMode,
-                                    )
-                                  : apiIsloading
-                                      ? DetailLoaderScreen(
-                                          screenWidth,
-                                          screenHeight,
-                                          darkMode,
-                                        )
-                                      : SizedBox(
-                                          height: playAllIsPlaying
-                                              ? (screenHeight - topKeyHeight)
-                                              : null,
-                                          width: screenWidth,
-                                          child:
-                                              ScrollablePositionedList.builder(
-                                            itemScrollController:
-                                                itemScrollController,
-                                            scrollDirection: Axis.vertical,
-                                            shrinkWrap: true,
-                                            physics: playAllIsPlaying
-                                                ? const AlwaysScrollableScrollPhysics()
-                                                : const NeverScrollableScrollPhysics(),
-                                            itemCount: snapshot.data.length,
-                                            itemBuilder: (BuildContext context,
-                                                int index) {
-                                              listViewMaxLength =
-                                                  snapshot.data.length;
-                                              verseCount = snapshot.data.length;
-
-                                              BookChapters item =
-                                                  snapshot.data[index];
-
-                                              chaptersList.add(item);
-
-                                              print(
-                                                  "ListView Length  : $listviewLength");
-
-                                              return Padding(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: (screenWidth *
-                                                      (8 /
-                                                          AppConfig()
-                                                              .screenWidth)),
-                                                  vertical: (screenHeight *
-                                                      (8 /
-                                                          AppConfig()
-                                                              .screenHeight)),
-                                                ),
-                                                child: Container(
-                                                  // width: (screenWidth *
-                                                  //     (396 /
-                                                  //         AppConfig()
-                                                  //             .screenWidth)),
-                                                  decoration: BoxDecoration(
-                                                    color: darkMode
-                                                        ? const Color(
-                                                            0xFF2D281E)
-                                                        : Colors.transparent,
-                                                    border: Border.all(
-                                                        color: const Color(
-                                                            0xFFAF6A06)),
-                                                    borderRadius:
-                                                        const BorderRadius.all(
-                                                      Radius.circular(6),
-                                                    ),
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceEvenly,
+                                        translationIsLoading == false
+                                            ? DropdownButtonHideUnderline(
+                                                child: DropdownButton2<
+                                                    Translations>(
+                                                  isExpanded: true,
+                                                  hint: Row(
                                                     children: [
-                                                      SizedBox(
-                                                        height: (screenHeight *
-                                                            (5 /
-                                                                AppConfig()
-                                                                    .screenHeight)),
+                                                      const SizedBox(
+                                                        width: 4,
                                                       ),
-                                                      Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                          right: (screenWidth *
-                                                              (12 /
-                                                                  AppConfig()
-                                                                      .screenWidth)),
-                                                        ),
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            const SizedBox(),
-                                                            Text(
-                                                              getLanguageCode ==
-                                                                      'en'
-                                                                  ? "Verse"
-                                                                  : "कविता",
-                                                              style: TextStyle(
-                                                                fontSize: MediaQuery.of(
-                                                                        context)
-                                                                    .textScaler
-                                                                    .scale((screenHeight *
-                                                                        (12 /
-                                                                            AppConfig().screenHeight))),
-                                                                color: const Color(
-                                                                    0xFFAF6A06),
-                                                              ),
-                                                            ),
-                                                            GestureDetector(
-                                                              onTap: () async {
-                                                                print(
-                                                                    _audioPlayer
-                                                                        .state);
-
-                                                                if (isPlaying) {
-                                                                  await _audioPlayer
-                                                                      .stop();
-
-                                                                  setState(() {
-                                                                    isPlaying =
-                                                                        false;
-                                                                    playingIndex =
-                                                                        -1;
-                                                                  });
-                                                                } else if (_audioState ==
-                                                                        "Pause" ||
-                                                                    !isPlaying) {
-                                                                  setState(() {
-                                                                    isPlaying =
-                                                                        true;
-                                                                    playingIndex =
-                                                                        index;
-                                                                  });
-
-                                                                  playAudio(
-                                                                    languageCode:
-                                                                        getLanguageCode,
-                                                                    text: item
-                                                                        .text!
-                                                                        .replaceAll(
-                                                                            '<br/>',
-                                                                            '\n'),
-                                                                  );
-
-                                                                  // meaningClick(item);
-                                                                }
-
-                                                                checkedIndex =
-                                                                    index;
-                                                              },
-                                                              child: SvgPicture
-                                                                  .asset(
-                                                                isPlaying &&
-                                                                        checkedIndex ==
-                                                                            index &&
-                                                                        !playAllIsPlaying
-                                                                    ? "assets/svg/speaker_on.svg"
-                                                                    : "assets/svg/mic_icon.svg",
-                                                                height: (screenHeight *
-                                                                    (25 /
+                                                      Expanded(
+                                                        child: Text(
+                                                          LanguageTextFile()
+                                                              .bottomNavAll(
+                                                                  getLanguageCode),
+                                                          style: TextStyle(
+                                                            fontSize: MediaQuery
+                                                                    .of(context)
+                                                                .textScaler
+                                                                .scale((screenHeight *
+                                                                    (12 /
                                                                         AppConfig()
-                                                                            .screenHeight)),
-                                                                width: (screenWidth *
-                                                                    (25 *
-                                                                        AppConfig()
-                                                                            .screenWidth)),
-                                                              ),
-                                                            ),
-                                                          ],
+                                                                            .screenHeight))),
+                                                            color: darkMode
+                                                                ? Colors.white
+                                                                : Colors.black,
+                                                          ),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
                                                         ),
-                                                      ),
-                                                      SizedBox(
-                                                        height: (screenHeight *
-                                                            (5 /
-                                                                AppConfig()
-                                                                    .screenHeight)),
-                                                      ),
-                                                      SvgPicture.asset(
-                                                          width: screenWidth,
-                                                          "assets/svg/rect_bookdetail.svg"),
-                                                      Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                          bottom: (screenHeight *
-                                                              (25 /
-                                                                  AppConfig()
-                                                                      .screenHeight)),
-                                                          top: (screenHeight *
-                                                              (33 /
-                                                                  AppConfig()
-                                                                      .screenHeight)),
-                                                          left: (screenWidth *
-                                                              28 /
-                                                              AppConfig()
-                                                                  .screenWidth),
-                                                          right: (screenWidth *
-                                                              28 /
-                                                              AppConfig()
-                                                                  .screenWidth),
-                                                        ),
-                                                        child: index ==
-                                                                    playingIndex &&
-                                                                _audioPlayer
-                                                                        .state ==
-                                                                    PlayerState
-                                                                        .playing
-                                                            ? Container(
-                                                                decoration: BoxDecoration(
-                                                                    borderRadius: const BorderRadius
-                                                                        .all(
-                                                                        Radius.circular(
-                                                                            10)),
-                                                                    color: const Color(
-                                                                            0xFFffefd7)
-                                                                        .withOpacity(
-                                                                            1) // Set the background color to green
-                                                                    ),
-                                                                child: Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                          .all(
-                                                                          5.0),
-                                                                  child: Text(
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .center,
-                                                                    item.text!.replaceAll(
-                                                                        '<br/>',
-                                                                        '\n'),
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontSize: MediaQuery.of(
-                                                                              context)
-                                                                          .textScaler
-                                                                          .scale((screenHeight *
-                                                                              (12 / AppConfig().screenHeight))),
-                                                                      color: darkMode
-                                                                          ? playAllIsPlaying || isPlaying
-                                                                              ? const Color(0xFF353535)
-                                                                              : const Color(0xFFFFFFFF)
-                                                                          : const Color(0xFF353535),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              )
-                                                            : Text(
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .center,
-                                                                item.text!
-                                                                    .replaceAll(
-                                                                        '<br/>',
-                                                                        '\n'),
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: MediaQuery.of(
-                                                                          context)
-                                                                      .textScaler
-                                                                      .scale((screenHeight *
-                                                                          (12 /
-                                                                              AppConfig().screenHeight))),
-                                                                  color: darkMode
-                                                                      ? const Color(
-                                                                          0xFFFFFFFF)
-                                                                      : const Color(
-                                                                          0xFF353535),
-                                                                ),
-                                                              ),
-                                                      ),
-                                                      Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                          bottom: (screenHeight *
-                                                              (15 /
-                                                                  AppConfig()
-                                                                      .screenHeight)),
-                                                        ),
-                                                        child: SvgPicture.asset(
-                                                            width: screenWidth,
-                                                            "assets/svg/narrow_line.svg"),
                                                       ),
                                                     ],
                                                   ),
+                                                  items: _translations
+                                                      .map(
+                                                          (Translations item) =>
+                                                              DropdownMenuItem<
+                                                                  Translations>(
+                                                                value: item,
+                                                                child: Text(
+                                                                  item.fullName!,
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .textScaler
+                                                                        .scale((screenHeight *
+                                                                            (12 /
+                                                                                AppConfig().screenHeight))),
+                                                                    color: darkMode
+                                                                        ? Colors
+                                                                            .white
+                                                                        : Colors
+                                                                            .black,
+                                                                  ),
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                ),
+                                                              ))
+                                                      .toList(),
+                                                  value: userSelectedTranslation ??
+                                                      _translations
+                                                          .first, // Set default value
+                                                  onChanged:
+                                                      (Translations? value) {
+                                                    Translations? oldTrans;
+
+                                                    setState(() {
+                                                      if (musicApiIsLoading) {
+                                                        value = oldTrans;
+                                                      } else {
+                                                        userSelectedTranslation =
+                                                            value;
+                                                        changableShortName =
+                                                            value!.shortName!;
+                                                        _booksFuture =
+                                                            getBookChapters(
+                                                                int.parse(
+                                                                    selectedChapter));
+                                                        oldTrans = value;
+                                                        _audioPlayer.stop();
+                                                        playAllIsPlaying =
+                                                            false;
+                                                        isPlaying = false;
+                                                        playingIndex = -1;
+                                                      }
+                                                    });
+                                                  },
+                                                  buttonStyleData:
+                                                      ButtonStyleData(
+                                                    height: (screenHeight *
+                                                        (40 /
+                                                            AppConfig()
+                                                                .screenHeight)),
+                                                    width: (screenWidth *
+                                                        (200 /
+                                                            AppConfig()
+                                                                .screenWidth)),
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 14,
+                                                            right: 14),
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              0),
+                                                      border: Border.all(
+                                                        color: Colors.black26,
+                                                      ),
+                                                      color: darkMode
+                                                          ? const Color(
+                                                              0xFF2D281E)
+                                                          : Colors.white,
+                                                    ),
+                                                    elevation: 0,
+                                                  ),
+                                                  iconStyleData: IconStyleData(
+                                                    icon: SvgPicture.asset(
+                                                        color: darkMode
+                                                            ? Colors.white
+                                                            : Colors.black,
+                                                        "assets/svg/drop_down.svg"),
+                                                    iconSize: 12,
+                                                    iconEnabledColor:
+                                                        Colors.black,
+                                                    iconDisabledColor:
+                                                        Colors.black,
+                                                  ),
+                                                  dropdownStyleData:
+                                                      DropdownStyleData(
+                                                    maxHeight: 200,
+                                                    width: (screenWidth *
+                                                        (200 /
+                                                            AppConfig()
+                                                                .screenWidth)),
+                                                    decoration: BoxDecoration(
+                                                      color: darkMode
+                                                          ? const Color(
+                                                              0xFF2D281E)
+                                                          : Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              0),
+                                                    ),
+                                                    offset:
+                                                        const Offset(0, -10),
+                                                  ),
+                                                  menuItemStyleData:
+                                                      const MenuItemStyleData(
+                                                    height: 30,
+                                                    padding: EdgeInsets.only(
+                                                        left: 20, right: 14),
+                                                  ),
                                                 ),
-                                              );
-                                            },
-                                          ),
-                                        );
-                            }
-                          },
-                        )
-                      ],
+                                              )
+                                            : TextLoaderWidget(
+                                                200,
+                                                screenHeight *
+                                                    (20 /
+                                                        AppConfig()
+                                                            .screenHeight),
+                                                screenHeight *
+                                                    (0 /
+                                                        AppConfig()
+                                                            .screenHeight),
+                                                darkMode),
+                                      ],
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                          FutureBuilder(
+                            future: _booksFuture,
+                            builder:
+                                (BuildContext context, AsyncSnapshot snapshot) {
+                              if (snapshot.hasError) {
+                                return DetailLoaderScreen(
+                                  screenWidth,
+                                  screenHeight,
+                                  darkMode,
+                                );
+                              } else {
+                                chaptersList.clear();
+
+                                return snapshot.data == null
+                                    ? DetailLoaderScreen(
+                                        screenWidth,
+                                        screenHeight,
+                                        darkMode,
+                                      )
+                                    : apiIsloading
+                                        ? DetailLoaderScreen(
+                                            screenWidth,
+                                            screenHeight,
+                                            darkMode,
+                                          )
+                                        : SizedBox(
+                                            height: playAllIsPlaying
+                                                ? (screenHeight - topKeyHeight)
+                                                : null,
+                                            width: screenWidth,
+                                            child: ScrollablePositionedList
+                                                .builder(
+                                              itemScrollController:
+                                                  itemScrollController,
+                                              scrollDirection: Axis.vertical,
+                                              shrinkWrap: true,
+                                              physics: playAllIsPlaying
+                                                  ? const AlwaysScrollableScrollPhysics()
+                                                  : const NeverScrollableScrollPhysics(),
+                                              itemCount: snapshot.data.length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                listViewMaxLength =
+                                                    snapshot.data.length;
+                                                verseCount =
+                                                    snapshot.data.length;
+
+                                                BookChapters item =
+                                                    snapshot.data[index];
+
+                                                chaptersList.add(item);
+
+                                                print(
+                                                    "ListView Length  : $listviewLength");
+
+                                                return Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: (screenWidth *
+                                                        (8 /
+                                                            AppConfig()
+                                                                .screenWidth)),
+                                                    vertical: (screenHeight *
+                                                        (8 /
+                                                            AppConfig()
+                                                                .screenHeight)),
+                                                  ),
+                                                  child: Container(
+                                                    // width: (screenWidth *
+                                                    //     (396 /
+                                                    //         AppConfig()
+                                                    //             .screenWidth)),
+                                                    decoration: BoxDecoration(
+                                                      color: darkMode
+                                                          ? const Color(
+                                                              0xFF2D281E)
+                                                          : Colors.transparent,
+                                                      border: Border.all(
+                                                          color: const Color(
+                                                              0xFFAF6A06)),
+                                                      borderRadius:
+                                                          const BorderRadius
+                                                              .all(
+                                                        Radius.circular(6),
+                                                      ),
+                                                    ),
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        SizedBox(
+                                                          height: (screenHeight *
+                                                              (5 /
+                                                                  AppConfig()
+                                                                      .screenHeight)),
+                                                        ),
+                                                        Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                            right: (screenWidth *
+                                                                (12 /
+                                                                    AppConfig()
+                                                                        .screenWidth)),
+                                                          ),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              const SizedBox(),
+                                                              Text(
+                                                                getLanguageCode ==
+                                                                        'en'
+                                                                    ? "Verse"
+                                                                    : "कविता",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: MediaQuery.of(
+                                                                          context)
+                                                                      .textScaler
+                                                                      .scale((screenHeight *
+                                                                          (12 /
+                                                                              AppConfig().screenHeight))),
+                                                                  color: const Color(
+                                                                      0xFFAF6A06),
+                                                                ),
+                                                              ),
+                                                              GestureDetector(
+                                                                onTap:
+                                                                    () async {
+                                                                  setState(() {
+                                                                    audioText =
+                                                                        item.text!;
+                                                                  });
+                                                                  print(_audioPlayer
+                                                                      .state);
+
+                                                                  if (isPlaying) {
+                                                                    await _audioPlayer
+                                                                        .stop();
+
+                                                                    setState(
+                                                                        () {
+                                                                      isPlaying =
+                                                                          false;
+                                                                      playingIndex =
+                                                                          -1;
+                                                                    });
+                                                                  } else if (_audioState ==
+                                                                          "Pause" ||
+                                                                      !isPlaying) {
+                                                                    setState(
+                                                                        () {
+                                                                      isPlaying =
+                                                                          true;
+                                                                      playingIndex =
+                                                                          index;
+                                                                    });
+
+                                                                    playAudio(
+                                                                      languageCode:
+                                                                          getLanguageCode,
+                                                                      text: item
+                                                                          .text!
+                                                                          .replaceAll(
+                                                                              '<br/>',
+                                                                              '\n'),
+                                                                    );
+
+                                                                    // meaningClick(item);
+                                                                  }
+                                                                  checkedIndex =
+                                                                      index;
+                                                                },
+                                                                child:
+                                                                    SvgPicture
+                                                                        .asset(
+                                                                  isPlaying &&
+                                                                          checkedIndex ==
+                                                                              index &&
+                                                                          !playAllIsPlaying
+                                                                      ? "assets/svg/speaker_on.svg"
+                                                                      : "assets/svg/mic_icon.svg",
+                                                                  height: (screenHeight *
+                                                                      (25 /
+                                                                          AppConfig()
+                                                                              .screenHeight)),
+                                                                  width: (screenWidth *
+                                                                      (25 *
+                                                                          AppConfig()
+                                                                              .screenWidth)),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                          height: (screenHeight *
+                                                              (5 /
+                                                                  AppConfig()
+                                                                      .screenHeight)),
+                                                        ),
+                                                        SvgPicture.asset(
+                                                            width: screenWidth,
+                                                            "assets/svg/rect_bookdetail.svg"),
+                                                        Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                            bottom: (screenHeight *
+                                                                (25 /
+                                                                    AppConfig()
+                                                                        .screenHeight)),
+                                                            top: (screenHeight *
+                                                                (33 /
+                                                                    AppConfig()
+                                                                        .screenHeight)),
+                                                            left: (screenWidth *
+                                                                28 /
+                                                                AppConfig()
+                                                                    .screenWidth),
+                                                            right: (screenWidth *
+                                                                28 /
+                                                                AppConfig()
+                                                                    .screenWidth),
+                                                          ),
+                                                          child: index ==
+                                                                      playingIndex &&
+                                                                  _audioPlayer
+                                                                          .state ==
+                                                                      PlayerState
+                                                                          .playing
+                                                              ? Container(
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius: const BorderRadius
+                                                                          .all(
+                                                                          Radius.circular(
+                                                                              10)),
+                                                                      color: const Color(
+                                                                              0xFFffefd7)
+                                                                          .withOpacity(
+                                                                              1) // Set the background color to green
+                                                                      ),
+                                                                  child:
+                                                                      Padding(
+                                                                    padding:
+                                                                        const EdgeInsets
+                                                                            .all(
+                                                                            5.0),
+                                                                    child: Text(
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .center,
+                                                                      item.text!.replaceAll(
+                                                                          '<br/>',
+                                                                          '\n'),
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize: MediaQuery.of(context)
+                                                                            .textScaler
+                                                                            .scale((screenHeight *
+                                                                                (12 / AppConfig().screenHeight))),
+                                                                        color: darkMode
+                                                                            ? playAllIsPlaying || isPlaying
+                                                                                ? const Color(0xFF353535)
+                                                                                : const Color(0xFFFFFFFF)
+                                                                            : const Color(0xFF353535),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              : Text(
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                  item.text!
+                                                                      .replaceAll(
+                                                                          '<br/>',
+                                                                          '\n'),
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize: MediaQuery.of(
+                                                                            context)
+                                                                        .textScaler
+                                                                        .scale((screenHeight *
+                                                                            (12 /
+                                                                                AppConfig().screenHeight))),
+                                                                    color: darkMode
+                                                                        ? const Color(
+                                                                            0xFFFFFFFF)
+                                                                        : const Color(
+                                                                            0xFF353535),
+                                                                  ),
+                                                                ),
+                                                        ),
+                                                        Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                            bottom: (screenHeight *
+                                                                (15 /
+                                                                    AppConfig()
+                                                                        .screenHeight)),
+                                                          ),
+                                                          child: SvgPicture.asset(
+                                                              width:
+                                                                  screenWidth,
+                                                              "assets/svg/narrow_line.svg"),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          );
+                              }
+                            },
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              !statusBarVisible
-                  ? Container(
-                      width: screenWidth,
-                      height: statusBarHeight,
-                      color: darkMode
-                          ? AppConfig().chapterScreenBackgroundStartDarkColor
-                          : AppConfig().chapterScreenBackgroundStartLightColor,
-                    )
-                  : const SizedBox(),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
+          statusBarVisible
+              ? Container(
+                  width: screenWidth,
+                  height: statusBarHeight,
+                  color: darkMode
+                      ? AppConfig().chapterScreenBackgroundStartDarkColor
+                      : AppConfig().chapterScreenBackgroundStartLightColor,
+                )
+              : const SizedBox(),
+        ],
       ),
       bottomNavigationBar: (isPlaying || playAllIsPlaying)
           ? musicApiIsLoading
@@ -1438,30 +1498,22 @@ class BookDetail extends State<BookDetailScreen> {
                       children: [
                         IconButton(
                           color: Colors.white,
-                          icon: Icon(_audioState == "Playing"
+                          icon: Icon(audioPlayerState == PlayerState.playing
                               ? Icons.pause
                               : Icons.play_arrow),
                           onPressed: () async {
-                            if (_audioState == "Playing") {
-                              setState(() {
-                                _audioState = "Paused";
-                              });
+                            if (audioPlayerState == PlayerState.playing) {
                               await _audioPlayer.pause();
-                            } else if (_audioState == "Paused" ||
-                                _audioState == "Stopped") {
+                            } else if (audioPlayerState == PlayerState.paused ||
+                                audioPlayerState == PlayerState.stopped) {
                               setState(() {
                                 _audioState = "Playing";
                               });
                               await _audioPlayer.resume();
-                            } else if (_audioState == "Compleated") {
-                              setState(() {
-                                _audioState = "Playing";
-                              });
-                              // await _audioPlayer.play(audioText);
-                              // playAudio(
-                              //   languageCode: getLanguageCode,
-                              //   text: chaptersList[verseIdForReplay].text!,
-                              // );
+                            } else if (audioPlayerState ==
+                                PlayerState.completed) {
+                              print(" Text audio completed");
+                              replayAudio(audioText!);
                             }
                           },
                         ),

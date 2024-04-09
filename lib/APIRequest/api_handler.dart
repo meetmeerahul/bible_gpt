@@ -378,4 +378,40 @@ class ApiHandler {
     }
     return socialLogInMediaResponse;
   }
+
+  Future<Map<String, dynamic>> deleteAccountAPI(
+      {required String getToken}) async {
+    Map<String, dynamic> deleteAccountResponse = {
+      "status": false,
+      "message": ""
+    };
+    String deleteAccountAPIUrl =
+        "https://api.qurangpt.com/api/v1/user/delete-my-account/";
+    print(deleteAccountAPIUrl);
+    try {
+      var deleteAccountAPIResponse = await http.delete(
+          Uri.parse(deleteAccountAPIUrl),
+          headers: {'Authorization': 'Bearer $getToken'});
+
+      print(deleteAccountAPIResponse.body);
+      if (deleteAccountAPIResponse.statusCode >= 200 &&
+          deleteAccountAPIResponse.statusCode < 300) {
+        deleteAccountResponse["status"] = true;
+        Map getResponseMap = jsonDecode(deleteAccountAPIResponse.body);
+        print(getResponseMap);
+        String getResponseMessage = getResponseMap["message"] ?? "";
+        deleteAccountResponse["message"] = getResponseMessage;
+      } else {
+        deleteAccountResponse["status"] = false;
+        Map getResponseMap = jsonDecode(deleteAccountAPIResponse.body);
+        String getErrorMessage = getResponseMap["message"] ?? "";
+        deleteAccountResponse["message"] = getErrorMessage;
+      }
+    } catch (e) {
+      deleteAccountResponse["status"] = false;
+      String getErrorMessage = e.toString() ?? "";
+      deleteAccountResponse["message"] = getErrorMessage;
+    }
+    return deleteAccountResponse;
+  }
 }

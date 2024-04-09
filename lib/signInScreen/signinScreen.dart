@@ -15,6 +15,7 @@ import '../class/country_class.dart';
 import '../class/theme_method.dart';
 import '../config/app_config.dart';
 import '../config/language_text_file.dart';
+import '../dashBoardScreen/noInternetScreen.dart';
 import '../reuseable/button/BackArrowWidget.dart';
 import '../reuseable/button/GoogleButton.dart';
 import '../reuseable/button/PrimaryButton.dart';
@@ -61,14 +62,16 @@ class _SigninScreenState extends State<SigninScreen> {
   bool statusBarVisible = false;
   bool isAPILoading = false;
 
+  bool isSuccess = false;
+
   navigateToNoInternetScreen(bool callInit) {
-    // Navigator.push(context,
-    //         MaterialPageRoute(builder: (context) => NoInternetScreen()))
-    //     .then((value) {
-    //   if (callInit) {
-    //     callInitState();
-    //   }
-    // });
+    Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetScreen()))
+        .then((value) {
+      if (callInit) {
+        callInitState();
+      }
+    });
   }
 
   bool nameValidation(String getName) {
@@ -1171,6 +1174,7 @@ class _SigninScreenState extends State<SigninScreen> {
   callLogInAPI(String getUserName, String getPassword) async {
     setState(() {
       isAPILoading = true;
+      isSuccess = false;
     });
     bool internetConnectCheck = await CheckInternetConnectionMethod();
     if (internetConnectCheck) {
@@ -1186,9 +1190,16 @@ class _SigninScreenState extends State<SigninScreen> {
         SharedPreference.instance.setUserProfileDetail("user", getUserMap);
         ToastMessage(screenHeight, logInAPIResponse["message"],
             logInAPIResponse["status"]);
-        Navigator.of(context).pushAndRemoveUntil(
-            (MaterialPageRoute(builder: (context) => const DashboardScreen())),
-            (route) => false);
+        setState(() {
+          isSuccess = true;
+        });
+        if (isSuccess) {
+          Navigator.of(context).pushAndRemoveUntil(
+              (MaterialPageRoute(
+                  builder: (context) => const DashboardScreen())),
+              (route) => false);
+        }
+        //  Navigator.pop(context, getResponseMessage);
       } else {
         ToastMessage(screenHeight, logInAPIResponse["message"],
             logInAPIResponse["status"]);
@@ -1205,6 +1216,7 @@ class _SigninScreenState extends State<SigninScreen> {
       String getSocialMediaId, String getMailId, String getImageUrl) async {
     setState(() {
       isAPILoading = true;
+      isSuccess = false;
     });
     bool internetConnectCheck = await CheckInternetConnectionMethod();
     if (internetConnectCheck) {
@@ -1223,9 +1235,18 @@ class _SigninScreenState extends State<SigninScreen> {
         SharedPreference.instance.setUserProfileDetail("user", getUserMap);
         ToastMessage(screenHeight, socialMediaAPIResponse["message"],
             socialMediaAPIResponse["status"]);
-        Navigator.of(context).pushAndRemoveUntil(
-            (MaterialPageRoute(builder: (context) => const DashboardScreen())),
-            (route) => false);
+
+        setState(() {
+          isSuccess = true;
+        });
+
+        if (isSuccess) {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const DashboardScreen()),
+              (route) => false);
+        }
+
+        // Navigator.pop(context, getResponseMessage);
       } else {
         ToastMessage(screenHeight, socialMediaAPIResponse["message"],
             socialMediaAPIResponse["status"]);
@@ -1242,6 +1263,7 @@ class _SigninScreenState extends State<SigninScreen> {
       String getSocialMediaId, String getMailId, String getImageUrl) async {
     setState(() {
       isAPILoading = true;
+      isSuccess = false;
     });
     print("Id : $getSocialMediaId");
     bool internetConnectCheck = await CheckInternetConnectionMethod();
@@ -1256,7 +1278,15 @@ class _SigninScreenState extends State<SigninScreen> {
         String getResponseMessage = socialMediaLogInAPIResponse["message"];
         Map<String, dynamic> getUserMap = socialMediaLogInAPIResponse["user"];
         SharedPreference.instance.setUserProfileDetail("user", getUserMap);
-        Navigator.pop(context, getResponseMessage);
+        setState(() {
+          isSuccess = true;
+        });
+
+        if (isSuccess) {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const DashboardScreen()),
+              (route) => false);
+        }
       } else {
         if ("User is not found" == socialMediaLogInAPIResponse["message"]) {
           callSignUpSocialMediaAPI(getFullName, getSocialMediaType,

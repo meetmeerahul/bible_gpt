@@ -59,6 +59,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   //late VideoPlayerController _controller;
   //late int getLanguageType;
   late String getLanguageCode;
+  late var activeSource;
   ScrollController pageScrollController = ScrollController();
   double statusBarHeight = 0;
   bool statusBarVisible = false;
@@ -101,6 +102,26 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
 
   bool oldTest = false;
   bool newTest = false;
+
+  scrollinit() async {
+    bool internetConnectCheck = await CheckInternetConnectionMethod();
+    if (internetConnectCheck) {
+      pageScrollController.addListener(() {
+        if (pageScrollController.offset > 0) {
+          if (statusBarVisible) {
+          } else {
+            setState(() {
+              statusBarVisible = true;
+            });
+          }
+        } else {
+          setState(() {
+            statusBarVisible = false;
+          });
+        }
+      });
+    }
+  }
 
   getUserToken() async {
     getToken = await SharedPreference.instance.getUserToken('token');
@@ -298,26 +319,24 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
       isDeleteAPILoading = true;
     });
     bool internetConnectCheck = await CheckInternetConnectionMethod();
-
     if (internetConnectCheck) {
-      //   var getDeleteAccountAPIResponse = await AllAPIMethod().deleteAccountAPI(
-      //     getToken: getToken,
-      //   );
-      //   print(getDeleteAccountAPIResponse);
-      //   if (getDeleteAccountAPIResponse["status"]) {
-      //     String getResponseMessage = getDeleteAccountAPIResponse["message"];
-      //     logOutUser(getResponseMessage);
-      //   } else {
-      //     ToastMessage(screenHeight, getDeleteAccountAPIResponse["message"],
-      //         getDeleteAccountAPIResponse["status"]);
-      //   }
-      // } else {
-      //   navigateToNoInternetScreen(false);
-      // }
-      setState(() {
-        isDeleteAPILoading = false;
-      });
+      var getDeleteAccountAPIResponse = await ApiHandler().deleteAccountAPI(
+        getToken: getToken,
+      );
+      print(getDeleteAccountAPIResponse);
+      if (getDeleteAccountAPIResponse["status"]) {
+        String getResponseMessage = getDeleteAccountAPIResponse["message"];
+        logOutUser(getResponseMessage);
+      } else {
+        ToastMessage(screenHeight, getDeleteAccountAPIResponse["message"],
+            getDeleteAccountAPIResponse["status"]);
+      }
+    } else {
+      navigateToNoInternetScreen(false);
     }
+    setState(() {
+      isDeleteAPILoading = false;
+    });
   }
 
   initialData() {
@@ -377,23 +396,24 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
       setState(() {
         pageIndex = currentPage;
       });
-      pageScrollController.addListener(() {
-        /*if(pageScrollController.offset>0){
-        if(statusBarVisible){
-
-        }
-        else{
-          setState(() {
-            statusBarVisible = true;
-          });
-        }
-      }
-      else{
-        setState(() {
-          statusBarVisible = false;
-        });
-      }*/
-      });
+      // pageScrollController.addListener(() {
+      //   if (pageScrollController.offset > 0) {
+      //     if (statusBarVisible) {
+      //     } else {
+      //       setState(() {
+      //         statusBarVisible = true;
+      //       });
+      //     }
+      //   } else {
+      //     setState(() {
+      //       statusBarVisible = false;
+      //     });
+      //   }
+      //   if (pageScrollController.position.maxScrollExtent ==
+      //       pageScrollController.position.pixels) {
+      //     print("call bottom");
+      //   }
+      // });
       getUserData();
     } else {
       navigateToNoInternetScreen(true);
@@ -429,6 +449,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    scrollinit();
     callInitState();
     _languagesFuture = ApiHandler.getLanguages();
 
@@ -1038,10 +1059,26 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                 _languagesFuture,
                                                             builder: (context,
                                                                 snapshot) {
-                                                              if (snapshot
-                                                                      .connectionState ==
+                                                              if (snapshot.connectionState ==
                                                                   ConnectionState
                                                                       .waiting) {
+                                                                return TextLoaderWidget(
+                                                                    200,
+                                                                    screenHeight *
+                                                                        (20 /
+                                                                            AppConfig()
+                                                                                .screenHeight),
+                                                                    screenHeight *
+                                                                        (0 /
+                                                                            AppConfig().screenHeight),
+                                                                    darkMode);
+                                                              } else if (snapshot
+                                                                          .data ==
+                                                                      null ||
+                                                                  snapshot.data!
+                                                                      .isEmpty ||
+                                                                  snapshot
+                                                                      .hasError) {
                                                                 return TextLoaderWidget(
                                                                     200,
                                                                     screenHeight *

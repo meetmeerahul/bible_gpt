@@ -81,21 +81,6 @@ Widget MenuBarProfileWidget(
           ),
           Flexible(
             child: Container(
-              // child: languageFutureWidget(
-              //     screenWidth: screenWidth,
-              //     screenHeight: screenHeight,
-              //     selectedLanguage: getLanguageCode,
-              //     getLanguageTranslatorMethod: profileNameFuture,
-              //     getFontSize: AppConfig().chapterScreenMenuProfileTextSize,
-              //     getDarkMode: darkMode,
-              //     getTextAlign: TextAlign.start,
-              //     getTextColor: darkMode
-              //         ? AppConfig().chapterScreenMenuProfileTextColorDark
-              //         : AppConfig().chapterScreenMenuProfileTextColorLight,
-              //     getFontFamily: AppConfig().outfitFontRegular,
-              //     getTextDirection:
-              //         LanguageTextFile().getTextDirection(getLanguageCode),
-              //     getSoftWrap: true),
               child: Text(
                 profileName,
                 textScaler: const TextScaler.linear(1.0),

@@ -105,7 +105,7 @@ class _GptScreenState extends State<GptScreen> {
       isAudioWidget = false;
       player.stop();
       activeSource = null;
-      textEditingController.text = "";
+      // textEditingController.text = "";
       //_stop();
     });
     bool internetConnectCheck = await CheckInternetConnectionMethod();

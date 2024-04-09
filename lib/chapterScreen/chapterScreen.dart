@@ -567,16 +567,23 @@ class chapterPage extends State<chapterScreen> {
                       (AppConfig().chapterScreenBottomAllChapterTextPadding /
                           AppConfig().screenHeight),
                 ),
-                Container(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      for (int al = 0; al < allChapterList.length; al++)
-                        AllChapterListview(allChapterList[al].getAllChapterList)
-                    ],
-                  ),
-                ),
+
+                allChapterList.isEmpty
+                    ? ChapterLoaderScreen(
+                        screenWidth: screenWidth,
+                        screenHeight: screenHeight,
+                        darkMode: darkMode)
+                    : Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            for (int al = 0; al < allChapterList.length; al++)
+                              AllChapterListview(
+                                  allChapterList[al].getAllChapterList)
+                          ],
+                        ),
+                      ),
                 // SizedBox(
                 //   height: screenHeight *
                 //       (AppConfig().bottomNavigationBarHeight /
@@ -652,7 +659,7 @@ class chapterPage extends State<chapterScreen> {
             }
           }
         }
-        // getSharedPreferenceData(getResult);
+        //getSharedPreferenceData(getResult);
       },
     );
   }
