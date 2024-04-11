@@ -25,8 +25,8 @@ Widget MenuBarProfileWidget(
         print("Profile Click");
         profileClick(true);
         print(darkMode);
-        Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const SigninScreen()));
+        // Navigator.of(context).push(
+        //     MaterialPageRoute(builder: (context) => const SigninScreen()));
       },
       style: TextButton.styleFrom(
         minimumSize: Size.zero,
