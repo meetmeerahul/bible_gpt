@@ -122,6 +122,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     setState(() {
       changableLanguage = "English";
+
+      oldT = 39;
+      newT = 27;
     });
     if (internetConnectCheck) {
       futureFunctionMethod();
@@ -347,6 +350,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // TODO: implement initState
     super.initState();
 
+    setState(() {
+      oldT = 39;
+      newT = 27;
+    });
+
     callInitState();
     //  print(" in init $getSelectedLanguageCode");
   }
@@ -362,6 +370,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     themeChange();
     initialData();
 
+    oldT = 39;
+    newT = 27;
     print(darkMode);
     //print(getSelectedLanguageCode);
     return WillPopScope(

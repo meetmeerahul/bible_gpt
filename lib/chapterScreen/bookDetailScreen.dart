@@ -10,6 +10,7 @@ import 'package:bible_gpt/config/app_config.dart';
 import 'package:bible_gpt/config/changable.dart';
 import 'package:bible_gpt/dashBoardScreen/gptScreen.dart';
 import 'package:bible_gpt/loader/screen/DetailLoaderScreen.dart';
+import 'package:bible_gpt/reuseable/button/PrimaryButton.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -1245,12 +1246,11 @@ class BookDetail extends State<BookDetailScreen> {
                                                                 MainAxisAlignment
                                                                     .spaceBetween,
                                                             children: [
-                                                              const SizedBox(),
                                                               Text(
                                                                 getLanguageCode ==
                                                                         'en'
-                                                                    ? "Verse"
-                                                                    : "कविता",
+                                                                    ? "  Verse ${index + 1}"
+                                                                    : "  कविता ${index + 1}",
                                                                 style:
                                                                     TextStyle(
                                                                   fontSize: MediaQuery.of(
@@ -1263,6 +1263,7 @@ class BookDetail extends State<BookDetailScreen> {
                                                                       0xFFAF6A06),
                                                                 ),
                                                               ),
+                                                              const SizedBox(),
                                                               GestureDetector(
                                                                 onTap:
                                                                     () async {
@@ -1452,6 +1453,154 @@ class BookDetail extends State<BookDetailScreen> {
                                           );
                               }
                             },
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10, right: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                selectedChapter != "1"
+                                    ? InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            if (musicApiIsLoading) {
+                                              selectedChapter = selectedChapter;
+                                            }
+                                            if (!musicApiIsLoading) {
+                                              selectedChapter =
+                                                  (int.parse(selectedChapter) -
+                                                          1)
+                                                      .toString();
+                                              print(
+                                                  " Selected chapter : $selectedChapter");
+                                              _booksFuture = getBookChapters(
+                                                  int.parse(selectedChapter));
+                                              _audioPlayer.stop();
+                                              checkedIndex = -1;
+                                              playAllIsPlaying = false;
+                                              isPlaying = false;
+                                            }
+                                          });
+                                          pageScrollController.jumpTo(0.0);
+                                        },
+                                        child: Container(
+                                          height: MediaQuery.of(context)
+                                              .textScaler
+                                              .scale((screenHeight *
+                                                  (36 /
+                                                      AppConfig()
+                                                          .screenHeight))),
+                                          width: MediaQuery.of(context)
+                                              .textScaler
+                                              .scale(screenWidth *
+                                                  (113 /
+                                                      AppConfig().screenWidth)),
+                                          decoration: const BoxDecoration(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(30)),
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: [
+                                                Color(0xFFC47807),
+                                                Color(0xFF643402),
+                                              ],
+                                            ),
+                                          ),
+                                          child: const Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                textAlign: TextAlign.center,
+                                                "Previous",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                    : const SizedBox(),
+                                SizedBox(
+                                  width: (screenWidth *
+                                      (10 / AppConfig().screenWidth)),
+                                ),
+                                chapterCOunt != selectedChapter
+                                    ? InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            if (musicApiIsLoading) {
+                                              selectedChapter = selectedChapter;
+                                            }
+                                            if (!musicApiIsLoading) {
+                                              selectedChapter =
+                                                  (int.parse(selectedChapter) +
+                                                          1)
+                                                      .toString();
+                                              print(
+                                                  " Selected chapter : $selectedChapter");
+                                              _booksFuture = getBookChapters(
+                                                  int.parse(selectedChapter));
+                                              _audioPlayer.stop();
+                                              checkedIndex = -1;
+                                              playAllIsPlaying = false;
+                                              isPlaying = false;
+                                            }
+                                          });
+                                          pageScrollController.jumpTo(0.0);
+                                        },
+                                        child: Container(
+                                          height: MediaQuery.of(context)
+                                              .textScaler
+                                              .scale((screenHeight *
+                                                  (36 /
+                                                      AppConfig()
+                                                          .screenHeight))),
+                                          width: MediaQuery.of(context)
+                                              .textScaler
+                                              .scale(screenWidth *
+                                                  (113 /
+                                                      AppConfig().screenWidth)),
+                                          decoration: const BoxDecoration(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(30)),
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: [
+                                                Color(0xFFC47807),
+                                                Color(0xFF643402),
+                                              ],
+                                            ),
+                                          ),
+                                          child: const Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                textAlign: TextAlign.center,
+                                                "Next",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                    : const SizedBox()
+                              ],
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 20,
                           )
                         ],
                       ),

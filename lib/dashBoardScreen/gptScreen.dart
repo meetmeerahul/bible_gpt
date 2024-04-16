@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:bible_gpt/APIRequest/api_handler.dart';
+import 'package:bible_gpt/config/changable.dart';
 import 'package:bible_gpt/signInScreen/signinScreen.dart';
 import 'package:bible_gpt/widgets/check_internet_method.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
@@ -24,6 +27,8 @@ import '../widgets/search_gpt_text_field.dart';
 import '../widgets/textWidget.dart';
 import '../widgets/toast_message.dart';
 import 'noInternetScreen.dart';
+
+import 'package:http/http.dart' as http;
 
 class GptScreen extends StatefulWidget {
   const GptScreen({super.key});
@@ -60,6 +65,7 @@ class _GptScreenState extends State<GptScreen> {
   bool get isAndroid => !kIsWeb && Platform.isAndroid;
   bool get isWeb => kIsWeb
   bool bottomBar = false;*/
+
   Duration duration = Duration.zero;
   Duration position = Duration.zero;
   bool isAudioWidget = false;
@@ -70,6 +76,11 @@ class _GptScreenState extends State<GptScreen> {
   late var activeSource;
   bool isAudioPlayerLoading = false;
   ScrollController textFieldScrollController = ScrollController();
+
+  bool isPlayerOn = false;
+
+  bool isPlaying = false;
+  bool musicApiIsLoading = false;
   //Future<String>? searchResultFutureMethod;
   //Future<String>? timerPositionFutureMethod;
   String copyRightContentTextFuture = "© 2023 Copyright by Bible GPT";
@@ -120,10 +131,8 @@ class _GptScreenState extends State<GptScreen> {
         print(content);
         setState(() {
           searchResult += content;
+          audioText = content;
         });
-        /*setState(() {
-          searchResult = getSearchAPIResponse["result"];
-        });*/
       } else {
         ToastMessage(screenHeight, getSearchAPIResponse["message"],
             getSearchAPIResponse["status"]);
@@ -144,10 +153,187 @@ class _GptScreenState extends State<GptScreen> {
     }
   }
 
+  audioPlayerInit() {
+    print("Initially called #################################################");
+    audioPlayerState = player.state;
+
+    player.onPlayerStateChanged.listen((state) {
+      print(" player state ^^^^^^^^^^^^^^^^ : $state");
+
+      setState(() {
+        audioPlayerState = state;
+
+        if (state == PlayerState.playing) {
+          //isAudioPlaying = true;
+          print("playing");
+        }
+
+        // else if (state == PlayerState.completed) {
+        //   positionDouble = durationDouble;
+        //   position = duration;
+        //   //isAudioPlaying = false;
+        //   print("completed");
+        //   print("play all : $playAllIsPlaying");
+
+        //   if (playAllIsPlaying) {
+        //     playNumber += 1;
+
+        //     if (playNumber < chaptersList.length) {
+        //       scrollToIndex(playNumber);
+        //       print("Chapters list $chaptersList");
+
+        //       print("@#%%#################################%%%%%%%");
+        //       meaningClick(chaptersList[playNumber]);
+        //     } else {
+        //       playAllIsPlaying = false;
+        //     }
+        //   }
+        // }
+
+        else if (state == PlayerState.paused) {
+          //isAudioPlaying = false;
+          print("paused");
+        } else if (state == PlayerState.stopped) {
+          //isAudioPlaying = false;
+          print("stopped");
+        } else if (state == PlayerState.completed) {
+          isPlaying = true;
+          setState(() {
+            isPlayerOn = false;
+          });
+          print("Playing compleated");
+        }
+
+        player.onPlayerStateChanged.listen((state) {
+          if (state == PlayerState.completed || state == PlayerState.paused) {
+            isPlayerOn = false;
+
+            // Do something when audio playback completes
+          } else if (state == PlayerState.playing) {
+            isPlayerOn = true;
+          } else if (state == PlayerState.stopped) {
+            setState(() {
+              player.seek(Duration.zero);
+            });
+          }
+        });
+      });
+    });
+    player.onDurationChanged.listen((getDuration) {
+      setState(() {
+        print(getDuration);
+        durationDouble = (getDuration.inMilliseconds) / 1000;
+        duration = getDuration;
+      });
+    });
+    player.onPositionChanged.listen((getPosition) {
+      setState(() {
+        print(getPosition);
+        positionDouble = (getPosition.inMilliseconds) / 1000;
+        position = getPosition;
+      });
+    });
+  }
+
+  Future<void> playAudio(
+      {required String text, required String languageCode}) async {
+    setState(() {
+      musicApiIsLoading = true;
+      player.audioCache.clearAll();
+    });
+
+    Map<String, dynamic> getTextToSpeechResponse = {
+      "status": false,
+      "message": "",
+      "audio": ""
+    };
+    String textToSpeechAPIUrl =
+        "https://api.mybiblegpt.com/api/v1/user/text-to-speach/";
+    print(textToSpeechAPIUrl);
+
+    try {
+      var getTextToSpeechAPIResponse = await http.post(
+          Uri.parse(textToSpeechAPIUrl),
+          body: {"text_input": text, "language_code": getLanguageCode});
+      print(getTextToSpeechAPIResponse.body);
+
+      if (getTextToSpeechAPIResponse.statusCode >= 200 &&
+          getTextToSpeechAPIResponse.statusCode < 300) {
+        getTextToSpeechResponse["status"] = true;
+
+        Map getResponseMap = jsonDecode(getTextToSpeechAPIResponse.body);
+        print("=============================");
+        print(getResponseMap);
+
+        String getAudioText = getResponseMap["audio_content"] ?? "";
+        audioText = getResponseMap["audio_content"];
+        getTextToSpeechResponse["audio"] = getAudioText;
+
+        audioText = getAudioText;
+      } else {
+        getTextToSpeechResponse["status"] = false;
+        Map getResponseMap = jsonDecode(getTextToSpeechAPIResponse.body);
+        String getErrorMessage = getResponseMap["message"] ?? "";
+        getTextToSpeechResponse["message"] = getErrorMessage;
+      }
+    } catch (e) {
+      getTextToSpeechResponse["status"] = false;
+      String getErrorMessage = "This voice is not available";
+      getTextToSpeechResponse["message"] = getErrorMessage;
+    }
+
+    final audioContent = getTextToSpeechResponse["audio"];
+
+    replayAudio(audioContent);
+  }
+
+  replayAudio(String getAudio) async {
+    print(getAudio);
+
+    setState(() {
+      musicApiIsLoading = false;
+      player.audioCache.clearAll();
+    });
+
+    if (Platform.isIOS) {
+      Uint8List audioData = Uint8List.fromList(base64.decode(getAudio));
+      audioPlayerLocalRun(audioData);
+    } else {
+      Uint8List audioData = Uint8List.fromList(base64.decode(getAudio));
+      activeSource = BytesSource(audioData);
+      player.play(BytesSource(audioData));
+      if (audioPlayerState == PlayerState.completed) {
+        setState(() {
+          isPlayerOn = false;
+        });
+      }
+    }
+  }
+
+  audioPlayerLocalRun(Uint8List getData) async {
+    print("get data $getData");
+    final file = File('${(await getTemporaryDirectory()).path}/temp_audio.mp3');
+    await file.writeAsBytes(getData);
+    activeSource = DeviceFileSource(file.path);
+    player.play(DeviceFileSource(file.path));
+    if (audioPlayerState == PlayerState.completed) {
+      setState(() {
+        isPlayerOn = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    audioPlayerInit();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    player.dispose();
   }
 
   loadInitialData() {
@@ -317,6 +503,8 @@ class _GptScreenState extends State<GptScreen> {
                                   if (textEditingController.text.isNotEmpty) {
                                     isListening = false;
                                     _speech.stop();
+                                    isPlayerOn = false;
+                                    isPlaying = false;
                                     callSearchGPTAPI(
                                         textEditingController.text.toString());
                                   } else {
@@ -398,11 +586,11 @@ class _GptScreenState extends State<GptScreen> {
                                 ? Padding(
                                     padding: EdgeInsets.only(
                                       top: (screenHeight *
-                                          (30 / AppConfig().screenHeight)),
+                                          (15 / AppConfig().screenHeight)),
                                       right: (screenWidth *
-                                          (30 / AppConfig().screenWidth)),
+                                          (10 / AppConfig().screenWidth)),
                                       left: (screenWidth *
-                                          (30 / AppConfig().screenWidth)),
+                                          (10 / AppConfig().screenWidth)),
                                     ),
                                     child: TextLoaderWidget(
                                         screenWidth,
@@ -422,29 +610,94 @@ class _GptScreenState extends State<GptScreen> {
                                       left: (screenWidth *
                                           (30 / AppConfig().screenWidth)),
                                     ),
-                                    child: AnimatedTextKit(
-                                      animatedTexts: [
-                                        TypewriterAnimatedText(
-                                          speed: const Duration(
-                                              microseconds: 2000),
-                                          textAlign: TextAlign.start,
-                                          searchResult,
-                                          textStyle: TextStyle(
-                                            color: darkMode
-                                                ? const Color(0xffffffff)
-                                                : const Color(0xff0000000),
-
-                                            fontSize: MediaQuery.of(context)
-                                                .textScaler
-                                                .scale((screenHeight *
-                                                    (12 /
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          border: searchResult.isNotEmpty
+                                              ? Border.all(
+                                                  color: !darkMode
+                                                      ? const Color(0xFFAF6A06)
+                                                      : const Color(0xFF623301))
+                                              : null),
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                            top: 20,
+                                            bottom: 20,
+                                            right: 10,
+                                            left: 10),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                if (isPlaying) {
+                                                  player.stop();
+                                                  setState(() {
+                                                    isPlaying = false;
+                                                    isPlayerOn = false;
+                                                  });
+                                                } else {
+                                                  setState(() {
+                                                    isPlaying = true;
+                                                    musicApiIsLoading = true;
+                                                    isPlayerOn = true;
+                                                  });
+                                                  playAudio(
+                                                      text: audioText!,
+                                                      languageCode: "en");
+                                                }
+                                              },
+                                              child: SvgPicture.asset(
+                                                searchResult.isNotEmpty
+                                                    ? isPlayerOn
+                                                        ? "assets/svg/speaker_on.svg"
+                                                        : "assets/svg/mic_icon.svg"
+                                                    : "default_value_if_null",
+                                                height: (screenHeight *
+                                                    (25 /
                                                         AppConfig()
-                                                            .screenHeight))),
-                                            //fontWeight: FontWeight.w400,
-                                          ),
+                                                            .screenHeight)),
+                                                width: (screenWidth *
+                                                    (25 *
+                                                        AppConfig()
+                                                            .screenWidth)),
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 20,
+                                            ),
+                                            AnimatedTextKit(
+                                              animatedTexts: [
+                                                TypewriterAnimatedText(
+                                                  speed: const Duration(
+                                                      microseconds: 2000),
+                                                  textAlign: TextAlign.start,
+                                                  searchResult,
+                                                  textStyle: TextStyle(
+                                                    color: darkMode
+                                                        ? const Color(
+                                                            0xffffffff)
+                                                        : const Color(
+                                                            0xff0000000),
+
+                                                    fontSize: MediaQuery.of(
+                                                            context)
+                                                        .textScaler
+                                                        .scale((screenHeight *
+                                                            (12 /
+                                                                AppConfig()
+                                                                    .screenHeight))),
+                                                    //fontWeight: FontWeight.w400,
+                                                  ),
+                                                ),
+                                              ],
+                                              totalRepeatCount: 1,
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                      totalRepeatCount: 1,
+                                      ),
                                     ),
                                   )
                             // If not loading and text is empty, show nothing
@@ -455,6 +708,78 @@ class _GptScreenState extends State<GptScreen> {
                 ],
               ),
             ),
+            bottomNavigationBar: (isPlaying)
+                ? musicApiIsLoading
+                    ? TextLoaderWidget(
+                        AppConfig().screenWidth * .8,
+                        screenHeight * (50 / AppConfig().screenHeight),
+                        screenHeight * (0 / AppConfig().screenHeight),
+                        darkMode)
+                    : Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal:
+                                (screenWidth * (1 / AppConfig().screenWidth)),
+                            vertical: (screenHeight *
+                                (1 / AppConfig().screenHeight))),
+                        child: Container(
+                          height: 50,
+                          width: 100,
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(colors: [
+                              Color(0xFF643402),
+                              Color(0xFF643402),
+                            ]),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                color: Colors.white,
+                                icon: Icon(
+                                    audioPlayerState == PlayerState.playing
+                                        ? Icons.pause
+                                        : Icons.play_arrow),
+                                onPressed: () async {
+                                  if (audioPlayerState == PlayerState.playing) {
+                                    await player.pause();
+                                  } else if (audioPlayerState ==
+                                          PlayerState.paused ||
+                                      audioPlayerState == PlayerState.stopped) {
+                                    await player.resume();
+                                  } else if (audioPlayerState ==
+                                      PlayerState.completed) {
+                                    print(" Text audio completed");
+                                    replayAudio(audioText!);
+                                  }
+                                },
+                              ),
+                              Slider(
+                                value: position.inSeconds
+                                    .toDouble()
+                                    .clamp(0.0, duration.inSeconds.toDouble()),
+                                min: 0,
+                                max: duration.inSeconds.toDouble(),
+                                activeColor: const Color(0XFFAF6A06),
+                                onChanged: (value) {
+                                  setState(() {
+                                    position = Duration(seconds: value.toInt());
+                                    player.seek(position);
+                                  });
+                                },
+                              ),
+                              Text(
+                                "${position.inSeconds}  /  ${duration.inSeconds} Sec ",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: (screenHeight *
+                                      (12 / AppConfig().screenHeight)),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      )
+                : null,
           ),
         ));
   }

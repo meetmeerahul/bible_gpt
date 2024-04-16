@@ -33,7 +33,7 @@ Widget MenuBarCategoryWidget(
               print("chapter click");
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (ctx) => const bottomNavigationBarScreen(
-                        currentPage: 1,
+                        currentPage: 0,
                       )));
               selectedCategoryFunction(0);
             },

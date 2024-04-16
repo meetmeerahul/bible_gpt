@@ -175,14 +175,13 @@ class chapterPage extends State<chapterScreen> {
           List<ChapterHomeListClass> getResponseData = [];
 
           for (var item in getHomeChapterAPIResponse) {
-            // Convert each map in the response to a ChapterHomeListClass object
             getResponseData.add(ChapterHomeListClass.fromJson(item));
           }
 
           List<ChapterHomeListClass> getChapterHomeList = [];
 
-          if (oldTestNew == false && newTestNew == false) {
-            for (int i = 0; i < getResponseData.length; i++) {
+          if (oldTestNew == false && newTestNew == true) {
+            for (int i = 0; i < oldT; i++) {
               getChapterHomeList.add(getResponseData[i]);
               if ((i == (getResponseData.length - 1)) || ((i + 1) % 3 == 0)) {
                 allChapterList.add(ChapterHomeAllListClass(
@@ -191,7 +190,7 @@ class chapterPage extends State<chapterScreen> {
               }
             }
           } else if (oldTestNew == true && newTestNew == false) {
-            for (int i = 39; i < getResponseData.length; i++) {
+            for (int i = oldT; i < getResponseData.length; i++) {
               getChapterHomeList.add(getResponseData[i]);
               if ((i == (getResponseData.length - 1)) || ((i + 1) % 3 == 0)) {
                 allChapterList.add(ChapterHomeAllListClass(
@@ -199,26 +198,6 @@ class chapterPage extends State<chapterScreen> {
                 getChapterHomeList.clear();
               }
             }
-          } else if (oldTestNew == false && newTestNew == true) {
-            int count = 0;
-            for (int i = 0; i <= 38; i++) {
-              count++;
-              getChapterHomeList.add(getResponseData[i]);
-              if ((i == (getResponseData.length - 1)) || ((i + 1) % 3 == 0)) {
-                allChapterList.add(ChapterHomeAllListClass(
-                    getAllChapterList: List.from(getChapterHomeList)));
-                getChapterHomeList.clear();
-              }
-            }
-
-            if (count == 0) {
-              print("No books");
-              const Text(
-                "No Books Avilable For New Tesaments",
-                style: TextStyle(color: Colors.red),
-              );
-            }
-            count = 0;
           }
         });
       } else {
@@ -544,8 +523,10 @@ class chapterPage extends State<chapterScreen> {
                       top: (screenHeight * (10 / AppConfig().screenHeight)),
                     ),
                     child: Text(
-                      LanguageTextFile()
-                          .getChapterScreenAllChapterText(getLanguageCode),
+                      newTestNew == false && oldTestNew == true && newT == 0
+                          ? ""
+                          : LanguageTextFile()
+                              .getChapterScreenAllChapterText(getLanguageCode),
                       textScaler: const TextScaler.linear(1.0),
                       textAlign: TextAlign.start,
                       style: TextStyle(
@@ -568,22 +549,43 @@ class chapterPage extends State<chapterScreen> {
                           AppConfig().screenHeight),
                 ),
 
-                allChapterList.isEmpty
-                    ? ChapterLoaderScreen(
-                        screenWidth: screenWidth,
-                        screenHeight: screenHeight,
-                        darkMode: darkMode)
-                    : Container(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            for (int al = 0; al < allChapterList.length; al++)
-                              AllChapterListview(
-                                  allChapterList[al].getAllChapterList)
-                          ],
-                        ),
-                      ),
+                newTestNew == false && oldTestNew == true && newT == 0
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Center(
+                            child: SizedBox(
+                              height: screenHeight,
+                              child: Text(
+                                getLanguageCode == "en"
+                                    ? "No Books In Newtestament"
+                                    : "न्यूटेस्टामेंट में कोई किताब नहीं",
+                                style: TextStyle(
+                                    color:
+                                        darkMode ? Colors.white : Colors.black),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : allChapterList.isEmpty
+                        ? ChapterLoaderScreen(
+                            screenWidth: screenWidth,
+                            screenHeight: screenHeight,
+                            darkMode: darkMode)
+                        : Container(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                for (int al = 0;
+                                    al < allChapterList.length;
+                                    al++)
+                                  AllChapterListview(
+                                      allChapterList[al].getAllChapterList)
+                              ],
+                            ),
+                          ),
                 // SizedBox(
                 //   height: screenHeight *
                 //       (AppConfig().bottomNavigationBarHeight /

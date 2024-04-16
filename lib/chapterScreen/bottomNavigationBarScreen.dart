@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bible_gpt/class/book_details.dart';
+import 'package:bible_gpt/dashBoardScreen/dash_board_screen.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -95,13 +96,14 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
 
   String shortName = "YLT";
 
-  int oldT = 39;
-  int newT = 27;
   String? _defaultShortName;
   bool languageSelected = false;
 
-  bool oldTest = false;
+  bool oldTest = true;
   bool newTest = false;
+
+  bool oldTShadow = true;
+  bool newTShadow = false;
 
   scrollinit() async {
     bool internetConnectCheck = await CheckInternetConnectionMethod();
@@ -429,17 +431,42 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
       int count = bookDetails.length; // Retrieve the count directly
       print('Number of result maps: $count');
 
-      if (count == 66) {
+      // Index 40 to last
+
+      // print("First Slice greek : ${firstSlice.length}");
+      // print("Second Slice greek : ${secondSlice.length}");
+
+      if (bookDetails.length == 27) {
         setState(() {
-          newT = 27;
-          oldT = 39;
+          newT = 0;
+
+          List<BookDetails> firstSlice = bookDetails.sublist(0, 27);
+          oldT = firstSlice.length;
+
+          print("Length Of $oldT");
         });
       } else {
+        List<BookDetails> firstSlice =
+            bookDetails.sublist(0, 39); // Index 0 to 39
+        List<BookDetails> secondSlice = bookDetails.sublist(39);
+
         setState(() {
-          oldT = 39;
-          newT = 0;
+          newT = secondSlice.length;
+          oldT = firstSlice.length;
         });
       }
+
+      // if (count == 66) {
+      //   setState(() {
+      //     newT = 27;
+      //     oldT = 39;
+      //   });
+      // } else {
+      //   setState(() {
+      //     oldT = 39;
+      //     newT = 0;
+      //   });
+      // }
     } else {
       navigateToNoInternetScreen(true);
     }
@@ -449,6 +476,7 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
     scrollinit();
     callInitState();
     _languagesFuture = ApiHandler.getLanguages();
@@ -482,6 +510,9 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
     darkMode = themeMethod(context);
     themeChange();
     initialData();
+
+    // newTShadow = false;
+    // oldTShadow = true;
 
     if (isRebuild) {
       addContextInScreen();
@@ -655,7 +686,11 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                               darkMode: darkMode,
                                               getCallBackFunction: (isClicked) {
                                                 if (isClicked) {
-                                                  Navigator.pop(context);
+                                                  // Navigator.pop(context);
+                                                  Navigator.of(context).push(
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              const DashboardScreen()));
                                                 }
                                               }),
                                         ),
@@ -824,10 +859,15 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                           InkWell(
                                             onTap: () {
                                               setState(() {
-                                                oldTest = !oldTest;
-                                                if (newTest) {
-                                                  newTest = !newTest;
-                                                }
+                                                // oldTest = !oldTest;
+                                                // if (newTest) {
+                                                //   newTest = !newTest;
+                                                // }
+                                                oldTest = true;
+                                                newTest = false;
+
+                                                oldTShadow = true;
+                                                newTShadow = false;
                                                 _chapterkey.currentState
                                                     ?.callReBuildWidget(
                                                         darkMode,
@@ -851,13 +891,26 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                           AppConfig()
                                                               .screenHeight))),
                                               decoration: BoxDecoration(
+                                                boxShadow: [
+                                                  oldTShadow
+                                                      ? BoxShadow(
+                                                          color: const Color(
+                                                                  0xFFBE7C12)
+                                                              .withOpacity(.9),
+                                                          spreadRadius: 1,
+                                                          blurRadius: 10,
+                                                          blurStyle:
+                                                              BlurStyle.outer)
+                                                      : const BoxShadow(
+                                                          color: Colors
+                                                              .transparent)
+                                                ],
                                                 border: Border.all(
-                                                    color: darkMode
-                                                        ? const Color(
-                                                            0xFFFFCA8C)
-                                                        : const Color(
-                                                            0xFF754003),
-                                                    width: 1),
+                                                  color: darkMode
+                                                      ? const Color(0xFFFFCA8C)
+                                                      : const Color(0xFF754003),
+                                                  width: 1,
+                                                ),
                                                 color: Colors.transparent,
                                                 borderRadius:
                                                     const BorderRadiusDirectional
@@ -921,10 +974,17 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                           GestureDetector(
                                             onTap: () {
                                               setState(() {
-                                                newTest = !newTest;
-                                                if (oldTest) {
-                                                  oldTest = !oldTest;
-                                                }
+                                                // newTest = !newTest;
+                                                // if (oldTest) {
+                                                //   oldTest = !oldTest;
+                                                // }
+
+                                                oldTest = false;
+                                                newTest = true;
+
+                                                oldTShadow = false;
+                                                newTShadow = true;
+
                                                 _chapterkey.currentState
                                                     ?.callReBuildWidget(
                                                         darkMode,
@@ -948,6 +1008,20 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                           AppConfig()
                                                               .screenHeight))),
                                               decoration: BoxDecoration(
+                                                boxShadow: [
+                                                  newTShadow
+                                                      ? BoxShadow(
+                                                          color: const Color(
+                                                                  0xFFBE7C12)
+                                                              .withOpacity(.9),
+                                                          spreadRadius: 1,
+                                                          blurRadius: 10,
+                                                          blurStyle:
+                                                              BlurStyle.outer)
+                                                      : const BoxShadow(
+                                                          color: Colors
+                                                              .transparent)
+                                                ],
                                                 border: Border.all(
                                                     color: darkMode
                                                         ? const Color(
@@ -1177,8 +1251,12 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                       setState(
                                                                           () {
                                                                         oldTest =
-                                                                            false;
+                                                                            true;
                                                                         newTest =
+                                                                            false;
+                                                                        oldTShadow =
+                                                                            true;
+                                                                        newTShadow =
                                                                             false;
                                                                       });
 
@@ -1191,8 +1269,8 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                       _chapterkey.currentState?.callReBuildWidget(
                                                                           darkMode,
                                                                           getLanguageCode,
-                                                                          false,
-                                                                          false,
+                                                                          oldTest,
+                                                                          newTest,
                                                                           true);
 
                                                                       print(
@@ -1384,8 +1462,12 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
 
                                                                 setState(() {
                                                                   oldTest =
-                                                                      false;
+                                                                      true;
                                                                   newTest =
+                                                                      false;
+                                                                  oldTShadow =
+                                                                      true;
+                                                                  newTShadow =
                                                                       false;
                                                                 });
                                                                 changableShortName =
@@ -1399,8 +1481,8 @@ class bottomNavigationBarPage extends State<bottomNavigationBarScreen> {
                                                                     ?.callReBuildWidget(
                                                                         darkMode,
                                                                         getLanguageCode,
-                                                                        false,
-                                                                        false,
+                                                                        oldTest,
+                                                                        newTest,
                                                                         true); // Retrieve book details
                                                               },
                                                               buttonStyleData:

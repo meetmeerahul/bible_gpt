@@ -9,3 +9,6 @@ Translations? userSelectedTrans;
 String? audioText = "";
 
 int listViewMaxLength = 0;
+
+int oldT = 39;
+int newT = 26;
